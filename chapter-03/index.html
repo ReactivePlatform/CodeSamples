@@ -131,6 +131,11 @@ Type to start searching
   <ul>
     <li><a href="../chapter-03/index.html#可用性-99-9999999-" class="header">可用性 99.9999999%</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-1" class="header">代码清单3-1</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-2" class="header">代码清单3-2</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-3" class="header">代码清单3-3</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-4" class="header">代码清单3-4</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-5" class="header">代码清单3-5</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-6" class="header">代码清单3-6</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -153,6 +158,11 @@ Type to start searching
   <ul>
     <li><a href="../chapter-03/index.html#可用性-99-9999999-" class="header">可用性 99.9999999%</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-1" class="header">代码清单3-1</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-2" class="header">代码清单3-2</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-3" class="header">代码清单3-3</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-4" class="header">代码清单3-4</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-5" class="header">代码清单3-5</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-6" class="header">代码清单3-6</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -196,6 +206,68 @@ public class Unsafe {
     }
     public StringBuffer getMessage() {
         return message;
+    }
+}</code></pre>
+<h2><a href="#代码清单3-2" name="代码清单3-2" class="anchor"><span class="anchor-link"></span></a>代码清单3-2</h2>
+<p>Listing 3.2 Immutable message class that behaves predictably and is easier to reason about</p>
+<pre class="prettyprint"><code class="language-java">import java.util.Date;
+
+public class Immutable {
+    private final Date timestamp;
+    private final String message;
+    public Immutable(final Date timestamp, final String message) {
+        this.timestamp = new Date(timestamp.getTime());
+        this.message = message;
+    }
+    public Date getTimestamp() {
+        return new Date(timestamp.getTime());
+    }
+    public String getMessage() {
+        return message;
+    }
+}</code></pre>
+<h2><a href="#代码清单3-3" name="代码清单3-3" class="anchor"><span class="anchor-link"></span></a>代码清单3-3</h2>
+<p>使用Scala的case class定义的不可变消息</p>
+<pre class="prettyprint"><code class="language-scala">import java.util.Date
+
+case class Message(timestamp: Date, message: String)</code></pre>
+<h2><a href="#代码清单3-4" name="代码清单3-4" class="anchor"><span class="anchor-link"></span></a>代码清单3-4</h2>
+<p>引用不透明</p>
+<pre class="prettyprint"><code class="language-java">final StringBuffer original = new StringBuffer(&quot;foo&quot;);
+final StringBuffer reversed = original.reverse();
+System.out.println(String.format(
+        &quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;,
+        original,
+        reversed));</code></pre>
+<h2><a href="#代码清单3-5" name="代码清单3-5" class="anchor"><span class="anchor-link"></span></a>代码清单3-5</h2>
+<p>引用透明</p>
+<p>Referential transparency: allowing substitution of precomputed values</p>
+<pre class="prettyprint"><code class="language-java">public class Rooter {
+    private final double value;
+    private Double root = null;
+    public Rooter(double value) {
+        this.value = value;
+    }
+    public double getValue() {
+        return value;
+    }
+    public double getRoot() {
+        if (root == null) {
+            root = Math.sqrt(value);
+        }
+        return root;
+    }
+}</code></pre>
+<h2><a href="#代码清单3-6" name="代码清单3-6" class="anchor"><span class="anchor-link"></span></a>代码清单3-6</h2>
+<p>Limiting usability with side effects</p>
+<pre class="prettyprint"><code class="language-java">public class SideEffecting implements Serializable, Cloneable {
+    private int count;
+    public SideEffecting(int start) {
+        this.count = start;
+    }
+    public int next() {
+        this.count += Math.incrementExact(this.count);
+        return this.count;
     }
 }</code></pre>
 </div>
