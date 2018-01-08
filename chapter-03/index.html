@@ -125,6 +125,14 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-03/index.html#第3章-行业主流工具" class="header">第3章——行业主流工具</a>
+  <ul>
+    <li><a href="../chapter-03/index.html#可用性-99-9999999-" class="header">可用性 99.9999999%</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-1" class="header">代码清单3-1</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -135,10 +143,61 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-03/index.html#第3章-行业主流工具" class="header">第3章——行业主流工具</a>
+  <ul>
+    <li><a href="../chapter-03/index.html#可用性-99-9999999-" class="header">可用性 99.9999999%</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-1" class="header">代码清单3-1</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第3章-行业主流工具" name="第3章-行业主流工具" class="anchor"><span class="anchor-link"></span></a>第3章——行业主流工具</h1>
+<h2><a href="#可用性-99-9999999-" name="可用性-99-9999999-" class="anchor"><span class="anchor-link"></span></a>可用性 99.9999999%</h2>
+<p>3.1536 seconds of downtime in 100 years</p>
+<pre class="prettyprint"><code class="language-md"><br/>100 years
+    * 365 days/year
+    * 24 hours/day
+    * 60 minutes/hour
+    * 60 seconds/minute
+        = 3,153,600,000 seconds
+        
+3,153,600,000 seconds
+    * 0.000000001 expected downtime
+        = 3.1536 seconds of downtime in 100 years        
+</code></pre>
+<h2><a href="#代码清单3-1" name="代码清单3-1" class="anchor"><span class="anchor-link"></span></a>代码清单3-1</h2>
+<p>Listing 3.1 Unsafe, mutable message class, which may hide unexpected behavior</p>
+<pre class="prettyprint"><code class="language-java">import java.util.Date;
+
+public class Unsafe {
+    private Date timestamp;
+    private final StringBuffer message;
+    public Unsafe(Date timestamp, StringBuffer message) {
+        this.timestamp = timestamp;
+        this.message = message;
+    }
+    public synchronized Date getTimestamp() {
+        return timestamp;
+    }
+    public synchronized void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+    public StringBuffer getMessage() {
+        return message;
+    }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">

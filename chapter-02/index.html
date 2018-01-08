@@ -125,6 +125,13 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-02/index.html#第2章-反应式宣言概览" class="header">第2章——反应式宣言概览</a>
+  <ul>
+    <li><a href="../chapter-02/index.html#代码清单2-1" class="header">代码清单2-1</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -135,10 +142,50 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-02/index.html#第2章-反应式宣言概览" class="header">第2章——反应式宣言概览</a>
+  <ul>
+    <li><a href="../chapter-02/index.html#代码清单2-1" class="header">代码清单2-1</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第2章-反应式宣言概览" name="第2章-反应式宣言概览" class="anchor"><span class="anchor-link"></span></a>第2章——反应式宣言概览</h1>
+<h2><a href="#代码清单2-1" name="代码清单2-1" class="anchor"><span class="anchor-link"></span></a>代码清单2-1</h2>
+<p>Listing 2.1 Excerpt from a simple controller for an image service</p>
+<pre class="prettyprint"><code class="language-java">public interface Images {
+    Image get(String Key);
+    void add(String key, Image image);
+}
+
+public Images cache;
+public Images database;
+
+public Image retrieveImages(String key){
+    Image result = cache.get(key);
+    if (result != null) {
+        return result;
+    } else {
+        result = database.get(key);
+        if (result != null) {
+            cache.add(key, result);
+            return result;
+        } else {
+            return fallback;
+        }
+    }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-02/index.md" title="Edit this page" class="md-source-file md-edit">
