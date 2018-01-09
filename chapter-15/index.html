@@ -131,6 +131,14 @@ Type to start searching
   <ul>
     <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
     <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-3" class="header">代码清单15-3</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-4" class="header">代码清单15-4</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-5" class="header">代码清单15-5</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-6" class="header">代码清单15-6</a></li>
+    <li><a href="../chapter-15/index.html#smtp" class="header">SMTP</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-7" class="header">代码清单15-7</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-8" class="header">代码清单15-8</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-9" class="header">代码清单15-9</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -153,6 +161,14 @@ Type to start searching
   <ul>
     <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
     <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-3" class="header">代码清单15-3</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-4" class="header">代码清单15-4</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-5" class="header">代码清单15-5</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-6" class="header">代码清单15-6</a></li>
+    <li><a href="../chapter-15/index.html#smtp" class="header">SMTP</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-7" class="header">代码清单15-7</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-8" class="header">代码清单15-8</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-9" class="header">代码清单15-9</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -221,6 +237,178 @@ Type to start searching
         }
     }
 }</code></pre>
+<p><em>Server 的输出结果</em></p>
+<pre class="prettyprint"><code class="language-output">server: received hello
+server: sender was /127.0.0.1:55589</code></pre>
+<p><em>Client 的可能输出结果</em></p>
+<pre class="prettyprint"><code class="language-output">client: received got it!
+client: sender was /127.0.0.1:8888</code></pre>
+<p><em>HTTP Request Header</em></p>
+<pre class="prettyprint"><code class="language-header">GET /request?msg=hello HTTP/1.1
+Host: client-interface.our.application.domain
+Accept: application/json</code></pre>
+<p><em>HTTP Response Header</em></p>
+<pre class="prettyprint"><code class="language-header">HTTP/1.1 200 OK
+...
+Content-Type: application/json
+Content-Length: 22
+{&quot;response&quot;:&quot;got it!&quot;}</code></pre>
+<h2><a href="#代码清单15-3" name="代码清单15-3" class="anchor"><span class="anchor-link"></span></a>代码清单15-3</h2>
+<p>Listing 15.3 Untyped Akka Actors modeling request–response</p>
+<pre class="prettyprint"><code class="language-scala">object RequestResponseActors {
+
+  case class Request(msg: String)
+  case class Response(msg: String)
+
+  class Responder extends Actor {
+    def receive: Receive = {
+      case Request(msg) ⇒
+        println(s&quot;got request: $msg&quot;)
+        sender() ! Response(&quot;got it!&quot;)
+    }
+  }
+
+  class Requester(responder: ActorRef) extends Actor {
+    responder ! Request(&quot;hello&quot;)
+
+    def receive: Receive = {
+      case Response(msg) ⇒
+        println(s&quot;got response: $msg&quot;)
+        context.system.terminate()
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+    val sys = ActorSystem(&quot;ReqRes&quot;)
+    val responder = sys.actorOf(Props[Responder], &quot;responder&quot;)
+    val requester = sys.actorOf(Props(new Requester(responder)), &quot;requester&quot;)
+  }
+
+}</code></pre>
+<p><em>运行结果</em></p>
+<pre class="prettyprint"><code class="language-output">got request: hello
+got response: got it!</code></pre>
+<h2><a href="#代码清单15-4" name="代码清单15-4" class="anchor"><span class="anchor-link"></span></a>代码清单15-4</h2>
+<p>Listing 15.4 Including the response explicitly in the request message</p>
+<pre class="prettyprint"><code class="language-scala">object RequestResponseTypedActors {
+
+  case class Request(msg: String, replyTo: ActorRef[Response])
+  case class Response(msg: String)
+
+  val responder: Behavior[Request] =
+    Static {
+      case Request(msg, replyTo) ⇒
+        println(s&quot;got request: $msg&quot;)
+        replyTo ! Response(&quot;got it!&quot;)
+    }
+
+  def requester(responder: ActorRef[Request]): Behavior[Response] =
+    SelfAware { self ⇒
+      responder ! Request(&quot;hello&quot;, self)
+      Total {
+        case Response(msg) ⇒
+          println(s&quot;got response: $msg&quot;)
+          Stopped
+      }
+    }
+
+  def main(args: Array[String]): Unit = {
+    ActorSystem(&quot;ReqResTyped&quot;, ContextAware[Unit] { ctx ⇒
+      val res = ctx.spawn(responder, &quot;responder&quot;)
+      val req = ctx.watch(ctx.spawn(requester(res), &quot;requester&quot;))
+      Full {
+        case Sig(_, Terminated(`req`)) ⇒ Stopped
+      }
+    })
+  }
+}</code></pre>
+<h2><a href="#代码清单15-5" name="代码清单15-5" class="anchor"><span class="anchor-link"></span></a>代码清单15-5</h2>
+<p>Listing 15.5 Request–response based on a one-way messaging protocol</p>
+<pre class="prettyprint"><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
+amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
+    conn.createChannel(function(err, ch) {
+        var q = &#39;rpc_queue&#39;;
+        ch.assertQueue(q, {durable: false});
+        ch.prefetch(1);
+        ch.consume(q, function reply(msg) {
+            console.log(&quot;got request: %s&quot;, msg.content.toString());
+            ch.sendToQueue(msg.properties.replyTo,
+                new Buffer(&#39;got it!&#39;),
+                {correlationId: msg.properties.correlationId});
+            ch.ack(msg);
+        });
+    });
+});</code></pre>
+<h2><a href="#代码清单15-6" name="代码清单15-6" class="anchor"><span class="anchor-link"></span></a>代码清单15-6</h2>
+<p>Listing 15.6 Listening for a response with the same correlation ID as the original request</p>
+<pre class="prettyprint"><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
+amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
+    conn.createChannel(function(err, ch) {
+        ch.assertQueue(&#39;responses&#39;, {}, function(err, q) {
+            var corr = uuid.v1();
+            ch.consume(q.queue, function(msg) {
+                if (msg.properties.correlationId === corr) {
+                    console.log(&#39;got response: %s&#39;, msg.content.toString());
+                    setTimeout(function() { conn.close(); process.exit(0) }, 500);
+                }
+            }, {noAck: true});
+            ch.sendToQueue(&#39;rpc_queue&#39;,
+                new Buffer(&#39;hello&#39;),
+                { correlationId: corr, replyTo: q.queue });
+        });
+    });
+});</code></pre>
+<h2><a href="#smtp" name="smtp" class="anchor"><span class="anchor-link"></span></a>SMTP</h2>
+<pre class="prettyprint"><code class="language-protocal"><br/>S: 220 mailhost.example.com ESMTP Postfix
+C: HELO alice-workstation.example.com
+S: 250 Hello alice-workstation.example.com
+C: MAIL FROM:&lt;alice@example.com&gt;
+S: 250 Ok
+C: RCPT TO:&lt;bob@example.com&gt;
+S: 250 Ok
+C: DATA
+S: 354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;
+C: From: &quot;Alice&quot; &lt;alice@example.com&gt;
+C: To: &quot;Bob&quot; &lt;bob@example.com&gt;
+C: Date: Fri, 23 October 2015 10:34:12 +0200
+C: Subject: lunch
+C:
+C: Hi Bob,
+C:
+C: sorry, I cannot make it, something else came up.
+C:
+C: Regards, Alice
+C: .
+S: 250 Ok, queued as 4567876345
+C: QUIT
+S: 221 Bye
+</code></pre>
+<h2><a href="#代码清单15-7" name="代码清单15-7" class="anchor"><span class="anchor-link"></span></a>代码清单15-7</h2>
+<p>Listing 15.7 Encapsulated information needed for multiple SMTP exchanges</p>
+<pre class="prettyprint"><code class="language-scala">case class SendEmail(
+  sender:     String,
+  recipients: List[String],
+  body:       String, correlationID: UUID,
+  replyTo: ActorRef[SendEmailResult])</code></pre>
+<pre class="prettyprint"><code class="language-scala">case class SendEmailResult(
+  correlationID: UUID,
+  status:        StatusCode,
+  explanation:   Option[String]) extends Result</code></pre>
+<h2><a href="#代码清单15-8" name="代码清单15-8" class="anchor"><span class="anchor-link"></span></a>代码清单15-8</h2>
+<p>Listing 15.8 Separating the body so it can be delivered on demand</p>
+<pre class="prettyprint"><code class="language-scala">case class SendEmail(
+  sender:        String,
+  recipients:    List[String],
+  correlationID: UUID,
+  replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
+  override def payload: Source[String] = body
+}</code></pre>
+<h2><a href="#代码清单15-9" name="代码清单15-9" class="anchor"><span class="anchor-link"></span></a>代码清单15-9</h2>
+<p>Listing 15.9 Enabling the body to be pulled by the recipient</p>
+<pre class="prettyprint"><code class="language-scala">case class SendEmail(sender: String, recipients: List[String],
+                     bodyLocation:  URL,
+                     correlationID: UUID,
+                     replyTo:       ActorRef[SendEmailResult])</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
