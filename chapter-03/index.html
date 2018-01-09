@@ -141,6 +141,12 @@ Type to start searching
     <li><a href="../chapter-03/index.html#python-repl-3-1" class="header">Python REPL 3-1</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-9" class="header">代码清单3-9</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-10" class="header">代码清单3-10</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-11" class="header">代码清单3-11</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-12" class="header">代码清单3-12</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-13" class="header">代码清单3-13</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-14" class="header">代码清单3-14</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-15" class="header">代码清单3-15</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-16" class="header">代码清单3-16</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -173,6 +179,12 @@ Type to start searching
     <li><a href="../chapter-03/index.html#python-repl-3-1" class="header">Python REPL 3-1</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-9" class="header">代码清单3-9</a></li>
     <li><a href="../chapter-03/index.html#代码清单3-10" class="header">代码清单3-10</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-11" class="header">代码清单3-11</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-12" class="header">代码清单3-12</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-13" class="header">代码清单3-13</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-14" class="header">代码清单3-14</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-15" class="header">代码清单3-15</a></li>
+    <li><a href="../chapter-03/index.html#代码清单3-16" class="header">代码清单3-16</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -342,6 +354,150 @@ func consumer(myChannel chan int, iterations int) {
         recVal := &lt;-myChannel
         fmt.Println(&quot;Received: &quot;, recVal)
     }   
+}</code></pre>
+<h2><a href="#代码清单3-11" name="代码清单3-11" class="anchor"><span class="anchor-link"></span></a>代码清单3-11</h2>
+<pre class="prettyprint"><code class="language-java">public class ParallelRetrievalExample {
+    private final CacheRetriever cacheRetriever;
+    private final DBRetriever dbRetriever;
+
+    ParallelRetrievalExample(CacheRetriever cacheRetriever,
+                             DBRetriever dbRetriever) {
+        this.cacheRetriever = cacheRetriever;
+        this.dbRetriever = dbRetriever;
+    }
+
+    public Object retrieveCustomer(final long id) {
+        final CompletableFuture&lt;Object&gt; cacheFuture = CompletableFuture
+                .supplyAsync(() -&gt; cacheRetriever.getCustomer(id));
+        final CompletableFuture&lt;Object&gt; dbFuture = CompletableFuture
+                .supplyAsync(() -&gt; dbRetriever.getCustomer(id));
+
+        return CompletableFuture.anyOf(cacheFuture, dbFuture);
+    }
+}</code></pre>
+<h2><a href="#代码清单3-12" name="代码清单3-12" class="anchor"><span class="anchor-link"></span></a>代码清单3-12</h2>
+<pre class="prettyprint"><code class="language-scala">def getProductInventoryByPostalCode(
+  productSku: Long,
+  postalCode: String): Future[(Long, Map[String, Long])] = {
+  // Import the duration DSL to be used in the timeout
+  import scala.concurrent.duration._
+
+  // Provide the thread pool and Future timeout value to be applied
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(new ForkJoinPool())
+  implicit val timeout: FiniteDuration = 250 milliseconds
+
+  // Define the futures so they can start doing their work
+  val localInventoryFuture = Future {
+    inventoryService.currentInventoryInWarehouse(
+      productSku, postalCode)
+  }
+  val overallInventoryFutureByWarehouse = Future {
+    inventoryService.currentInventoryOverallByWarehouse(
+      productSku)
+  }
+
+  // Retrieve the values and return a future of the combined result
+  for {
+    local ← localInventoryFuture
+    overall ← overallInventoryFutureByWarehouse
+  } yield (local, overall)
+}</code></pre>
+<h2><a href="#代码清单3-13" name="代码清单3-13" class="anchor"><span class="anchor-link"></span></a>代码清单3-13</h2>
+<pre class="prettyprint"><code class="language-scala">import scala.async.Async.{ async, await }
+val resultFuture = async {
+  val localInventoryFuture = async {
+    inventoryService.currentInventoryInWarehouse(productSku, postalCode)
+  }
+  val overallInventoryFutureByWarehouse = async {
+    inventoryService.currentInventoryOverallByWarehouse(productSku)
+  }
+  (await(localInventoryFuture), await(overallInventoryFutureByWarehouse))
+}</code></pre>
+<h2><a href="#代码清单3-14" name="代码清单3-14" class="anchor"><span class="anchor-link"></span></a>代码清单3-14</h2>
+<pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
+
+import io.reactivex.Observable;
+
+public class RxJavaExample {
+    public void observe(String[] strings) {
+        Observable.fromArray(strings).subscribe((s) -&gt; {
+                System.out.println(&quot;Received &quot; + s);
+        });
+    }
+}</code></pre>
+<h2><a href="#代码清单3-15" name="代码清单3-15" class="anchor"><span class="anchor-link"></span></a>代码清单3-15</h2>
+<pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
+
+public class RxJavaExampleDriver {
+    private static final RxJavaExample rxJavaExample = new RxJavaExample();
+    public static void main(String[] args) {
+        String[] strings = { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; };
+        rxJavaExample.observe(strings);
+    }
+}</code></pre>
+<h2><a href="#代码清单3-16" name="代码清单3-16" class="anchor"><span class="anchor-link"></span></a>代码清单3-16</h2>
+<pre class="prettyprint"><code class="language-scala">package chapter03.actor
+
+import akka.actor._
+import akka.actor.SupervisorStrategy.Restart
+import akka.event.LoggingReceive
+
+case object Start
+case class CounterMessage(counterValue: Int)
+case class CounterTooLargeException(message: String) extends Exception(message)
+
+class SupervisorActor extends Actor with ActorLogging {
+  override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
+    case _: CounterTooLargeException ⇒ Restart
+  }
+
+  private val actor2 = context.actorOf(Props[SecondActor], &quot;second-actor&quot;)
+  private val actor1 = context.actorOf(Props(new FirstActor(actor2)), &quot;first-actor&quot;)
+
+  def receive: PartialFunction[Any, Unit] = {
+    case Start ⇒ actor1 ! Start
+  }
+}
+
+class AbstractCounterActor extends Actor with ActorLogging {
+  protected var counterValue = 0
+
+  def receive: PartialFunction[Any, Unit] = {
+    case _ ⇒
+  }
+
+  def counterReceive: Receive = LoggingReceive {
+    case CounterMessage(i) if i &lt;= 1000 ⇒
+      counterValue = i
+      log.info(s&quot;Counter value: $counterValue&quot;)
+      sender ! CounterMessage(counterValue + 1)
+    case CounterMessage(_) ⇒
+      throw CounterTooLargeException(
+        &quot;Exceeded max value of counter!&quot;)
+  }
+
+  override def postRestart(reason: Throwable): Unit = {
+    context.parent ! Start
+  }
+}
+
+class FirstActor(secondActor: ActorRef) extends AbstractCounterActor {
+  override def receive = LoggingReceive {
+    case Start ⇒
+      context.become(counterReceive)
+      log.info(&quot;Starting counter passing.&quot;)
+      secondActor ! CounterMessage(counterValue + 1)
+  }
+}
+
+class SecondActor() extends AbstractCounterActor {
+  override def receive: Receive = counterReceive
+}
+
+object Example extends App {
+  val system = ActorSystem(&quot;counter-supervision-example&quot;)
+  val supervisor = system.actorOf(Props[SupervisorActor])
+  supervisor ! Start
 }</code></pre>
 </div>
 <div>
