@@ -125,6 +125,14 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-15/index.html#第15章-消息流模式" class="header">第15章——消息流模式</a>
+  <ul>
+    <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -135,10 +143,84 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-15/index.html#第15章-消息流模式" class="header">第15章——消息流模式</a>
+  <ul>
+    <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
+    <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第15章-消息流模式" name="第15章-消息流模式" class="anchor"><span class="anchor-link"></span></a>第15章——消息流模式</h1>
+<h2><a href="#代码清单15-1" name="代码清单15-1" class="anchor"><span class="anchor-link"></span></a>代码清单15-1</h2>
+<p>Listing 15.1 Server responding to the address that originated the request</p>
+<pre class="prettyprint"><code class="language-java">public class Server {
+    static final int SERVER_PORT = 8888;
+
+    static public void main(String[] args) throws IOException {
+        // bind a socket for receiving packets
+        try (final DatagramSocket socket =
+                     new DatagramSocket(SERVER_PORT)) {
+
+            // receive one packet
+            final byte[] buffer = new byte[1500];
+            final DatagramPacket packet1 =
+                    new DatagramPacket(buffer, buffer.length);
+            socket.receive(packet1);
+
+            final SocketAddress sender = packet1.getSocketAddress();
+            System.out.println(&quot;server: received &quot; +
+                    new String(packet1.getData()));
+            System.out.println(&quot;server: sender was &quot; + sender);
+
+            // send response back
+            final byte[] response = &quot;got it!&quot;.getBytes();
+            final DatagramPacket packet2 =
+                    new DatagramPacket(response, response.length, sender);
+            socket.send(packet2);
+        }
+    }
+}</code></pre>
+<h2><a href="#代码清单15-2" name="代码清单15-2" class="anchor"><span class="anchor-link"></span></a>代码清单15-2</h2>
+<p>Listing 15.2 Client sending a request and then blocking until the server responds</p>
+<pre class="prettyprint"><code class="language-java">public class Client {
+    static public void main(String[] args) throws IOException {
+        // get local socket with random port
+        try (final DatagramSocket socket = new DatagramSocket()) {
+
+            // send message to server
+            final byte[] request = &quot;hello&quot;.getBytes();
+            final SocketAddress serverAddress =
+                    new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
+            final DatagramPacket packet1 =
+                    new DatagramPacket(request, request.length, serverAddress);
+            socket.send(packet1);
+
+            // receive one packet
+            final byte[] buffer = new byte[1500];
+            final DatagramPacket packet2 =
+                    new DatagramPacket(buffer, buffer.length);
+            socket.receive(packet2);
+
+            final SocketAddress sender = packet2.getSocketAddress();
+            System.out.println(&quot;client: received &quot; +
+                    new String(packet2.getData()));
+            System.out.println(&quot;client: sender was &quot; + sender);
+        }
+    }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
