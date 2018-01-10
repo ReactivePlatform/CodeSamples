@@ -125,6 +125,20 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-11/index.html#第11章-测试反应式应用程序" class="header">第11章——测试反应式应用程序</a>
+  <ul>
+    <li><a href="../chapter-11/index.html#代码清单11-1" class="header">代码清单11-1</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-2" class="header">代码清单11-2</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-3" class="header">代码清单11-3</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-4" class="header">代码清单11-4</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-5" class="header">代码清单11-5</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-6" class="header">代码清单11-6</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-7" class="header">代码清单11-7</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-8" class="header">代码清单11-8</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -135,10 +149,82 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-11/index.html#第11章-测试反应式应用程序" class="header">第11章——测试反应式应用程序</a>
+  <ul>
+    <li><a href="../chapter-11/index.html#代码清单11-1" class="header">代码清单11-1</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-2" class="header">代码清单11-2</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-3" class="header">代码清单11-3</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-4" class="header">代码清单11-4</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-5" class="header">代码清单11-5</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-6" class="header">代码清单11-6</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-7" class="header">代码清单11-7</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-8" class="header">代码清单11-8</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第11章-测试反应式应用程序" name="第11章-测试反应式应用程序" class="anchor"><span class="anchor-link"></span></a>第11章——测试反应式应用程序</h1>
+<h2><a href="#代码清单11-1" name="代码清单11-1" class="anchor"><span class="anchor-link"></span></a>代码清单11-1</h2>
+<p>Listing 11.1 Testing a purely synchronous translation function</p>
+<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+translate(input) should be(output)</code></pre>
+<h2><a href="#代码清单11-2" name="代码清单11-2" class="anchor"><span class="anchor-link"></span></a>代码清单11-2</h2>
+<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val future = translate(input)
+// what now?</code></pre>
+<h2><a href="#代码清单11-3" name="代码清单11-3" class="anchor"><span class="anchor-link"></span></a>代码清单11-3</h2>
+<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val probe = TestProbe()
+translationService ! Translate(input, probe.ref)
+// when can we continue?</code></pre>
+<h2><a href="#代码清单11-4" name="代码清单11-4" class="anchor"><span class="anchor-link"></span></a>代码清单11-4</h2>
+<pre class="prettyprint"><code class="language-scala">while (!future.isCompleted) Thread.sleep(50)</code></pre>
+<h2><a href="#代码清单11-5" name="代码清单11-5" class="anchor"><span class="anchor-link"></span></a>代码清单11-5</h2>
+<pre class="prettyprint"><code class="language-scala">var i = 20
+while (!future.isCompleted &amp;&amp; i &gt; 0) {
+  i -= 1
+  Thread.sleep(50)
+}
+if (i == 0) fail(&quot;translation was not received in time&quot;)</code></pre>
+<h2><a href="#代码清单11-6" name="代码清单11-6" class="anchor"><span class="anchor-link"></span></a>代码清单11-6</h2>
+<p>Listing 11.2 Awaiting the result blocks synchronously on the translation</p>
+<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val result = Await.result(translate(input), 1.second)
+result should be(output)</code></pre>
+<h2><a href="#代码清单11-7" name="代码清单11-7" class="anchor"><span class="anchor-link"></span></a>代码清单11-7</h2>
+<p>Listing 11.3 Expecting replies with a TestProbe</p>
+<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val probe = TestProbe()
+translationService ! Translate(input, probe.ref)
+probe.expectMsg(1.second, output)</code></pre>
+<h2><a href="#代码清单11-8" name="代码清单11-8" class="anchor"><span class="anchor-link"></span></a>代码清单11-8</h2>
+<p>Listing 11.4 Using a TestProbe to receive the response from the scheduler</p>
+<pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+val start = Timestamp.now
+scheduler ! Schedule(probe.ref, &quot;tick&quot;, 1.second)
+probe.expectMsg(2.seconds, &quot;tick&quot;)
+val stop = Timestamp.now
+val duration = stop - start
+assert(duration &gt; 950.millis, &quot;tick came in early&quot;)
+assert(duration &lt; 1050.millis, &quot;tick came in late&quot;)
+// when can we continue?</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">
