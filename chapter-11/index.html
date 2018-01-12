@@ -137,6 +137,10 @@ Type to start searching
     <li><a href="../chapter-11/index.html#代码清单11-6" class="header">代码清单11-6</a></li>
     <li><a href="../chapter-11/index.html#代码清单11-7" class="header">代码清单11-7</a></li>
     <li><a href="../chapter-11/index.html#代码清单11-8" class="header">代码清单11-8</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-9" class="header">代码清单11-9</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-10" class="header">代码清单11-10</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-12" class="header">代码清单11-12</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-13" class="header">代码清单11-13</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -165,6 +169,10 @@ Type to start searching
     <li><a href="../chapter-11/index.html#代码清单11-6" class="header">代码清单11-6</a></li>
     <li><a href="../chapter-11/index.html#代码清单11-7" class="header">代码清单11-7</a></li>
     <li><a href="../chapter-11/index.html#代码清单11-8" class="header">代码清单11-8</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-9" class="header">代码清单11-9</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-10" class="header">代码清单11-10</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-12" class="header">代码清单11-12</a></li>
+    <li><a href="../chapter-11/index.html#代码清单11-13" class="header">代码清单11-13</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -225,6 +233,65 @@ val duration = stop - start
 assert(duration &gt; 950.millis, &quot;tick came in early&quot;)
 assert(duration &lt; 1050.millis, &quot;tick came in late&quot;)
 // when can we continue?</code></pre>
+<h2><a href="#代码清单11-9" name="代码清单11-9" class="anchor"><span class="anchor-link"></span></a>代码清单11-9</h2>
+<p>Listing 11.5 Determining 95th percentile latency</p>
+<pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+val echo = echoService(&quot;keepSLA&quot;)
+val N = 200
+val timings = for (i ← 1 to N) yield {
+  val string = s&quot;test$i&quot;
+  val start = Timestamp.now
+  echo ! Request(string, probe.ref)
+  probe.expectMsg(100.millis, s&quot;test run $i&quot;, Response(string))
+  val stop = Timestamp.now
+  stop - start
+}
+// discard top 5%
+val sorted = timings.sorted
+val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
+info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
+val SLA = if (Helpers.isCiTest) 25.milliseconds else 1.millisecond
+ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre>
+<h2><a href="#代码清单11-10" name="代码清单11-10" class="anchor"><span class="anchor-link"></span></a>代码清单11-10</h2>
+<p>Listing 11.6 Generating the test samples in parallel with the Ask pattern</p>
+<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAfuture&quot;)
+val N = 10000
+val timingFutures = for (i ← 1 to N) yield {
+  val string = s&quot;test$i&quot;
+  val start = Timestamp.now
+  (echo ? (Request(string, _))) collect {
+    case Response(`string`) ⇒ Timestamp.now - start
+  }
+}
+val futureOfTimings = Future.sequence(timingFutures)
+val timings = Await.result(futureOfTimings, 5.seconds)
+// discard top 5%
+val sorted = timings.sorted
+val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
+info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
+val SLA = if (Helpers.isCiTest) 500.milliseconds else 100.milliseconds
+ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre>
+<h2><a href="#代码清单11-12" name="代码清单11-12" class="anchor"><span class="anchor-link"></span></a>代码清单11-12</h2>
+<p>Listing 11.8 Verifying that no additional messages are received</p>
+<pre class="prettyprint"><code class="language-scala">import scala.concurrent.duration._
+val scheduler = system.actorOf(Scheduler.props)
+
+val probe = TestProbe()
+scheduler ! ScheduleRepeatedly(probe.ref, 1.second, &quot;tick&quot;)
+val token = probe.expectMsgType[SchedulerToken]
+probe.expectMsg(1500.millis, &quot;tick&quot;)
+scheduler ! CancelSchedule(token, probe.ref)
+probe.expectMsg(100.millis, ScheduleCanceled)
+probe.expectNoMessage(2.seconds)</code></pre>
+<h2><a href="#代码清单11-13" name="代码清单11-13" class="anchor"><span class="anchor-link"></span></a>代码清单11-13</h2>
+<p>Listing 11.9 Matching responses to requests with a correlation ID</p>
+<pre class="prettyprint"><code class="language-scala">val ingestService = system.actorOf(DataIngester.props)
+val probe = TestProbe()
+ingestService ! Retrieve(url, &quot;myID&quot;, probe.ref)
+val replies = probe.receiveWhile(1.second) {
+  case r @ Record(&quot;myID&quot;, _) ⇒ r
+}
+probe.expectMsg(0.seconds, EOF)</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">
