@@ -118,16 +118,9 @@ Type to start searching
 <ul>
   <li><a href="../chapter-15/index.html#第15章-消息流模式" class="header">第15章——消息流模式</a>
   <ul>
-    <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-3" class="header">代码清单15-3</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-4" class="header">代码清单15-4</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-5" class="header">代码清单15-5</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-6" class="header">代码清单15-6</a></li>
-    <li><a href="../chapter-15/index.html#smtp" class="header">SMTP</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-7" class="header">代码清单15-7</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-8" class="header">代码清单15-8</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-9" class="header">代码清单15-9</a></li>
+    <li><a href="../chapter-15/index.html#15-1-请求-响应模式" class="header">15.1 请求——响应模式</a></li>
+    <li><a href="../chapter-15/index.html#15-2-消息自包含模式" class="header">15.2 消息自包含模式</a></li>
+    <li><a href="../chapter-15/index.html#15-3-询问模式" class="header">15.3 询问模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -148,16 +141,9 @@ Type to start searching
 <ul>
   <li><a href="../chapter-15/index.html#第15章-消息流模式" class="header">第15章——消息流模式</a>
   <ul>
-    <li><a href="../chapter-15/index.html#代码清单15-1" class="header">代码清单15-1</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-2" class="header">代码清单15-2</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-3" class="header">代码清单15-3</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-4" class="header">代码清单15-4</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-5" class="header">代码清单15-5</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-6" class="header">代码清单15-6</a></li>
-    <li><a href="../chapter-15/index.html#smtp" class="header">SMTP</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-7" class="header">代码清单15-7</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-8" class="header">代码清单15-8</a></li>
-    <li><a href="../chapter-15/index.html#代码清单15-9" class="header">代码清单15-9</a></li>
+    <li><a href="../chapter-15/index.html#15-1-请求-响应模式" class="header">15.1 请求——响应模式</a></li>
+    <li><a href="../chapter-15/index.html#15-2-消息自包含模式" class="header">15.2 消息自包含模式</a></li>
+    <li><a href="../chapter-15/index.html#15-3-询问模式" class="header">15.3 询问模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -169,8 +155,11 @@ Type to start searching
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第15章-消息流模式" name="第15章-消息流模式" class="anchor"><span class="anchor-link"></span></a>第15章——消息流模式</h1>
-<h2><a href="#代码清单15-1" name="代码清单15-1" class="anchor"><span class="anchor-link"></span></a>代码清单15-1</h2>
-<p>Listing 15.1 Server responding to the address that originated the request</p>
+<p>在这一章中，我们将探讨一些存在于反应式组件之间最基本的通信模式：具体而言，我们将讨论消息是如何在它们之间流动的。在第10章中，我们讨论了理论背景，提到了系统中的通信路径设计对于系统的成功来说至关重要——无论是对现实世界的组织，还是反应式应用程序。</p>
+<h2><a href="#15-1-请求-响应模式" name="15-1-请求-响应模式" class="anchor"><span class="anchor-link"></span></a>15.1 请求——响应模式</h2>
+<blockquote>
+  <p>代码清单15-1 服务器向发起请求的地址发送响应</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">public class Server {
   static final int SERVER_PORT = 8888;
 
@@ -198,8 +187,9 @@ Type to start searching
     }
   }
 }</code></pre>
-<h2><a href="#代码清单15-2" name="代码清单15-2" class="anchor"><span class="anchor-link"></span></a>代码清单15-2</h2>
-<p>Listing 15.2 Client sending a request and then blocking until the server responds</p>
+<blockquote>
+  <p>代码清单15-2 客户端发送一个请求，然后阻塞直到接收到服务器的响应</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">public class Client {
   static public void main(String[] args) throws IOException {
     // get local socket with random port
@@ -242,8 +232,9 @@ Accept: application/json</code></pre>
 Content-Type: application/json
 Content-Length: 22
 {&quot;response&quot;:&quot;got it!&quot;}</code></pre>
-<h2><a href="#代码清单15-3" name="代码清单15-3" class="anchor"><span class="anchor-link"></span></a>代码清单15-3</h2>
-<p>Listing 15.3 Untyped Akka Actors modeling request–response</p>
+<blockquote>
+  <p>代码清单15-3 使用Akka UntypedActor 来建模请求——响应模式</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">object RequestResponseActors {
 
   case class Request(msg: String)
@@ -277,8 +268,9 @@ Content-Length: 22
 <p><em>运行结果</em></p>
 <pre class="prettyprint"><code class="language-output">got request: hello
 got response: got it!</code></pre>
-<h2><a href="#代码清单15-4" name="代码清单15-4" class="anchor"><span class="anchor-link"></span></a>代码清单15-4</h2>
-<p>Listing 15.4 Including the response explicitly in the request message</p>
+<blockquote>
+  <p>代码清单15-4 在请求消息中显式地包含响应地址</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">object RequestResponseTypedActors {
 
   case class Request(msg: String, replyTo: ActorRef[Response])
@@ -311,8 +303,9 @@ got response: got it!</code></pre>
     })
   }
 }</code></pre>
-<h2><a href="#代码清单15-5" name="代码清单15-5" class="anchor"><span class="anchor-link"></span></a>代码清单15-5</h2>
-<p>Listing 15.5 Request–response based on a one-way messaging protocol</p>
+<blockquote>
+  <p>代码清单15-5 基于单向消息传递的请求——响应模式</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
 amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
     conn.createChannel(function(err, ch) {
@@ -328,8 +321,9 @@ amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
         });
     });
 });</code></pre>
-<h2><a href="#代码清单15-6" name="代码清单15-6" class="anchor"><span class="anchor-link"></span></a>代码清单15-6</h2>
-<p>Listing 15.6 Listening for a response with the same correlation ID as the original request</p>
+<blockquote>
+  <p>代码清单15-6 监听与原始请求具有相同的关联ID的响应</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
 amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
     conn.createChannel(function(err, ch) {
@@ -347,7 +341,8 @@ amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
         });
     });
 });</code></pre>
-<h2><a href="#smtp" name="smtp" class="anchor"><span class="anchor-link"></span></a>SMTP</h2>
+<h2><a href="#15-2-消息自包含模式" name="15-2-消息自包含模式" class="anchor"><span class="anchor-link"></span></a>15.2 消息自包含模式</h2>
+<p><em>SMTP</em></p>
 <pre class="prettyprint"><code class="language-protocal"><br/>S: 220 mailhost.example.com ESMTP Postfix
 C: HELO alice-workstation.example.com
 S: 250 Hello alice-workstation.example.com
@@ -372,8 +367,9 @@ S: 250 Ok, queued as 4567876345
 C: QUIT
 S: 221 Bye
 </code></pre>
-<h2><a href="#代码清单15-7" name="代码清单15-7" class="anchor"><span class="anchor-link"></span></a>代码清单15-7</h2>
-<p>Listing 15.7 Encapsulated information needed for multiple SMTP exchanges</p>
+<blockquote>
+  <p>代码清单15-7 封装了多次 SMTP 交换所需要的信息</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">case class SendEmail(
   sender:     String,
   recipients: List[String],
@@ -383,8 +379,9 @@ S: 221 Bye
   correlationID: UUID,
   status:        StatusCode,
   explanation:   Option[String]) extends Result</code></pre>
-<h2><a href="#代码清单15-8" name="代码清单15-8" class="anchor"><span class="anchor-link"></span></a>代码清单15-8</h2>
-<p>Listing 15.8 Separating the body so it can be delivered on demand</p>
+<blockquote>
+  <p>代码清单15-8 分离电子邮件主体，使得其可以按需投递</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">case class SendEmail(
   sender:        String,
   recipients:    List[String],
@@ -392,12 +389,24 @@ S: 221 Bye
   replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
   override def payload: Source[String] = body
 }</code></pre>
-<h2><a href="#代码清单15-9" name="代码清单15-9" class="anchor"><span class="anchor-link"></span></a>代码清单15-9</h2>
-<p>Listing 15.9 Enabling the body to be pulled by the recipient</p>
+<blockquote>
+  <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">case class SendEmail(sender: String, recipients: List[String],
                      bodyLocation:  URL,
                      correlationID: UUID,
                      replyTo:       ActorRef[SendEmailResult])</code></pre>
+<h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
+<blockquote>
+  <p>代码清单15-10 请求启动验证过程的简单协议</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class StartVerificationProcess(userEmail: String, replyTo: ActorRef[VerificationProcessResponse]) extends MyCommands
+
+sealed trait VerificationProcessResponse
+
+case class VerificationProcessStarted(userEmail: String) extends VerificationProcessResponse
+
+case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
