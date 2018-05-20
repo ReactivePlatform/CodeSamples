@@ -121,6 +121,8 @@ Type to start searching
     <li><a href="../chapter-15/index.html#15-1-请求-响应模式" class="header">15.1 请求——响应模式</a></li>
     <li><a href="../chapter-15/index.html#15-2-消息自包含模式" class="header">15.2 消息自包含模式</a></li>
     <li><a href="../chapter-15/index.html#15-3-询问模式" class="header">15.3 询问模式</a></li>
+    <li><a href="../chapter-15/index.html#15-5-聚合器模式" class="header">15.5 聚合器模式</a></li>
+    <li><a href="../chapter-15/index.html#15-7-业务握手协议-又名可靠投递模式-" class="header">15.7 业务握手协议（又名可靠投递模式）</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -144,6 +146,8 @@ Type to start searching
     <li><a href="../chapter-15/index.html#15-1-请求-响应模式" class="header">15.1 请求——响应模式</a></li>
     <li><a href="../chapter-15/index.html#15-2-消息自包含模式" class="header">15.2 消息自包含模式</a></li>
     <li><a href="../chapter-15/index.html#15-3-询问模式" class="header">15.3 询问模式</a></li>
+    <li><a href="../chapter-15/index.html#15-5-聚合器模式" class="header">15.5 聚合器模式</a></li>
+    <li><a href="../chapter-15/index.html#15-7-业务握手协议-又名可靠投递模式-" class="header">15.7 业务握手协议（又名可靠投递模式）</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -407,6 +411,443 @@ sealed trait VerificationProcessResponse
 case class VerificationProcessStarted(userEmail: String) extends VerificationProcessResponse
 
 case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse</code></pre>
+<blockquote>
+  <p>代码清单15-11 一个转发结果的匿名子Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">def withChildActor(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware { ctx: ActorContext[StartVerificationProcess] ⇒
+    val log = new BusLogging(
+      ctx.system.eventStream,
+      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+
+    Static {
+      case StartVerificationProcess(userEmail, replyTo) ⇒
+        val corrID = UUID.randomUUID()
+        val childActor = ctx.spawnAnonymous(FullTotal[Result] {
+          case Sig(ctx, PreStart) ⇒
+            ctx.setReceiveTimeout(5.seconds, ReceiveTimeout)
+            Same
+          case Msg(_, ReceiveTimeout) ⇒
+            log.warning(
+              &quot;verification process initiation timed out for {}&quot;,
+              userEmail)
+            replyTo ! VerificationProcessFailed(userEmail)
+            Stopped
+          case Msg(_, SendEmailResult(`corrID`, StatusCode.OK, _)) ⇒
+            log.debug(
+              &quot;successfully started the verification process for {}&quot;,
+              userEmail)
+            replyTo ! VerificationProcessStarted(userEmail)
+            Stopped
+          case Msg(_, SendEmailResult(`corrID`, StatusCode.Failed, explanation)) ⇒
+            log.info(
+              &quot;failed to start the verification process for {}: {}&quot;,
+              userEmail, explanation)
+            replyTo ! VerificationProcessFailed(userEmail)
+            Stopped
+          case Msg(_, SendEmailResult(wrongID, _, _)) ⇒
+            log.error(
+              &quot;received wrong SendEmailResult for corrID {}&quot;,
+              corrID)
+            Same
+        })
+        val request = SendEmail(
+          &quot;verification@example.com&quot;,
+          List(userEmail),
+          constructBody(userEmail, corrID), corrID, childActor)
+        emailGateway ! request
+    }
+  }</code></pre>
+<blockquote>
+  <p>代码清单15-12 由询问模式所产生的Future，并进行了转换</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">def withAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware { ctx ⇒
+    val log = new BusLogging(
+      ctx.system.eventStream,
+      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+    implicit val timeout: Timeout = Timeout(5.seconds)
+    import ctx.executionContext
+    implicit val scheduler: Scheduler = ctx.system.scheduler
+
+    Static {
+      case StartVerificationProcess(userEmail, replyTo) ⇒
+        val corrID = UUID.randomUUID()
+        val response: Future[SendEmailResult] =
+          emailGateway ? (SendEmail(
+            &quot;verification@example.com&quot;,
+            List(userEmail),
+            constructBody(userEmail, corrID), corrID, _))
+        response.map {
+          case SendEmailResult(`corrID`, StatusCode.OK, _) ⇒
+            log.debug(
+              &quot;successfully started the verification process for {}&quot;,
+              userEmail)
+            VerificationProcessStarted(userEmail)
+          case SendEmailResult(`corrID`, StatusCode.Failed, explanation) ⇒
+            log.info(
+              &quot;failed to start the verification process for {}: {}&quot;,
+              userEmail, explanation)
+            VerificationProcessFailed(userEmail)
+          case SendEmailResult(wrongID, _, _) ⇒
+            log.error(
+              &quot;received wrong SendEmailResult for corrID {}&quot;,
+              corrID)
+            VerificationProcessFailed(userEmail)
+        }.recover {
+          case _: AskTimeoutException ⇒
+            log.warning(
+              &quot;verification process initiation timed out for {}&quot;,
+              userEmail)
+            VerificationProcessFailed(userEmail)
+        }.foreach(result ⇒ replyTo ! result)
+    }
+  }</code></pre>
+<blockquote>
+  <p>代码清单15-13 不使用内置支持实现询问模式</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">def withoutAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware[MyCommands] { ctx ⇒
+    val log = new BusLogging(
+      ctx.system.eventStream,
+      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+    var statusMap = Map.empty[UUID, (String, ActorRef[VerificationProcessResponse])]
+    val adapter = ctx.spawnAdapter((s: SendEmailResult) ⇒
+      MyEmailResult(s.correlationID, s.status, s.explanation))
+
+    Static {
+      case StartVerificationProcess(userEmail, replyTo) ⇒
+        val corrID = UUID.randomUUID()
+        val request = SendEmail(
+          &quot;verification@example.com&quot;,
+          List(userEmail),
+          constructBody(userEmail, corrID), corrID, adapter)
+        emailGateway ! request
+        statusMap += corrID -&gt; (userEmail, replyTo)
+        ctx.schedule(5.seconds, ctx.self,
+          MyEmailResult(corrID, StatusCode.Failed, Some(&quot;timeout&quot;)))
+      case MyEmailResult(corrID, status, expl) ⇒
+        statusMap.get(corrID) match {
+          case None ⇒
+            log.error(
+              &quot;received SendEmailResult for unknown correlation ID {}&quot;,
+              corrID)
+          case Some((userEmail, replyTo)) ⇒
+            status match {
+              case StatusCode.OK ⇒
+                log.debug(
+                  &quot;successfully started the verification process for {}&quot;,
+                  userEmail)
+                replyTo ! VerificationProcessStarted(userEmail)
+              case StatusCode.Failed ⇒
+                log.info(
+                  &quot;failed to start the verification process for {}: {}&quot;,
+                  userEmail, expl)
+                replyTo ! VerificationProcessFailed(userEmail)
+            }
+            statusMap -= corrID
+        }
+    }
+  }.narrow[StartVerificationProcess]</code></pre>
+<h2><a href="#15-5-聚合器模式" name="15-5-聚合器模式" class="anchor"><span class="anchor-link"></span></a>15.5 聚合器模式</h2>
+<blockquote>
+  <p>代码清单15-14 使用for推导式来聚合三个Future表达式的结果。</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">def futureFrontPage(
+  themes:       ActorRef[GetTheme],
+  personalNews: ActorRef[GetPersonalNews],
+  topNews:      ActorRef[GetTopNews]): Behavior[GetFrontPage] =
+  ContextAware { ctx ⇒
+    import ctx.executionContext
+    implicit val timeout: Timeout = Timeout(1.second)
+    implicit val scheduler: Scheduler = ctx.system.scheduler
+
+    Static {
+      case GetFrontPage(user, replyTo) ⇒
+        val cssFuture =
+          (themes ? (GetTheme(user, _: ActorRef[ThemeResult])))
+            .map(_.css)
+            .recover {
+              case _: AskTimeoutException ⇒ &quot;default.css&quot;
+            }
+        val personalNewsFuture =
+          (personalNews ? (GetPersonalNews(
+            user,
+            _: ActorRef[PersonalNewsResult])))
+            .map(_.news)
+            .recover {
+              case _: AskTimeoutException ⇒ Nil
+            }
+        val topNewsFuture =
+          (topNews ? (GetTopNews(_: ActorRef[TopNewsResult])))
+            .map(_.news)
+            .recover {
+              case _: AskTimeoutException ⇒ Nil
+            }
+        for {
+          css ← cssFuture
+          personalNews ← personalNewsFuture
+          topNews ← topNewsFuture
+        } {
+          val topSet = topNews.toSet
+          val allNews = topNews ::: personalNews.filterNot(topSet.contains)
+          replyTo ! FrontPageResult(user, css, allNews)
+        }
+    }
+  }
+</code></pre>
+<blockquote>
+  <p>代码清单15-15 使用子Actor替代Future组合子的使用</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">private def pf(p: PartialFunction[AnyRef, Unit]): p.type = p
+
+def frontPage(
+  themes:       ActorRef[GetTheme],
+  personalNews: ActorRef[GetPersonalNews],
+  topNews:      ActorRef[GetTopNews]): Behavior[GetFrontPage] =
+  ContextAware { ctx ⇒
+    Static {
+      case GetFrontPage(user, replyTo) ⇒
+        val childRef = ctx.spawnAnonymous(Deferred { () ⇒
+          val builder = new FrontPageResultBuilder(user)
+          Partial[AnyRef](
+            pf {
+              case ThemeResult(css)         ⇒ builder.addCSS(css)
+              case PersonalNewsResult(news) ⇒ builder.addPersonalNews(news)
+              case TopNewsResult(news)      ⇒ builder.addTopNews(news)
+              case ReceiveTimeout           ⇒ builder.timeout()
+            } andThen { _ ⇒
+              if (builder.isComplete) {
+                replyTo ! builder.result
+                Stopped
+              } else Same
+            })
+        })
+        themes ! GetTheme(user, childRef)
+        personalNews ! GetPersonalNews(user, childRef)
+        topNews ! GetTopNews(childRef)
+        ctx.schedule(1.second, childRef, ReceiveTimeout)
+    }
+  }</code></pre>
+<blockquote>
+  <p>代码清单15-16 使用一个构建器来更加直接地表达领域模型</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class FrontPageResultBuilder(user: String) {
+  private var css: Option[String] = None
+  private var personalNews: Option[List[String]] = None
+  private var topNews: Option[List[String]] = None
+
+  def addCSS(css: String): Unit = this.css = Option(css)
+
+  def addPersonalNews(news: List[String]): Unit =
+    this.personalNews = Option(news)
+
+  def addTopNews(news: List[String]): Unit =
+    this.topNews = Option(news)
+
+  def timeout(): Unit = {
+    if (css.isEmpty) css = Some(&quot;default.css&quot;)
+    if (personalNews.isEmpty) personalNews = Some(Nil)
+    if (topNews.isEmpty) topNews = Some(Nil)
+  }
+
+  def isComplete: Boolean = css.isDefined &amp;&amp;
+    personalNews.isDefined &amp;&amp; topNews.isDefined
+
+  def result: FrontPageResult = {
+    val topSet = topNews.get.toSet
+    val allNews = topNews.get :::
+      personalNews.get.filterNot(topSet.contains)
+    FrontPageResult(user, css.get, allNews)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单15-17 添加第4个服务，降低了代码的可读性</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val overrideFuture =
+  (overrides ? (GetOverride(_: ActorRef[OverrideResult])))
+    .recover {
+      case _: AskTimeoutException ⇒ NoOverride
+    }
+for {
+  css ← cssFuture
+  personalNews ← personalNewsFuture
+  topNews ← topNewsFuture
+  ovr ← overrideFuture
+} ovr match {
+  case NoOverride ⇒
+    val topSet = topNews.toSet
+    val allNews = topNews ::: personalNews.filterNot(topSet.contains)
+    replyTo ! FrontPageResult(user, css, allNews)
+  case other ⇒ // nothing to do here
+}
+for {
+  ovr ← overrideFuture
+} ovr match {
+  case NoOverride ⇒ // nothing to do here
+  case Override(css, news) ⇒
+    replyTo ! FrontPageResult(user, css, news)
+}</code></pre>
+<h2><a href="#15-7-业务握手协议-又名可靠投递模式-" name="15-7-业务握手协议-又名可靠投递模式-" class="anchor"><span class="anchor-link"></span></a>15.7 业务握手协议（又名可靠投递模式）</h2>
+<blockquote>
+  <p>代码清单15-18 使用Actor实现上面的（信息）交换</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
+case object ChangeBudgetDone
+case class CannotChangeBudget(reason: String)
+
+class Sam(alice: ActorRef,
+          bob: ActorRef,
+          amount: BigDecimal) extends Actor {
+  def receive: Receive = talkToAlice()
+
+  def talkToAlice(): Receive = {
+    alice ! ChangeBudget(-amount, self)
+    context.setReceiveTimeout(1.second)
+
+    LoggingReceive {
+      case ChangeBudgetDone           ⇒ context.become(talkToBob())
+      case CannotChangeBudget(reason) ⇒ context.stop(self)
+      case ReceiveTimeout             ⇒ alice ! ChangeBudget(-amount, self)
+    }
+  }
+
+  def talkToBob(): Receive = {
+    context.system.terminate()
+    Actor.emptyBehavior
+  }
+}
+
+class Alice extends Actor {
+  var budget: BigDecimal = 10
+  var alreadyDone: Set[ActorRef] = Set.empty
+
+  def receive = LoggingReceive {
+    case ChangeBudget(amount, replyTo) if alreadyDone(replyTo) ⇒
+      replyTo ! ChangeBudgetDone
+    case ChangeBudget(amount, replyTo) if amount + budget &gt; 0 ⇒
+      budget += amount
+      alreadyDone += replyTo
+      context.watch(replyTo)
+      replyTo ! ChangeBudgetDone
+    case ChangeBudget(_, replyTo) ⇒
+      replyTo ! CannotChangeBudget(&quot;insufficient budget&quot;)
+    case Terminated(saga) ⇒
+      alreadyDone -= saga
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单15-19 向预算消息添加持久性</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class AliceConfirmedChange(deliveryId: Long)
+case class AliceDeniedChange(deliveryId: Long)
+
+class PersistentSam(alice: ActorPath,
+                    bob: ActorPath,
+                    amount: BigDecimal,
+                    override val persistenceId: String)
+  extends PersistentActor with AtLeastOnceDelivery with ActorLogging {
+
+  def receiveCommand: Actor.emptyBehavior.type = Actor.emptyBehavior
+
+  override def preStart(): Unit = {
+    context.become(talkToAlice())
+  }
+
+  def talkToAlice(): Receive = {
+    log.debug(&quot;talking to Alice&quot;)
+    var deliveryId: Long = 0
+    deliver(alice)(id ⇒ { deliveryId = id;
+      ChangeBudget(-amount, self, persistenceId) })
+
+    LoggingReceive({
+      case ChangeBudgetDone ⇒
+        persist(AliceConfirmedChange(deliveryId)) { ev ⇒
+          confirmDelivery(ev.deliveryId)
+          context.become(talkToBob())
+        }
+      case CannotChangeBudget(reason) ⇒
+        persist(AliceDeniedChange(deliveryId)) { ev ⇒
+          confirmDelivery(ev.deliveryId)
+          context.stop(self)
+        }
+    }: Receive)
+  }
+
+  def talkToBob(): Actor.emptyBehavior.type = {
+    context.system.terminate()
+    Actor.emptyBehavior
+  }
+
+  def receiveRecover = LoggingReceive {
+    case AliceConfirmedChange(deliveryId) ⇒
+      confirmDelivery(deliveryId)
+      context.become(talkToBob())
+    case AliceDeniedChange(deliveryId) ⇒
+      confirmDelivery(deliveryId)
+      context.stop(self)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单15-20 Alice Actor的持久化版本</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class BudgetChanged(amount: BigDecimal, persistenceId: String)
+case object CleanupDoneList
+case class ChangeDone(persistenceId: String)
+
+class PersistentAlice extends PersistentActor with ActorLogging {
+  def persistenceId: String = &quot;Alice&quot;
+
+  implicit val mat: ActorMaterializer = ActorMaterializer()
+  import context.dispatcher
+
+  var alreadyDone: Set[String] = Set.empty
+  var budget: BigDecimal = 10
+
+  val cleanupTimer: Cancellable = context.system.scheduler.
+    schedule(1.hour, 1.hour, self, CleanupDoneList)
+
+  def receiveCommand = LoggingReceive {
+    case ChangeBudget(amount, replyTo, id) if alreadyDone(id) ⇒
+      replyTo ! ChangeBudgetDone
+    case ChangeBudget(amount, replyTo, id) if amount + budget &gt; 0 ⇒
+      persist(BudgetChanged(amount, id)) { ev ⇒
+        budget += ev.amount
+        alreadyDone += ev.persistenceId
+        replyTo ! ChangeBudgetDone
+      }
+    case ChangeBudget(_, replyTo, _) ⇒
+      replyTo ! CannotChangeBudget(&quot;insufficient budget&quot;)
+    case CleanupDoneList ⇒
+      val journal = PersistenceQuery(context.system)
+        .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+      for (persistenceId ← alreadyDone) {
+        val stream = journal
+          .currentEventsByPersistenceId(persistenceId)
+          .map(_.event)
+          .collect {
+          case AliceConfirmedChange(_) ⇒ ChangeDone(persistenceId)
+        }
+        stream.runWith(Sink.head).pipeTo(self)
+      }
+    case ChangeDone(id) ⇒
+      persist(ChangeDone(id)) { ev ⇒
+        alreadyDone -= ev.persistenceId
+      }
+  }
+
+  def receiveRecover = LoggingReceive {
+    case BudgetChanged(amount, id) ⇒
+      budget += amount
+      alreadyDone += id
+    case ChangeDone(id) ⇒
+      alreadyDone -= id
+  }
+
+  override def postStop(): Unit = {
+    cleanupTimer.cancel()
+  }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
