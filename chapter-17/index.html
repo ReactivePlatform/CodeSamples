@@ -114,6 +114,16 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-17/index.html#第17章-状态管理和持久化模式" class="header">第17章——状态管理和持久化模式</a>
+  <ul>
+    <li><a href="../chapter-17/index.html#17-1-领域对象模式" class="header">17.1 领域对象模式</a></li>
+    <li><a href="../chapter-17/index.html#17-2-分片模式" class="header">17.2 分片模式</a></li>
+    <li><a href="../chapter-17/index.html#17-3-事件溯源模式" class="header">17.3 事件溯源模式</a></li>
+    <li><a href="../chapter-17/index.html#17-4-事件流模式" class="header">17.4 事件流模式</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -124,10 +134,358 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-17/index.html#第17章-状态管理和持久化模式" class="header">第17章——状态管理和持久化模式</a>
+  <ul>
+    <li><a href="../chapter-17/index.html#17-1-领域对象模式" class="header">17.1 领域对象模式</a></li>
+    <li><a href="../chapter-17/index.html#17-2-分片模式" class="header">17.2 分片模式</a></li>
+    <li><a href="../chapter-17/index.html#17-3-事件溯源模式" class="header">17.3 事件溯源模式</a></li>
+    <li><a href="../chapter-17/index.html#17-4-事件流模式" class="header">17.4 事件流模式</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第17章-状态管理和持久化模式" name="第17章-状态管理和持久化模式" class="anchor"><span class="anchor-link"></span></a>第17章——状态管理和持久化模式</h1>
+<p>前一章介绍了消息速率、负载和时间的各种概念；我们之前只考虑了不同组件之间和时间无关的关联。这一章增加了另一个正交维度来完成这整个版图：维持状态几乎是所有组件的共同目的，而我们还没有讨论应该怎么做到这一点。这里所呈现的模式彼此密切相关，并形成了一个有机整体。</p>
+<h2><a href="#17-1-领域对象模式" name="17-1-领域对象模式" class="anchor"><span class="anchor-link"></span></a>17.1 领域对象模式</h2>
+<blockquote>
+  <p>DomainObject.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class ItemRef(id: URI)
+case class CustomerRef(id: URI)
+case class ShoppingCartRef(id: URI)
+</code></pre>
+<blockquote>
+  <p>清单 17-1 一个最小化的购物车定义</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(items: Map[ItemRef, Int], owner: Option[CustomerRef]) {
+  def setOwner(customer: CustomerRef): ShoppingCart = {
+    require(owner.isEmpty, &quot;owner cannot be overwritten&quot;)
+    copy(owner = Some(customer))
+  }
+
+  def addItem(item: ItemRef, count: Int): ShoppingCart = {
+    require(count &gt; 0, s&quot;count must be positive (trying to add $item with count $count)&quot;)
+    val currentCount = items.get(item).getOrElse(0)
+    copy(items = items.updated(item, currentCount + count))
+  }
+
+  def removeItem(item: ItemRef, count: Int): ShoppingCart = {
+    require(count &gt; 0, s&quot;count must be positive (trying to remove $item with count $count)&quot;)
+    val currentCount = items.get(item).getOrElse(0)
+    val newCount = currentCount - count
+    if (newCount &lt;= 0) copy(items = items - item)
+    else copy(items = items.updated(item, newCount))
+  }
+
+  // 代码清单 17-6
+  def applyEvent(event: Event): ShoppingCart = event match {
+    case OwnerChanged(_, owner) =&gt; setOwner(owner)
+    case ItemAdded(_, item, count) =&gt; addItem(item, count)
+    case ItemRemoved(_, item, count) =&gt; removeItem(item, count)
+  }
+  // 代码清单 17-6
+}
+
+object ShoppingCart {
+  val empty = ShoppingCart(Map.empty, None)
+}</code></pre>
+<blockquote>
+  <p>清单 17-2 用于和购物车对象通信的消息</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">trait ShoppingCartMessage {
+  def shoppingCart: ShoppingCartRef
+}
+
+sealed trait Command extends ShoppingCartMessage
+
+case class SetOwner(
+  shoppingCart: ShoppingCartRef,
+  owner: CustomerRef) extends Command
+
+case class AddItem(
+  shoppingCart: ShoppingCartRef,
+  item: ItemRef,
+  count: Int) extends Command
+
+case class RemoveItem(
+  shoppingCart: ShoppingCartRef,
+  item: ItemRef,
+  count: Int) extends Command
+
+sealed trait Query extends ShoppingCartMessage
+
+case class GetItems(shoppingCart: ShoppingCartRef) extends Query
+
+sealed trait Event extends ShoppingCartMessage
+
+case class OwnerChanged(
+  shoppingCart: ShoppingCartRef,
+  owner: CustomerRef) extends Event
+
+case class ItemAdded(
+  shoppingCart: ShoppingCartRef,
+  item: ItemRef,
+  count: Int) extends Event
+
+case class ItemRemoved(
+  shoppingCart: ShoppingCartRef,
+  item: ItemRef,
+  count: Int) extends Event
+
+sealed trait Result extends ShoppingCartMessage
+
+case class GetItemsResult(
+  shoppingCart: ShoppingCartRef,
+  items: Map[ItemRef, Int]) extends Result</code></pre>
+<blockquote>
+  <p>清单 17-3 一个购物车管理者 Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class ManagerCommand(cmd: Command, id: Long, replyTo: ActorRef)
+case class ManagerEvent(id: Long, event: Event)
+case class ManagerQuery(cmd: Query, id: Long, replyTo: ActorRef)
+case class ManagerResult(id: Long, result: Result)
+case class ManagerRejection(id: Long, reason: String)
+
+class Manager(var shoppingCart: ShoppingCart) extends Actor {
+  /*
+   * this is the usual constructor, the above allows priming with
+   * previously persisted state.
+   */
+  def this() = this(ShoppingCart.empty)
+
+  def receive: PartialFunction[Any, Unit] = {
+    case ManagerCommand(cmd, id, replyTo) =&gt;
+      try {
+        val event = cmd match {
+          case SetOwner(cart, owner) =&gt;
+            shoppingCart = shoppingCart.setOwner(owner)
+            OwnerChanged(cart, owner)
+          case AddItem(cart, item, count) =&gt;
+            shoppingCart = shoppingCart.addItem(item, count)
+            ItemAdded(cart, item, count)
+          case RemoveItem(cart, item, count) =&gt;
+            shoppingCart = shoppingCart.removeItem(item, count)
+            ItemRemoved(cart, item, count)
+        }
+        replyTo ! ManagerEvent(id, event)
+      } catch {
+        case ex: IllegalArgumentException =&gt;
+          replyTo ! ManagerRejection(id, ex.getMessage)
+      }
+    case ManagerQuery(cmd, id, replyTo) =&gt;
+      try {
+        val result = cmd match {
+          case GetItems(cart) =&gt;
+            GetItemsResult(cart, shoppingCart.items)
+        }
+        replyTo ! ManagerResult(id, result)
+      } catch {
+        case ex: IllegalArgumentException =&gt;
+          replyTo ! ManagerRejection(id, ex.getMessage)
+      }
+  }
+}</code></pre>
+<h2><a href="#17-2-分片模式" name="17-2-分片模式" class="anchor"><span class="anchor-link"></span></a>17.2 分片模式</h2>
+<blockquote>
+  <p>清单 17-4 为购物车定义分片算法</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">object ShardSupport {
+  /*
+   * use the shoppingCart reference as the sharding key; the partial function
+   * must return both the key and the message to be forwarded, and if it does
+   * not match then the message is dropped
+   */
+  val extractEntityId: ShardRegion.ExtractEntityId = {
+    case mc @ ManagerCommand(cmd, _, _) =&gt; cmd.shoppingCart.id.toString -&gt; mc
+    case mc @ ManagerQuery(query, _, _) =&gt; query.shoppingCart.id.toString -&gt; mc
+  }
+
+  /*
+   * allocate shoppingCarts into 256 shards based on the low 8 bits of their
+   * ID’s hash; this is a total function that must be defined for all messages
+   * that are forwarded
+   */
+  val extractShardId: ShardRegion.ExtractShardId = {
+    case ManagerCommand(cmd, _, _) =&gt; toHex(cmd.shoppingCart.id.hashCode &amp; 255)
+    case ManagerQuery(query, _, _) =&gt; toHex(query.shoppingCart.id.hashCode &amp; 255)
+  }
+
+  private def toHex(b: Int) =
+    new java.lang.StringBuilder(2)
+      .append(hexDigits(b &gt;&gt; 4))
+      .append(hexDigits(b &amp; 15))
+      .toString
+
+  private val hexDigits = &quot;0123456789ABCDEF&quot;
+
+  val RegionName = &quot;ShoppingCart&quot;
+}</code></pre>
+<blockquote>
+  <p>清单 17-5 启动一个群集来托管分片</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val sys1 = ActorSystem(&quot;ShardingExample&quot;, node1Config.withFallback(clusterConfig))
+val seed = Cluster(sys1).selfAddress
+
+def startNode(sys: ActorSystem): Unit = {
+  Cluster(sys).join(seed)
+  ClusterSharding(sys).start(
+    typeName = ShardSupport.RegionName,
+    entityProps = Props(new Manager),
+    settings = ClusterShardingSettings(sys1),
+    extractEntityId = ShardSupport.extractEntityId,
+    extractShardId = ShardSupport.extractShardId)
+}
+
+startNode(sys1)
+
+val sys2 = ActorSystem(&quot;ShardingExample&quot;, clusterConfig)
+startNode(sys2)</code></pre>
+<blockquote>
+  <p>Sharding.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val manager = ClusterSharding(sys1).shardRegion(ShardSupport.RegionName)</code></pre>
+<h2><a href="#17-3-事件溯源模式" name="17-3-事件溯源模式" class="anchor"><span class="anchor-link"></span></a>17.3 事件溯源模式</h2>
+<blockquote>
+  <p>清单 17-6 将领域事件添加到业务逻辑</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(items: Map[ItemRef, Int], owner: Option[CustomerRef]) {
+  def setOwner(customer: CustomerRef): ShoppingCart = {
+    require(owner.isEmpty, &quot;owner cannot be overwritten&quot;)
+    copy(owner = Some(customer))
+  }
+
+  def addItem(item: ItemRef, count: Int): ShoppingCart = {
+    require(count &gt; 0, s&quot;count must be positive (trying to add $item with count $count)&quot;)
+    val currentCount = items.get(item).getOrElse(0)
+    copy(items = items.updated(item, currentCount + count))
+  }
+
+  def removeItem(item: ItemRef, count: Int): ShoppingCart = {
+    require(count &gt; 0, s&quot;count must be positive (trying to remove $item with count $count)&quot;)
+    val currentCount = items.get(item).getOrElse(0)
+    val newCount = currentCount - count
+    if (newCount &lt;= 0) copy(items = items - item)
+    else copy(items = items.updated(item, newCount))
+  }
+
+  // 代码清单 17-6
+  def applyEvent(event: Event): ShoppingCart = event match {
+    case OwnerChanged(_, owner) =&gt; setOwner(owner)
+    case ItemAdded(_, item, count) =&gt; addItem(item, count)
+    case ItemRemoved(_, item, count) =&gt; removeItem(item, count)
+  }
+  // 代码清单 17-6
+}
+
+object ShoppingCart {
+  val empty = ShoppingCart(Map.empty, None)
+}</code></pre>
+<blockquote>
+  <p>清单 17-7 持久化一个事件溯源领域对象</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class PersistentObjectManager extends PersistentActor {
+  // we expect the name to be the shopping card ID
+  override def persistenceId: String = context.self.path.name
+
+  var shoppingCart: ShoppingCart = ShoppingCart.empty
+
+  def receiveCommand: PartialFunction[Any, Unit] = {
+    case ManagerCommand(cmd, id, replyTo) =&gt;
+      try {
+        val event = cmd match {
+          case SetOwner(cart, owner) =&gt; OwnerChanged(cart, owner)
+          case AddItem(cart, item, count) =&gt; ItemAdded(cart, item, count)
+          case RemoveItem(cart, item, count) =&gt; ItemRemoved(cart, item, count)
+        }
+        // perform the update here in order to treat validation errors immediately
+        shoppingCart = shoppingCart.applyEvent(event)
+        persist(event) { _ =&gt;
+          replyTo ! ManagerEvent(id, event)
+        }
+      } catch {
+        case ex: IllegalArgumentException =&gt;
+          replyTo ! ManagerRejection(id, ex.getMessage)
+      }
+    case ManagerQuery(cmd, id, replyTo) =&gt;
+      try {
+        val result = cmd match {
+          case GetItems(cart) =&gt; GetItemsResult(cart, shoppingCart.items)
+        }
+        replyTo ! ManagerResult(id, result)
+      } catch {
+        case ex: IllegalArgumentException =&gt;
+          replyTo ! ManagerRejection(id, ex.getMessage)
+      }
+  }
+
+  def receiveRecover: PartialFunction[Any, Unit] = {
+    case e: Event =&gt; shoppingCart = shoppingCart.applyEvent(e)
+  }
+}</code></pre>
+<h2><a href="#17-4-事件流模式" name="17-4-事件流模式" class="anchor"><span class="anchor-link"></span></a>17.4 事件流模式</h2>
+<blockquote>
+  <p>清单 17-8 在写日志期间对事件打标签</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class ShoppingCartTagging(system: ExtendedActorSystem) extends WriteEventAdapter {
+  def manifest(event: Any): String = &quot;&quot;
+
+  def toJournal(event: Any): Any =
+    event match {
+      case s: ShoppingCartMessage =&gt; Tagged(event, Set(&quot;shoppingCart&quot;))
+      case other =&gt; other
+    }
+}</code></pre>
+<blockquote>
+  <p>清单 17-9 一个正在监听事件流的 Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">object TopProductListener {
+  private class IntHolder(var value: Int)
+}
+
+class TopProductListener extends Actor with ActorLogging {
+  import TopProductListener._
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+
+  val readJournal: LeveldbReadJournal =
+    PersistenceQuery(context.system)
+      .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+
+  readJournal.eventsByTag(&quot;shoppingCart&quot;, 0)
+    .collect { case EventEnvelope(_, _, _, add: ItemAdded) =&gt; add }
+    .groupedWithin(100000, 1.second)
+    .addAttributes(Attributes.asyncBoundary)
+    .runForeach { seq: Seq[ItemAdded] =&gt;
+      val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) {
+        (map, event) =&gt;
+          map.get(event.item) match {
+            case Some(holder) =&gt; { holder.value += event.count; map }
+            case None =&gt; map.updated(event.item, new IntHolder(event.count))
+          }
+      }
+      self ! TopProducts(0, histogram.map(p =&gt; (p._1, p._2.value)))
+    }
+
+  var topProducts = Map.empty[ItemRef, Int]
+
+  def receive: PartialFunction[Any, Unit] = {
+    case GetTopProducts(id, replyTo) =&gt; replyTo ! TopProducts(id, topProducts)
+    case TopProducts(_, products) =&gt;
+      topProducts = products
+      log.info(&quot;new {}&quot;, products)
+  }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-17/index.md" title="Edit this page" class="md-source-file md-edit">
