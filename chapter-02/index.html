@@ -118,14 +118,9 @@ Type to start searching
 <ul>
   <li><a href="../chapter-02/index.html#第2章-反应式宣言概览" class="header">第2章——反应式宣言概览</a>
   <ul>
-    <li><a href="../chapter-02/index.html#代码清单2-1" class="header">代码清单2-1</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-2" class="header">代码清单2-2</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-3" class="header">代码清单2-3</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-4" class="header">代码清单2-4</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-5" class="header">代码清单2-5</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-6" class="header">代码清单2-6</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-7" class="header">代码清单2-7</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-8" class="header">代码清单2-8</a></li>
+    <li><a href="../chapter-02/index.html#2-1-对用户作出反应" class="header">2.1 对用户作出反应</a></li>
+    <li><a href="../chapter-02/index.html#2-2-利用并行性" class="header">2.2 利用并行性</a></li>
+    <li><a href="../chapter-02/index.html#2-4-对失败作出反应" class="header">2.4 对失败作出反应</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -146,14 +141,9 @@ Type to start searching
 <ul>
   <li><a href="../chapter-02/index.html#第2章-反应式宣言概览" class="header">第2章——反应式宣言概览</a>
   <ul>
-    <li><a href="../chapter-02/index.html#代码清单2-1" class="header">代码清单2-1</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-2" class="header">代码清单2-2</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-3" class="header">代码清单2-3</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-4" class="header">代码清单2-4</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-5" class="header">代码清单2-5</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-6" class="header">代码清单2-6</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-7" class="header">代码清单2-7</a></li>
-    <li><a href="../chapter-02/index.html#代码清单2-8" class="header">代码清单2-8</a></li>
+    <li><a href="../chapter-02/index.html#2-1-对用户作出反应" class="header">2.1 对用户作出反应</a></li>
+    <li><a href="../chapter-02/index.html#2-2-利用并行性" class="header">2.2 利用并行性</a></li>
+    <li><a href="../chapter-02/index.html#2-4-对失败作出反应" class="header">2.4 对失败作出反应</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -165,8 +155,11 @@ Type to start searching
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第2章-反应式宣言概览" name="第2章-反应式宣言概览" class="anchor"><span class="anchor-link"></span></a>第2章——反应式宣言概览</h1>
-<h2><a href="#代码清单2-1" name="代码清单2-1" class="anchor"><span class="anchor-link"></span></a>代码清单2-1</h2>
-<p>Listing 2.1 Excerpt from a simple controller for an image service</p>
+<p>这一章详细地介绍了《反应式宣言》：原文文字简练且内容紧凑，我们将在这里加以展开并进行深入地讨论。有关该宣言相关理论的更多背景知识，请参阅本书第二部分。</p>
+<h2><a href="#2-1-对用户作出反应" name="2-1-对用户作出反应" class="anchor"><span class="anchor-link"></span></a>2.1 对用户作出反应</h2>
+<blockquote>
+  <p>代码清单 2-1 图片服务中简单 Controller 的一段代码</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">public interface Images {
   Image get(String Key);
 
@@ -190,37 +183,53 @@ public Image retrieveImages(String key) {
     }
   }
 }</code></pre>
-<h2><a href="#代码清单2-2" name="代码清单2-2" class="anchor"><span class="anchor-link"></span></a>代码清单2-2</h2>
+<h2><a href="#2-2-利用并行性" name="2-2-利用并行性" class="anchor"><span class="anchor-link"></span></a>2.2 利用并行性</h2>
+<blockquote>
+  <p>SimpleFunction.scala</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">val result = f(42)</code></pre>
-<h2><a href="#代码清单2-3" name="代码清单2-3" class="anchor"><span class="anchor-link"></span></a>代码清单2-3</h2>
+<blockquote>
+  <p>SequentialExecution.java</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">ReplyA a = computeA();
 ReplyB b = computeB();
 ReplyC c = computeC();
 
 Result r = aggregate(a, b, c);</code></pre>
-<h2><a href="#代码清单2-4" name="代码清单2-4" class="anchor"><span class="anchor-link"></span></a>代码清单2-4</h2>
+<blockquote>
+  <p>ParallelExecutionWithJavaFuture.java</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">Future&lt;ReplyA&gt; a = taskA();
 Future&lt;ReplyB&gt; b = taskB();
 Future&lt;ReplyC&gt; c = taskC();
 
 Result r = aggregate(a.get(), b.get(), c.get());</code></pre>
-<h2><a href="#代码清单2-5" name="代码清单2-5" class="anchor"><span class="anchor-link"></span></a>代码清单2-5</h2>
+<blockquote>
+  <p>ParallelExecutionWithScalaFuture.scala</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">val fa: Future[ReplyA] = taskA()
 val fb: Future[ReplyB] = taskB()
 val fc: Future[ReplyC] = taskC()
 
 val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
   yield aggregate(a, b, c)</code></pre>
-<h2><a href="#代码清单2-6" name="代码清单2-6" class="anchor"><span class="anchor-link"></span></a>代码清单2-6</h2>
+<blockquote>
+  <p>BlockingSocketRead.java</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;, 8080);
 socket.getOutputStream().write(requestMessageBytes);
 final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre>
-<h2><a href="#代码清单2-7" name="代码清单2-7" class="anchor"><span class="anchor-link"></span></a>代码清单2-7</h2>
+<blockquote>
+  <p>AskActorWithJava8.java</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-java">CompletionStage&lt;Response&gt; future =
         ask(actorRef, request, timeout)
                 .thenApply(Response.class::cast);
 future.thenAccept(response -&gt; AskActorWithJava8.processIt(response));</code></pre>
-<h2><a href="#代码清单2-8" name="代码清单2-8" class="anchor"><span class="anchor-link"></span></a>代码清单2-8</h2>
+<h2><a href="#2-4-对失败作出反应" name="2-4-对失败作出反应" class="anchor"><span class="anchor-link"></span></a>2.4 对失败作出反应</h2>
+<blockquote>
+  <p>ExceptionHandler.scala</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">try {
   f(i)
 } catch {
