@@ -118,10 +118,7 @@ Type to start searching
 <ul>
   <li><a href="../chapter-12/index.html#第12章-容错及恢复模式" class="header">第12章——容错及恢复模式</a>
   <ul>
-    <li><a href="../chapter-12/index.html#代码清单12-1" class="header">代码清单12-1</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-2" class="header">代码清单12-2</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-3" class="header">代码清单12-3</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-4" class="header">代码清单12-4</a></li>
+    <li><a href="../chapter-12/index.html#12-4-断路器模式" class="header">12.4. 断路器模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -142,10 +139,7 @@ Type to start searching
 <ul>
   <li><a href="../chapter-12/index.html#第12章-容错及恢复模式" class="header">第12章——容错及恢复模式</a>
   <ul>
-    <li><a href="../chapter-12/index.html#代码清单12-1" class="header">代码清单12-1</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-2" class="header">代码清单12-2</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-3" class="header">代码清单12-3</a></li>
-    <li><a href="../chapter-12/index.html#代码清单12-4" class="header">代码清单12-4</a></li>
+    <li><a href="../chapter-12/index.html#12-4-断路器模式" class="header">12.4. 断路器模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -157,8 +151,11 @@ Type to start searching
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第12章-容错及恢复模式" name="第12章-容错及恢复模式" class="anchor"><span class="anchor-link"></span></a>第12章——容错及恢复模式</h1>
-<h2><a href="#代码清单12-1" name="代码清单12-1" class="anchor"><span class="anchor-link"></span></a>代码清单12-1</h2>
-<p>Listing 12.1 Using a circuit breaker to give a failed component time to recover</p>
+<p>在这一章中，你将学习到在设计应用程序时如何应对失败出现的可能性。我们将通过具体地构建一个具有回弹性的计算引擎来演示几个相应的模式，这个系统允许提交批处理作业，并在有着弹性调度的硬件资源上执行。我们将基于你在第6章和第7章所学习到的知识进行展开，因此，你可能想要回顾一下之前的内容。</p>
+<h2><a href="#12-4-断路器模式" name="12-4-断路器模式" class="anchor"><span class="anchor-link"></span></a>12.4. 断路器模式</h2>
+<blockquote>
+  <p>代码清单 12-1 利用断路器使得失败组件有时间恢复</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">private object StorageFailed extends RuntimeException
 
 private def sendToStorage(job: Job): Future[StorageStatus] = {
@@ -188,8 +185,9 @@ def persist(job: Job): Future[StorageStatus] = {
       case _: CircuitBreakerOpenException =&gt; StorageStatus.Failed
     }
 }</code></pre>
-<h2><a href="#代码清单12-2" name="代码清单12-2" class="anchor"><span class="anchor-link"></span></a>代码清单12-2</h2>
-<p>Listing 12.2 Protecting a component by using a rate limiter</p>
+<blockquote>
+  <p>代码清单12-2 使用速率限制器保护组件</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">import scala.concurrent.Future
 import scala.concurrent.duration.{ Deadline, FiniteDuration }
 
@@ -217,8 +215,9 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
     }
   }
 }</code></pre>
-<h2><a href="#代码清单12-3" name="代码清单12-3" class="anchor"><span class="anchor-link"></span></a>代码清单12-3</h2>
-<p>Listing 12.3 Protecting a component by using a rate limiter</p>
+<blockquote>
+  <p>代码清单12-3 断路器：限制来自同一个客户端的请求</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
 
 def persistForThisClient(job: Job): Future[StorageStatus] = {
@@ -229,8 +228,9 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case RateLimitExceeded ⇒ StorageStatus.Failed
     }
 }</code></pre>
-<h2><a href="#代码清单12-4" name="代码清单12-4" class="anchor"><span class="anchor-link"></span></a>代码清单12-4</h2>
-<p>Listing 12.4 Gating a client</p>
+<blockquote>
+  <p>代码清单12-4 门控一个客户端</p>
+</blockquote>
 <pre class="prettyprint"><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
 private val breaker = CircuitBreaker(
   system.scheduler,
