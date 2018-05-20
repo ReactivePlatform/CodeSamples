@@ -177,7 +177,7 @@ Type to start searching
   request()
 
   def receive: PartialFunction[Any, Unit] = {
-    case Job(id, data, replyTo) =&gt;
+    case Job(id, data, replyTo) ⇒
       requested -= 1
       request()
       val sign = if ((data &amp; 1) == 1) plus else minus
@@ -191,23 +191,23 @@ Type to start searching
 <pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
 
   val workStream: Iterator[Job] =
-    Iterator from 1 map (x =&gt; Job(x, x, self)) take 1000000
+    Iterator from 1 map (x ⇒ Job(x, x, self)) take 1000000
 
-  val aggregator: (BigDecimal, BigDecimal) =&gt; BigDecimal = (x: BigDecimal, y: BigDecimal) =&gt; x + y
+  val aggregator: (BigDecimal, BigDecimal) ⇒ BigDecimal = (x: BigDecimal, y: BigDecimal) ⇒ x + y
   var approximation = BigDecimal(0, new MathContext(10000, RoundingMode.HALF_EVEN))
 
   var outstandingWork = 0
 
-  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
   def receive: PartialFunction[Any, Unit] = {
-    case WorkRequest(worker, items) =&gt;
+    case WorkRequest(worker, items) ⇒
       workStream.take(items).foreach {
-        job =&gt;
+        job ⇒
           worker ! job
           outstandingWork += 1
       }
-    case JobResult(id, report) =&gt;
+    case JobResult(id, report) ⇒
       approximation = aggregator(approximation, report)
       outstandingWork -= 1
       if (outstandingWork == 0 &amp;&amp; workStream.isEmpty) {
@@ -225,10 +225,10 @@ Type to start searching
   var workQueue: Queue[Job] = Queue.empty[Job]
   var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
 
-  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
   def receive: PartialFunction[Any, Unit] = {
-    case job @ Job(id, _, replyTo) =&gt;
+    case job @ Job(id, _, replyTo) ⇒
       if (requestQueue.isEmpty) {
         if (workQueue.size &lt; 1000) workQueue :+= job
         else replyTo ! JobRejected(id)
@@ -238,11 +238,11 @@ Type to start searching
         if (items &gt; 1) worker ! DummyWork(items - 1)
         requestQueue = requestQueue.drop(1)
       }
-    case wr @ WorkRequest(worker, items) =&gt;
+    case wr @ WorkRequest(worker, items) ⇒
       if (workQueue.isEmpty) {
         if (!requestQueue.contains(worker)) requestQueue :+= wr
       } else {
-        workQueue.iterator.take(items).foreach(job =&gt; worker ! job)
+        workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
         if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
         workQueue = workQueue.drop(items)
       }
@@ -256,10 +256,10 @@ Type to start searching
   var workQueue: Queue[Job] = Queue.empty[Job]
   var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
 
-  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
   def receive: PartialFunction[Any, Unit] = {
-    case job @ Job(id, _, replyTo) =&gt;
+    case job @ Job(id, _, replyTo) ⇒
       if (requestQueue.isEmpty) {
         if (workQueue.size &lt; 1000) workQueue :+= job
         else replyTo ! JobRejected(id)
@@ -269,11 +269,11 @@ Type to start searching
         if (items &gt; 1) worker ! DummyWork(items - 1)
         requestQueue = requestQueue.drop(1)
       }
-    case wr @ WorkRequest(worker, items) =&gt;
+    case wr @ WorkRequest(worker, items) ⇒
       if (workQueue.isEmpty) {
         if (!requestQueue.contains(worker)) requestQueue :+= wr
       } else {
-        workQueue.iterator.take(items).foreach(job =&gt; worker ! job)
+        workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
         if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
         workQueue = workQueue.drop(items)
       }
@@ -297,7 +297,7 @@ def shallEnqueue(atSize: Int): Boolean =
 <blockquote>
   <p>DropPattern.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case job @ Job(id, _, replyTo) =&gt;
+<pre class="prettyprint"><code class="language-scala">case job @ Job(id, _, replyTo) ⇒
   if (requestQueue.isEmpty) {
     val atSize = workQueue.size
     if (shallEnqueue(atSize)) workQueue :+= job
@@ -314,7 +314,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
 
   def receive: PartialFunction[Any, Unit] = {
-    case job: Job =&gt;
+    case job: Job ⇒
       workQueue = workQueue.dropWhile(_.consumed)
       if (workQueue.size &lt; 1000) {
         val envelope = WorkEnvelope(job)
@@ -328,11 +328,11 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   <p>代码清单16-4 根据特定速率使用令牌桶来拉取工作</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class CalculatorClient(
-  workSource: ActorRef,
-  calculator: ActorRef,
+  workSource:    ActorRef,
+  calculator:    ActorRef,
   ratePerSecond: Long,
-  bucketSize: Int,
-  batchSize: Int) extends Actor {
+  bucketSize:    Int,
+  batchSize:     Int) extends Actor {
   def now(): Long = System.nanoTime()
   val nanoSecondsBetweenTokens: Long = 1000000000L / ratePerSecond
 
@@ -384,7 +384,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   request(lastTokenTime)
 
   def receive: PartialFunction[Any, Unit] = {
-    case job: Job =&gt;
+    case job: Job ⇒
       val time = now()
       if (Debug) if (requested == 1) println(s&quot;$time: received job&quot;)
       consumeToken(time)

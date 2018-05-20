@@ -191,9 +191,9 @@ case class ShoppingCartRef(id: URI)
 
   // 代码清单 17-6
   def applyEvent(event: Event): ShoppingCart = event match {
-    case OwnerChanged(_, owner) =&gt; setOwner(owner)
-    case ItemAdded(_, item, count) =&gt; addItem(item, count)
-    case ItemRemoved(_, item, count) =&gt; removeItem(item, count)
+    case OwnerChanged(_, owner)      ⇒ setOwner(owner)
+    case ItemAdded(_, item, count)   ⇒ addItem(item, count)
+    case ItemRemoved(_, item, count) ⇒ removeItem(item, count)
   }
   // 代码清单 17-6
 }
@@ -212,17 +212,17 @@ sealed trait Command extends ShoppingCartMessage
 
 case class SetOwner(
   shoppingCart: ShoppingCartRef,
-  owner: CustomerRef) extends Command
+  owner:        CustomerRef) extends Command
 
 case class AddItem(
   shoppingCart: ShoppingCartRef,
-  item: ItemRef,
-  count: Int) extends Command
+  item:         ItemRef,
+  count:        Int) extends Command
 
 case class RemoveItem(
   shoppingCart: ShoppingCartRef,
-  item: ItemRef,
-  count: Int) extends Command
+  item:         ItemRef,
+  count:        Int) extends Command
 
 sealed trait Query extends ShoppingCartMessage
 
@@ -232,23 +232,23 @@ sealed trait Event extends ShoppingCartMessage
 
 case class OwnerChanged(
   shoppingCart: ShoppingCartRef,
-  owner: CustomerRef) extends Event
+  owner:        CustomerRef) extends Event
 
 case class ItemAdded(
   shoppingCart: ShoppingCartRef,
-  item: ItemRef,
-  count: Int) extends Event
+  item:         ItemRef,
+  count:        Int) extends Event
 
 case class ItemRemoved(
   shoppingCart: ShoppingCartRef,
-  item: ItemRef,
-  count: Int) extends Event
+  item:         ItemRef,
+  count:        Int) extends Event
 
 sealed trait Result extends ShoppingCartMessage
 
 case class GetItemsResult(
   shoppingCart: ShoppingCartRef,
-  items: Map[ItemRef, Int]) extends Result</code></pre>
+  items:        Map[ItemRef, Int]) extends Result</code></pre>
 <blockquote>
   <p>清单 17-3 一个购物车管理者 Actor</p>
 </blockquote>
@@ -266,33 +266,33 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
   def this() = this(ShoppingCart.empty)
 
   def receive: PartialFunction[Any, Unit] = {
-    case ManagerCommand(cmd, id, replyTo) =&gt;
+    case ManagerCommand(cmd, id, replyTo) ⇒
       try {
         val event = cmd match {
-          case SetOwner(cart, owner) =&gt;
+          case SetOwner(cart, owner) ⇒
             shoppingCart = shoppingCart.setOwner(owner)
             OwnerChanged(cart, owner)
-          case AddItem(cart, item, count) =&gt;
+          case AddItem(cart, item, count) ⇒
             shoppingCart = shoppingCart.addItem(item, count)
             ItemAdded(cart, item, count)
-          case RemoveItem(cart, item, count) =&gt;
+          case RemoveItem(cart, item, count) ⇒
             shoppingCart = shoppingCart.removeItem(item, count)
             ItemRemoved(cart, item, count)
         }
         replyTo ! ManagerEvent(id, event)
       } catch {
-        case ex: IllegalArgumentException =&gt;
+        case ex: IllegalArgumentException ⇒
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
-    case ManagerQuery(cmd, id, replyTo) =&gt;
+    case ManagerQuery(cmd, id, replyTo) ⇒
       try {
         val result = cmd match {
-          case GetItems(cart) =&gt;
+          case GetItems(cart) ⇒
             GetItemsResult(cart, shoppingCart.items)
         }
         replyTo ! ManagerResult(id, result)
       } catch {
-        case ex: IllegalArgumentException =&gt;
+        case ex: IllegalArgumentException ⇒
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
   }
@@ -308,8 +308,8 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
    * not match then the message is dropped
    */
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case mc @ ManagerCommand(cmd, _, _) =&gt; cmd.shoppingCart.id.toString -&gt; mc
-    case mc @ ManagerQuery(query, _, _) =&gt; query.shoppingCart.id.toString -&gt; mc
+    case mc @ ManagerCommand(cmd, _, _) ⇒ cmd.shoppingCart.id.toString -&gt; mc
+    case mc @ ManagerQuery(query, _, _) ⇒ query.shoppingCart.id.toString -&gt; mc
   }
 
   /*
@@ -318,8 +318,8 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
    * that are forwarded
    */
   val extractShardId: ShardRegion.ExtractShardId = {
-    case ManagerCommand(cmd, _, _) =&gt; toHex(cmd.shoppingCart.id.hashCode &amp; 255)
-    case ManagerQuery(query, _, _) =&gt; toHex(query.shoppingCart.id.hashCode &amp; 255)
+    case ManagerCommand(cmd, _, _) ⇒ toHex(cmd.shoppingCart.id.hashCode &amp; 255)
+    case ManagerQuery(query, _, _) ⇒ toHex(query.shoppingCart.id.hashCode &amp; 255)
   }
 
   private def toHex(b: Int) =
@@ -382,9 +382,9 @@ startNode(sys2)</code></pre>
 
   // 代码清单 17-6
   def applyEvent(event: Event): ShoppingCart = event match {
-    case OwnerChanged(_, owner) =&gt; setOwner(owner)
-    case ItemAdded(_, item, count) =&gt; addItem(item, count)
-    case ItemRemoved(_, item, count) =&gt; removeItem(item, count)
+    case OwnerChanged(_, owner)      ⇒ setOwner(owner)
+    case ItemAdded(_, item, count)   ⇒ addItem(item, count)
+    case ItemRemoved(_, item, count) ⇒ removeItem(item, count)
   }
   // 代码清单 17-6
 }
@@ -402,36 +402,36 @@ object ShoppingCart {
   var shoppingCart: ShoppingCart = ShoppingCart.empty
 
   def receiveCommand: PartialFunction[Any, Unit] = {
-    case ManagerCommand(cmd, id, replyTo) =&gt;
+    case ManagerCommand(cmd, id, replyTo) ⇒
       try {
         val event = cmd match {
-          case SetOwner(cart, owner) =&gt; OwnerChanged(cart, owner)
-          case AddItem(cart, item, count) =&gt; ItemAdded(cart, item, count)
-          case RemoveItem(cart, item, count) =&gt; ItemRemoved(cart, item, count)
+          case SetOwner(cart, owner)         ⇒ OwnerChanged(cart, owner)
+          case AddItem(cart, item, count)    ⇒ ItemAdded(cart, item, count)
+          case RemoveItem(cart, item, count) ⇒ ItemRemoved(cart, item, count)
         }
         // perform the update here in order to treat validation errors immediately
         shoppingCart = shoppingCart.applyEvent(event)
-        persist(event) { _ =&gt;
+        persist(event) { _ ⇒
           replyTo ! ManagerEvent(id, event)
         }
       } catch {
-        case ex: IllegalArgumentException =&gt;
+        case ex: IllegalArgumentException ⇒
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
-    case ManagerQuery(cmd, id, replyTo) =&gt;
+    case ManagerQuery(cmd, id, replyTo) ⇒
       try {
         val result = cmd match {
-          case GetItems(cart) =&gt; GetItemsResult(cart, shoppingCart.items)
+          case GetItems(cart) ⇒ GetItemsResult(cart, shoppingCart.items)
         }
         replyTo ! ManagerResult(id, result)
       } catch {
-        case ex: IllegalArgumentException =&gt;
+        case ex: IllegalArgumentException ⇒
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
   }
 
   def receiveRecover: PartialFunction[Any, Unit] = {
-    case e: Event =&gt; shoppingCart = shoppingCart.applyEvent(e)
+    case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
   }
 }</code></pre>
 <h2><a href="#17-4-事件流模式" name="17-4-事件流模式" class="anchor"><span class="anchor-link"></span></a>17.4 事件流模式</h2>
@@ -443,8 +443,8 @@ object ShoppingCart {
 
   def toJournal(event: Any): Any =
     event match {
-      case s: ShoppingCartMessage =&gt; Tagged(event, Set(&quot;shoppingCart&quot;))
-      case other =&gt; other
+      case s: ShoppingCartMessage ⇒ Tagged(event, Set(&quot;shoppingCart&quot;))
+      case other                  ⇒ other
     }
 }</code></pre>
 <blockquote>
@@ -463,25 +463,25 @@ class TopProductListener extends Actor with ActorLogging {
       .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
 
   readJournal.eventsByTag(&quot;shoppingCart&quot;, 0)
-    .collect { case EventEnvelope(_, _, _, add: ItemAdded) =&gt; add }
+    .collect { case EventEnvelope(_, _, _, add: ItemAdded) ⇒ add }
     .groupedWithin(100000, 1.second)
     .addAttributes(Attributes.asyncBoundary)
-    .runForeach { seq: Seq[ItemAdded] =&gt;
+    .runForeach { seq: Seq[ItemAdded] ⇒
       val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) {
-        (map, event) =&gt;
+        (map, event) ⇒
           map.get(event.item) match {
-            case Some(holder) =&gt; { holder.value += event.count; map }
-            case None =&gt; map.updated(event.item, new IntHolder(event.count))
+            case Some(holder) ⇒ { holder.value += event.count; map }
+            case None         ⇒ map.updated(event.item, new IntHolder(event.count))
           }
       }
-      self ! TopProducts(0, histogram.map(p =&gt; (p._1, p._2.value)))
+      self ! TopProducts(0, histogram.map(p ⇒ (p._1, p._2.value)))
     }
 
   var topProducts = Map.empty[ItemRef, Int]
 
   def receive: PartialFunction[Any, Unit] = {
-    case GetTopProducts(id, replyTo) =&gt; replyTo ! TopProducts(id, topProducts)
-    case TopProducts(_, products) =&gt;
+    case GetTopProducts(id, replyTo) ⇒ replyTo ! TopProducts(id, topProducts)
+    case TopProducts(_, products) ⇒
       topProducts = products
       log.info(&quot;new {}&quot;, products)
   }
