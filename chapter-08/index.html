@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>第8章——有限定的一致性 · </title>
+<title>第8章——有界一致性 · </title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
 <link rel="stylesheet" href="../lib/prettify/prettify.css">
@@ -53,7 +53,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 <span class="md-header-nav__topic">
 </span>
 <span class="md-header-nav__topic">
-第8章——有限定的一致性
+第8章——有界一致性
 </span>
 </div>
 </div>
@@ -127,7 +127,10 @@ Type to start searching
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#第8章-有限定的一致性" name="第8章-有限定的一致性" class="anchor"><span class="anchor-link"></span></a>第8章——有限定的一致性</h1>
+<h1><a href="#第8章-有界一致性" name="第8章-有界一致性" class="anchor"><span class="anchor-link"></span></a>第8章——有界一致性</h1>
+<p>分布式系统（distributed system）的某种定义是：一个各部分允许独立失败的系统。 反应式设计的本质是分布式的：你想对相互隔离的组件进行建模，并且只通过位置透明的消息传递进行交互，从而建立具有回弹性的监督层级结构。这意味着，最终产生的应用程序结构也将要面对分布式所带来的各种后果。在无状态系统中，这类后果主要与失败处理有关，恢复处理手段则如前一章所述。但是当系统需要维护状态时，就没有那么简单了。即使系统的每个部分都完美地工作，时间也是一个（可能导致失败的）因素。正如你在第 2 章中所学习到的，分布式会导致的其中一个后果就是无法保证强一致性（strong consistency）。在这一章中，你将学到有界一致性（delimited consistency），这是退而求其次的最优选。</p>
+<hr/>
+<p>没有代码清单</p>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-08/index.md" title="Edit this page" class="md-source-file md-edit">
