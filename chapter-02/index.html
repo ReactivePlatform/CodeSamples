@@ -142,7 +142,7 @@ Type to start searching
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.1*
+<i class="md-icon">label_outline</i> 1.0.0
 </div>
 </nav>
 
@@ -179,26 +179,27 @@ Type to start searching
 <h2><a href="#代码清单2-1" name="代码清单2-1" class="anchor"><span class="anchor-link"></span></a>代码清单2-1</h2>
 <p>Listing 2.1 Excerpt from a simple controller for an image service</p>
 <pre class="prettyprint"><code class="language-java">public interface Images {
-    Image get(String Key);
-    void add(String key, Image image);
+  Image get(String Key);
+
+  void add(String key, Image image);
 }
 
 public Images cache;
 public Images database;
 
-public Image retrieveImages(String key){
-    Image result = cache.get(key);
+public Image retrieveImages(String key) {
+  Image result = cache.get(key);
+  if (result != null) {
+    return result;
+  } else {
+    result = database.get(key);
     if (result != null) {
-        return result;
+      cache.add(key, result);
+      return result;
     } else {
-        result = database.get(key);
-        if (result != null) {
-            cache.add(key, result);
-            return result;
-        } else {
-            return fallback;
-        }
+      return fallback;
     }
+  }
 }</code></pre>
 <h2><a href="#代码清单2-2" name="代码清单2-2" class="anchor"><span class="anchor-link"></span></a>代码清单2-2</h2>
 <pre class="prettyprint"><code class="language-scala">val result = f(42)</code></pre>
@@ -222,7 +223,7 @@ val fc: Future[ReplyC] = taskC()
 val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
   yield aggregate(a, b, c)</code></pre>
 <h2><a href="#代码清单2-6" name="代码清单2-6" class="anchor"><span class="anchor-link"></span></a>代码清单2-6</h2>
-<pre class="prettyprint"><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;,8080);
+<pre class="prettyprint"><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;, 8080);
 socket.getOutputStream().write(requestMessageBytes);
 final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre>
 <h2><a href="#代码清单2-7" name="代码清单2-7" class="anchor"><span class="anchor-link"></span></a>代码清单2-7</h2>
@@ -246,7 +247,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.1*
+1.0.0
 </span>
 </div>
 </article>

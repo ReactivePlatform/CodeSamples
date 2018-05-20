@@ -144,7 +144,7 @@ Type to start searching
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.1*
+<i class="md-icon">label_outline</i> 1.0.0
 </div>
 </nav>
 
@@ -183,59 +183,59 @@ Type to start searching
 <h2><a href="#代码清单15-1" name="代码清单15-1" class="anchor"><span class="anchor-link"></span></a>代码清单15-1</h2>
 <p>Listing 15.1 Server responding to the address that originated the request</p>
 <pre class="prettyprint"><code class="language-java">public class Server {
-    static final int SERVER_PORT = 8888;
+  static final int SERVER_PORT = 8888;
 
-    static public void main(String[] args) throws IOException {
-        // bind a socket for receiving packets
-        try (final DatagramSocket socket =
-                     new DatagramSocket(SERVER_PORT)) {
+  static public void main(String[] args) throws IOException {
+    // bind a socket for receiving packets
+    try (final DatagramSocket socket =
+        new DatagramSocket(SERVER_PORT)) {
 
-            // receive one packet
-            final byte[] buffer = new byte[1500];
-            final DatagramPacket packet1 =
-                    new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet1);
+      // receive one packet
+      final byte[] buffer = new byte[1500];
+      final DatagramPacket packet1 =
+          new DatagramPacket(buffer, buffer.length);
+      socket.receive(packet1);
 
-            final SocketAddress sender = packet1.getSocketAddress();
-            System.out.println(&quot;server: received &quot; +
-                    new String(packet1.getData()));
-            System.out.println(&quot;server: sender was &quot; + sender);
+      final SocketAddress sender = packet1.getSocketAddress();
+      System.out.println(&quot;server: received &quot; +
+          new String(packet1.getData()));
+      System.out.println(&quot;server: sender was &quot; + sender);
 
-            // send response back
-            final byte[] response = &quot;got it!&quot;.getBytes();
-            final DatagramPacket packet2 =
-                    new DatagramPacket(response, response.length, sender);
-            socket.send(packet2);
-        }
+      // send response back
+      final byte[] response = &quot;got it!&quot;.getBytes();
+      final DatagramPacket packet2 =
+          new DatagramPacket(response, response.length, sender);
+      socket.send(packet2);
     }
+  }
 }</code></pre>
 <h2><a href="#代码清单15-2" name="代码清单15-2" class="anchor"><span class="anchor-link"></span></a>代码清单15-2</h2>
 <p>Listing 15.2 Client sending a request and then blocking until the server responds</p>
 <pre class="prettyprint"><code class="language-java">public class Client {
-    static public void main(String[] args) throws IOException {
-        // get local socket with random port
-        try (final DatagramSocket socket = new DatagramSocket()) {
+  static public void main(String[] args) throws IOException {
+    // get local socket with random port
+    try (final DatagramSocket socket = new DatagramSocket()) {
 
-            // send message to server
-            final byte[] request = &quot;hello&quot;.getBytes();
-            final SocketAddress serverAddress =
-                    new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
-            final DatagramPacket packet1 =
-                    new DatagramPacket(request, request.length, serverAddress);
-            socket.send(packet1);
+      // send message to server
+      final byte[] request = &quot;hello&quot;.getBytes();
+      final SocketAddress serverAddress =
+          new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
+      final DatagramPacket packet1 =
+          new DatagramPacket(request, request.length, serverAddress);
+      socket.send(packet1);
 
-            // receive one packet
-            final byte[] buffer = new byte[1500];
-            final DatagramPacket packet2 =
-                    new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet2);
+      // receive one packet
+      final byte[] buffer = new byte[1500];
+      final DatagramPacket packet2 =
+          new DatagramPacket(buffer, buffer.length);
+      socket.receive(packet2);
 
-            final SocketAddress sender = packet2.getSocketAddress();
-            System.out.println(&quot;client: received &quot; +
-                    new String(packet2.getData()));
-            System.out.println(&quot;client: sender was &quot; + sender);
-        }
+      final SocketAddress sender = packet2.getSocketAddress();
+      System.out.println(&quot;client: received &quot; +
+          new String(packet2.getData()));
+      System.out.println(&quot;client: sender was &quot; + sender);
     }
+  }
 }</code></pre>
 <p><em>Server 的输出结果</em></p>
 <pre class="prettyprint"><code class="language-output">server: received hello
@@ -417,7 +417,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.1*
+1.0.0
 </span>
 </div>
 </article>

@@ -152,7 +152,7 @@ Type to start searching
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.1*
+<i class="md-icon">label_outline</i> 1.0.0
 </div>
 </nav>
 
@@ -214,39 +214,46 @@ Type to start searching
 <pre class="prettyprint"><code class="language-java">import java.util.Date;
 
 public class Unsafe {
-    private Date timestamp;
-    private final StringBuffer message;
-    public Unsafe(Date timestamp, StringBuffer message) {
-        this.timestamp = timestamp;
-        this.message = message;
-    }
-    public synchronized Date getTimestamp() {
-        return timestamp;
-    }
-    public synchronized void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-    public StringBuffer getMessage() {
-        return message;
-    }
+  private Date timestamp;
+  private final StringBuffer message;
+
+  public Unsafe(Date timestamp, StringBuffer message) {
+    this.timestamp = timestamp;
+    this.message = message;
+  }
+
+  public synchronized Date getTimestamp() {
+    return timestamp;
+  }
+
+  public synchronized void setTimestamp(Date timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public StringBuffer getMessage() {
+    return message;
+  }
 }</code></pre>
 <h2><a href="#代码清单3-2" name="代码清单3-2" class="anchor"><span class="anchor-link"></span></a>代码清单3-2</h2>
 <p>Listing 3.2 Immutable message class that behaves predictably and is easier to reason about</p>
 <pre class="prettyprint"><code class="language-java">import java.util.Date;
 
 public class Immutable {
-    private final Date timestamp;
-    private final String message;
-    public Immutable(final Date timestamp, final String message) {
-        this.timestamp = new Date(timestamp.getTime());
-        this.message = message;
-    }
-    public Date getTimestamp() {
-        return new Date(timestamp.getTime());
-    }
-    public String getMessage() {
-        return message;
-    }
+  private final Date timestamp;
+  private final String message;
+
+  public Immutable(final Date timestamp, final String message) {
+    this.timestamp = new Date(timestamp.getTime());
+    this.message = message;
+  }
+
+  public Date getTimestamp() {
+    return new Date(timestamp.getTime());
+  }
+
+  public String getMessage() {
+    return message;
+  }
 }</code></pre>
 <h2><a href="#代码清单3-3" name="代码清单3-3" class="anchor"><span class="anchor-link"></span></a>代码清单3-3</h2>
 <p>使用Scala的case class定义的不可变消息</p>
@@ -258,44 +265,49 @@ case class Message(timestamp: Date, message: String)</code></pre>
 <pre class="prettyprint"><code class="language-java">final StringBuffer original = new StringBuffer(&quot;foo&quot;);
 final StringBuffer reversed = original.reverse();
 System.out.println(String.format(
-        &quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;,
-        original,
-        reversed));</code></pre>
+    &quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;,
+    original,
+    reversed));</code></pre>
 <h2><a href="#代码清单3-5" name="代码清单3-5" class="anchor"><span class="anchor-link"></span></a>代码清单3-5</h2>
 <p>引用透明</p>
 <p>Referential transparency: allowing substitution of precomputed values</p>
 <pre class="prettyprint"><code class="language-java">public class Rooter {
-    private final double value;
-    private Double root = null;
-    public Rooter(double value) {
-        this.value = value;
+  private final double value;
+  private Double root = null;
+
+  public Rooter(double value) {
+    this.value = value;
+  }
+
+  public double getValue() {
+    return value;
+  }
+
+  public double getRoot() {
+    if (root == null) {
+      root = Math.sqrt(value);
     }
-    public double getValue() {
-        return value;
-    }
-    public double getRoot() {
-        if (root == null) {
-            root = Math.sqrt(value);
-        }
-        return root;
-    }
+    return root;
+  }
 }</code></pre>
 <h2><a href="#代码清单3-6" name="代码清单3-6" class="anchor"><span class="anchor-link"></span></a>代码清单3-6</h2>
 <p>Limiting usability with side effects</p>
 <pre class="prettyprint"><code class="language-java">public class SideEffecting implements Serializable, Cloneable {
-    private int count;
-    public SideEffecting(int start) {
-        this.count = start;
-    }
-    public int next() {
-        this.count += Math.incrementExact(this.count);
-        return this.count;
-    }
+  private int count;
+
+  public SideEffecting(int start) {
+    this.count = start;
+  }
+
+  public int next() {
+    this.count += Math.incrementExact(this.count);
+    return this.count;
+  }
 }</code></pre>
 <h2><a href="#代码清单3-7" name="代码清单3-7" class="anchor"><span class="anchor-link"></span></a>代码清单3-7</h2>
 <pre class="prettyprint"><code class="language-java">final int next = se.next();
 if (logger.isDebugEnabled()) {
-    logger.debug(&quot;Next is &quot; + se.next());
+  logger.debug(&quot;Next is &quot; + se.next());
 }
 return next;</code></pre>
 <h2><a href="#代码清单3-8" name="代码清单3-8" class="anchor"><span class="anchor-link"></span></a>代码清单3-8</h2>
@@ -357,16 +369,16 @@ func consumer(myChannel chan int, iterations int) {
 }</code></pre>
 <h2><a href="#代码清单3-11" name="代码清单3-11" class="anchor"><span class="anchor-link"></span></a>代码清单3-11</h2>
 <pre class="prettyprint"><code class="language-java">public class ParallelRetrievalExample {
-    private final CacheRetriever cacheRetriever;
-    private final DBRetriever dbRetriever;
+  private final CacheRetriever cacheRetriever;
+  private final DBRetriever dbRetriever;
 
-    ParallelRetrievalExample(CacheRetriever cacheRetriever,
-                             DBRetriever dbRetriever) {
-        this.cacheRetriever = cacheRetriever;
-        this.dbRetriever = dbRetriever;
-    }
+  ParallelRetrievalExample(CacheRetriever cacheRetriever,
+      DBRetriever dbRetriever) {
+    this.cacheRetriever = cacheRetriever;
+    this.dbRetriever = dbRetriever;
+  }
 
-    public Object retrieveCustomer(final long id) {
+  public Object retrieveCustomer(final long id) {
         final CompletableFuture&lt;Object&gt; cacheFuture = CompletableFuture
                 .supplyAsync(() -&gt; cacheRetriever.getCustomer(id));
         final CompletableFuture&lt;Object&gt; dbFuture = CompletableFuture
@@ -419,7 +431,7 @@ val resultFuture = async {
 import io.reactivex.Observable;
 
 public class RxJavaExample {
-    public void observe(String[] strings) {
+  public void observe(String[] strings) {
         Observable.fromArray(strings).subscribe((s) -&gt; {
                 System.out.println(&quot;Received &quot; + s);
         });
@@ -429,11 +441,12 @@ public class RxJavaExample {
 <pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
 
 public class RxJavaExampleDriver {
-    private static final RxJavaExample rxJavaExample = new RxJavaExample();
-    public static void main(String[] args) {
-        String[] strings = { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; };
-        rxJavaExample.observe(strings);
-    }
+  private static final RxJavaExample rxJavaExample = new RxJavaExample();
+
+  public static void main(String[] args) {
+    String[] strings = {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;};
+    rxJavaExample.observe(strings);
+  }
 }</code></pre>
 <h2><a href="#代码清单3-16" name="代码清单3-16" class="anchor"><span class="anchor-link"></span></a>代码清单3-16</h2>
 <pre class="prettyprint"><code class="language-scala">package chapter03.actor
@@ -507,7 +520,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.1*
+1.0.0
 </span>
 </div>
 </article>
