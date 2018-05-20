@@ -17,12 +17,12 @@
 
 
 <meta name="description" content="docs">
-<link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>第16章——流控制模式 · </title>
-<link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
-<link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
-<link rel="stylesheet" href="../lib/prettify/prettify.css">
-<script src="../lib/modernizr/modernizr.min.js"></script>
+<link rel="shortcut icon" href="assets/images/favicon.png">
+<title>第一部分 简介 · </title>
+<link rel="stylesheet" href="assets/stylesheets/application.7a4cdee3.css">
+<link rel="stylesheet" href="lib/material__tabs/dist/mdc.tabs.min.css">
+<link rel="stylesheet" href="lib/prettify/prettify.css">
+<script src="lib/modernizr/modernizr.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
 <style>
 body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}
@@ -30,7 +30,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="../assets/stylesheets/paradox-material-theme.css">
+<link rel="stylesheet" href="assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
 >
@@ -41,7 +41,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 <nav class="md-header-nav md-grid">
 <div class="md-flex">
 <div class="md-flex__cell md-flex__cell--shrink">
-<a href="../index.html" title="" class="md-header-nav__button md-logo">
+<a href="index.html" title="" class="md-header-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </a>
 </div>
@@ -53,7 +53,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 <span class="md-header-nav__topic">
 </span>
 <span class="md-header-nav__topic">
-第16章——流控制模式
+第一部分 简介
 </span>
 </div>
 </div>
@@ -96,21 +96,21 @@ Type to start searching
 <span class="md-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </span>
-<a href="../index.html" title="">
+<a href="index.html" title="">
 </a>
 </label>
 <ul>
-  <li><a href="../contents.html" class="page">目录</a>
+  <li><a href="contents.html" class="page">目录</a>
   <ul>
-    <li><a href="../abstract.html" class="page">内容提要</a></li>
-    <li><a href="../part1.html" class="page">第一部分 简介</a></li>
-    <li><a href="../part2.html" class="page">第二部分 微言大义</a></li>
-    <li><a href="../part3.html" class="page">第三部分 设计模式</a></li>
-    <li><a href="../appendix-01/index.html" class="page">附录A——图解反应式系统</a></li>
-    <li><a href="../appendix-02/index.html" class="page">附录B——图解示例</a></li>
-    <li><a href="../appendix-03/index.html" class="page">附录C——反应式宣言</a></li>
-    <li><a href="../extras.html" class="page">额外指引</a></li>
-    <li><a href="../errata.html" class="page">勘误</a></li>
+    <li><a href="abstract.html" class="page">内容提要</a></li>
+    <li><a href="part1.html" class="active page">第一部分 简介</a></li>
+    <li><a href="part2.html" class="page">第二部分 微言大义</a></li>
+    <li><a href="part3.html" class="page">第三部分 设计模式</a></li>
+    <li><a href="appendix-01/index.html" class="page">附录A——图解反应式系统</a></li>
+    <li><a href="appendix-02/index.html" class="page">附录B——图解示例</a></li>
+    <li><a href="appendix-03/index.html" class="page">附录C——反应式宣言</a></li>
+    <li><a href="extras.html" class="page">额外指引</a></li>
+    <li><a href="errata.html" class="page">勘误</a></li>
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
@@ -127,10 +127,16 @@ Type to start searching
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#第16章-流控制模式" name="第16章-流控制模式" class="anchor"><span class="anchor-link"></span></a>第16章——流控制模式</h1>
+<h1><a href="#第一部分-简介" name="第一部分-简介" class="anchor"><span class="anchor-link"></span></a>第一部分 简介</h1>
+<p>你有曾思考过高性能Web应用程序是如何实现的吗？社交网络和大型零售网站肯定有一些秘密配方使得系统运行迅速并且可靠，但这些秘密是什么呢？在这本书中，我们将为你揭晓谜底，你将学习到这些近似永远不出故障，并且能够满足数十亿人需要的系统背后的设计原则与模式。虽然你所构建的系统未必有如此雄心壮志的要求，但是它们主要的特质应该是一致的：</p>
+<p>你想要你的应用程序可靠地工作，即使某些部件（硬件或者软件）有可能出现故障。</p>
+<p>你希望你的应用程序在你需要支撑更多的用户时，可以持续地提供服务，而且你希望能够通过添加或者删除资源来调整它的能力，从而适应不断变化的需求（没有可以预测未来的水晶球的帮助，很难进行正确的容量规划）。</p>
+<p>在第1章中，我们将勾勒出一个具备这些特质的应用程序的开发过程。我们将指明你会遇到的挑战，并基于一个具体的例子（一个假想中的Gmail服务实现）给出解决方案，但是我们将会以不提供具体的技术选型的形式进行。</p>
+<p>这个使用场景为接下来在第2章中对《反应式宣言》所进行的详细讨论作了铺垫。该宣言以简洁、抽象的形式撰写，目的是为了聚焦于它的本质：将多个独立的、有效的程序特性凝聚为一个整体，从而形成更大的合力。我们将通过把高度抽象的特质分解为更小的部分，并解释各部分又是如何合回一体的过程，来展现这一点。</p>
+<p>我们将会以第3章结束这一部分，其大致地介绍了行业工具：函数式编程、Future 和 Promise、通信顺序进程（CSP）、 Observer 和 Observable（Reactive Extensions）以及 Actor 模型。</p>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-16/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/part1.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -146,7 +152,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../chapter-15/index.html" title="第15章——消息流模式" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="abstract.html" title="内容提要" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -155,17 +161,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-第15章——消息流模式
+内容提要
 </span>
 </div>
 </a>
-<a href="../chapter-17/index.html" title="第17章——状态管理和持久化模式" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="chapter-01/index.html" title="第1章——为什么需要反应式" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-第17章——状态管理和持久化模式
+第1章——为什么需要反应式
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -188,11 +194,11 @@ and
 </footer>
 
 </div>
-<script src="../assets/javascripts/application.5165553b.js"></script>
-<script src="../assets/javascripts/paradox-material-theme.js"></script>
-<script>app.initialize({version:"0.17",url:{base:"../."}})</script>
-<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
-<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script src="assets/javascripts/application.5165553b.js"></script>
+<script src="assets/javascripts/paradox-material-theme.js"></script>
+<script>app.initialize({version:"0.17",url:{base:"."}})</script>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function(event) {
 window.prettyPrint && prettyPrint();
