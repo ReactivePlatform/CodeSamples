@@ -114,6 +114,16 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-16/index.html#第16章-流控制模式" class="header">第16章——流控制模式</a>
+  <ul>
+    <li><a href="../chapter-16/index.html#16-1-拉取模式" class="header">16.1 拉取模式</a></li>
+    <li><a href="../chapter-16/index.html#16-2-托管队列模式" class="header">16.2 托管队列模式</a></li>
+    <li><a href="../chapter-16/index.html#16-3-丢弃模式" class="header">16.3 丢弃模式</a></li>
+    <li><a href="../chapter-16/index.html#16-4-限流模式" class="header">16.4 限流模式</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -124,10 +134,265 @@ Type to start searching
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../chapter-16/index.html#第16章-流控制模式" class="header">第16章——流控制模式</a>
+  <ul>
+    <li><a href="../chapter-16/index.html#16-1-拉取模式" class="header">16.1 拉取模式</a></li>
+    <li><a href="../chapter-16/index.html#16-2-托管队列模式" class="header">16.2 托管队列模式</a></li>
+    <li><a href="../chapter-16/index.html#16-3-丢弃模式" class="header">16.3 丢弃模式</a></li>
+    <li><a href="../chapter-16/index.html#16-4-限流模式" class="header">16.4 限流模式</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#第16章-流控制模式" name="第16章-流控制模式" class="anchor"><span class="anchor-link"></span></a>第16章——流控制模式</h1>
+<p>在前面的章节里，你学会了如何将系统拆分成较小的部分，以及这些部分之间如何通信以解决较大的任务。有一个我们到目前为止尚未提及的角度：除了确定谁与谁交互之外，你必须同样考虑通信的时效性。为了让你的系统在不同的负载下都更具有回弹性，你需要能够阻止组件因为过量的请求速率而不可控制地失败的机制。为此，这一章介绍了下面四种基本模式。</p>
+<h2><a href="#16-1-拉取模式" name="16-1-拉取模式" class="anchor"><span class="anchor-link"></span></a>16.1 拉取模式</h2>
+<blockquote>
+  <p>代码清单16.1 在拉取输入的工作者内部处理昂贵的计算</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class Worker(manager: ActorRef) extends Actor {
+  val mc = new MathContext(100, RoundingMode.HALF_EVEN)
+  val plus = BigDecimal(1, mc)
+  val minus = BigDecimal(-1, mc)
+
+  var requested = 0
+  def request(): Unit =
+    if (requested &lt; 5) {
+      manager ! WorkRequest(self, 10)
+      requested += 10
+    }
+
+  request()
+
+  def receive: PartialFunction[Any, Unit] = {
+    case Job(id, data, replyTo) =&gt;
+      requested -= 1
+      request()
+      val sign = if ((data &amp; 1) == 1) plus else minus
+      val result = sign / data
+      replyTo ! JobResult(id, result)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单16-2 按工作者所请求的数目给它们提供任务</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
+
+  val workStream: Iterator[Job] =
+    Iterator from 1 map (x =&gt; Job(x, x, self)) take 1000000
+
+  val aggregator: (BigDecimal, BigDecimal) =&gt; BigDecimal = (x: BigDecimal, y: BigDecimal) =&gt; x + y
+  var approximation = BigDecimal(0, new MathContext(10000, RoundingMode.HALF_EVEN))
+
+  var outstandingWork = 0
+
+  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+
+  def receive: PartialFunction[Any, Unit] = {
+    case WorkRequest(worker, items) =&gt;
+      workStream.take(items).foreach {
+        job =&gt;
+          worker ! job
+          outstandingWork += 1
+      }
+    case JobResult(id, report) =&gt;
+      approximation = aggregator(approximation, report)
+      outstandingWork -= 1
+      if (outstandingWork == 0 &amp;&amp; workStream.isEmpty) {
+        println(&quot;final result: &quot; + approximation)
+        context.system.terminate()
+      }
+  }
+}</code></pre>
+<h2><a href="#16-2-托管队列模式" name="16-2-托管队列模式" class="anchor"><span class="anchor-link"></span></a>16.2 托管队列模式</h2>
+<blockquote>
+  <p>代码清单16-3 管理一个工作队列以对过载作出反应</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
+
+  var workQueue: Queue[Job] = Queue.empty[Job]
+  var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
+
+  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+
+  def receive: PartialFunction[Any, Unit] = {
+    case job @ Job(id, _, replyTo) =&gt;
+      if (requestQueue.isEmpty) {
+        if (workQueue.size &lt; 1000) workQueue :+= job
+        else replyTo ! JobRejected(id)
+      } else {
+        val WorkRequest(worker, items) = requestQueue.head
+        worker ! job
+        if (items &gt; 1) worker ! DummyWork(items - 1)
+        requestQueue = requestQueue.drop(1)
+      }
+    case wr @ WorkRequest(worker, items) =&gt;
+      if (workQueue.isEmpty) {
+        if (!requestQueue.contains(worker)) requestQueue :+= wr
+      } else {
+        workQueue.iterator.take(items).foreach(job =&gt; worker ! job)
+        if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
+        workQueue = workQueue.drop(items)
+      }
+  }
+}</code></pre>
+<blockquote>
+  <p>QueuePattern.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
+
+  var workQueue: Queue[Job] = Queue.empty[Job]
+  var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
+
+  (1 to 8) foreach (_ =&gt; context.actorOf(Props(new Worker(self))))
+
+  def receive: PartialFunction[Any, Unit] = {
+    case job @ Job(id, _, replyTo) =&gt;
+      if (requestQueue.isEmpty) {
+        if (workQueue.size &lt; 1000) workQueue :+= job
+        else replyTo ! JobRejected(id)
+      } else {
+        val WorkRequest(worker, items) = requestQueue.head
+        worker ! job
+        if (items &gt; 1) worker ! DummyWork(items - 1)
+        requestQueue = requestQueue.drop(1)
+      }
+    case wr @ WorkRequest(worker, items) =&gt;
+      if (workQueue.isEmpty) {
+        if (!requestQueue.contains(worker)) requestQueue :+= wr
+      } else {
+        workQueue.iterator.take(items).foreach(job =&gt; worker ! job)
+        if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
+        workQueue = workQueue.drop(items)
+      }
+  }
+}</code></pre>
+<h2><a href="#16-3-丢弃模式" name="16-3-丢弃模式" class="anchor"><span class="anchor-link"></span></a>16.3 丢弃模式</h2>
+<blockquote>
+  <p>DropPattern.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val queueThreshold = 1000
+val dropThreshold = 1500
+
+def random: ThreadLocalRandom = ThreadLocalRandom.current
+
+def shallEnqueue(atSize: Int): Boolean =
+  (atSize &lt; queueThreshold) || {
+    val dropFactor = (atSize - queueThreshold) &gt;&gt; 6
+    random.nextInt(dropFactor + 2) == 0
+  }
+</code></pre>
+<blockquote>
+  <p>DropPattern.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case job @ Job(id, _, replyTo) =&gt;
+  if (requestQueue.isEmpty) {
+    val atSize = workQueue.size
+    if (shallEnqueue(atSize)) workQueue :+= job
+    else if (atSize &lt; dropThreshold) replyTo ! JobRejected(id)
+  } else {</code></pre>
+<blockquote>
+  <p>DropPatternWithProtection.scala</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">private case class WorkEnvelope(job: Job) {
+  @volatile var consumed = false
+}
+
+private class IncomingQueue(manager: ActorRef) extends Actor {
+  var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
+
+  def receive: PartialFunction[Any, Unit] = {
+    case job: Job =&gt;
+      workQueue = workQueue.dropWhile(_.consumed)
+      if (workQueue.size &lt; 1000) {
+        val envelope = WorkEnvelope(job)
+        workQueue :+= envelope
+        manager ! envelope
+      }
+  }
+}</code></pre>
+<h2><a href="#16-4-限流模式" name="16-4-限流模式" class="anchor"><span class="anchor-link"></span></a>16.4 限流模式</h2>
+<blockquote>
+  <p>代码清单16-4 根据特定速率使用令牌桶来拉取工作</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class CalculatorClient(
+  workSource: ActorRef,
+  calculator: ActorRef,
+  ratePerSecond: Long,
+  bucketSize: Int,
+  batchSize: Int) extends Actor {
+  def now(): Long = System.nanoTime()
+  val nanoSecondsBetweenTokens: Long = 1000000000L / ratePerSecond
+
+  var tokenBucket: Int = bucketSize
+  var lastTokenTime: Long = now()
+
+  def refillBucket(time: Long): Unit = {
+    val accrued = (time - lastTokenTime) * ratePerSecond / 1000000000L
+    if (tokenBucket + accrued &gt;= bucketSize) {
+      tokenBucket = bucketSize
+      lastTokenTime = time
+    } else {
+      tokenBucket += accrued.toInt
+      lastTokenTime += accrued * nanoSecondsBetweenTokens
+    }
+  }
+  def consumeToken(time: Long): Unit = {
+    refillBucket(time)
+    tokenBucket -= 1
+  }
+
+  var requested = 0
+  def request(time: Long): Unit =
+    if (tokenBucket - requested &gt;= batchSize) {
+      sendRequest(time, batchSize)
+    } else if (requested == 0) {
+      if (tokenBucket &gt; 0) {
+        sendRequest(time, tokenBucket)
+      } else {
+        val timeForNextToken = lastTokenTime + nanoSecondsBetweenTokens - time
+        context.system.scheduler
+          .scheduleOnce(
+            timeForNextToken.nanos,
+            workSource,
+            WorkRequest(self, 1))(context.dispatcher)
+        requested = 1
+        if (Debug)
+          println(s&quot;$time: request(1) scheduled for ${time + timeForNextToken}&quot;)
+      }
+    } else if (Debug)
+      println(s&quot;$time: not requesting (requested=$requested tokenBucket=$tokenBucket)&quot;)
+  def sendRequest(time: Long, items: Int): Unit = {
+    if (Debug)
+      println(s&quot;$time: requesting $items items (requested=$requested tokenBucket=$tokenBucket)&quot;)
+    workSource ! WorkRequest(self, items)
+    requested += items
+  }
+
+  request(lastTokenTime)
+
+  def receive: PartialFunction[Any, Unit] = {
+    case job: Job =&gt;
+      val time = now()
+      if (Debug) if (requested == 1) println(s&quot;$time: received job&quot;)
+      consumeToken(time)
+      requested -= 1
+      request(time)
+      calculator ! job
+  }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-16/index.md" title="Edit this page" class="md-source-file md-edit">
