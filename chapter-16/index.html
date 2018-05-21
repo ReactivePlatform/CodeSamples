@@ -160,7 +160,7 @@ Type to start searching
 <p>在前面的章节里，你学会了如何将系统拆分成较小的部分，以及这些部分之间如何通信以解决较大的任务。有一个我们到目前为止尚未提及的角度：除了确定谁与谁交互之外，你必须同样考虑通信的时效性。为了让你的系统在不同的负载下都更具有回弹性，你需要能够阻止组件因为过量的请求速率而不可控制地失败的机制。为此，这一章介绍了下面四种基本模式。</p>
 <h2><a href="#16-1-拉取模式" name="16-1-拉取模式" class="anchor"><span class="anchor-link"></span></a>16.1 拉取模式</h2>
 <blockquote>
-  <p>代码清单16.1 在拉取输入的工作者内部处理昂贵的计算</p>
+  <p>代码清单16-1 在拉取输入的工作者内部处理昂贵的计算</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Worker(manager: ActorRef) extends Actor {
   val mc = new MathContext(100, RoundingMode.HALF_EVEN)
