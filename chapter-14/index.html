@@ -119,6 +119,9 @@ Type to start searching
   <li><a href="../chapter-14/index.html#第14章-资源管理模式" class="header">第14章——资源管理模式</a>
   <ul>
     <li><a href="../chapter-14/index.html#14-1-资源封装模式" class="header">14.1 资源封装模式</a></li>
+    <li><a href="../chapter-14/index.html#14-2-资源借贷模式" class="header">14.2 资源借贷模式</a></li>
+    <li><a href="../chapter-14/index.html#14-3-复杂命令模式" class="header">14.3 复杂命令模式</a></li>
+    <li><a href="../chapter-14/index.html#14-5-托管阻塞模式" class="header">14.5 托管阻塞模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -140,6 +143,9 @@ Type to start searching
   <li><a href="../chapter-14/index.html#第14章-资源管理模式" class="header">第14章——资源管理模式</a>
   <ul>
     <li><a href="../chapter-14/index.html#14-1-资源封装模式" class="header">14.1 资源封装模式</a></li>
+    <li><a href="../chapter-14/index.html#14-2-资源借贷模式" class="header">14.2 资源借贷模式</a></li>
+    <li><a href="../chapter-14/index.html#14-3-复杂命令模式" class="header">14.3 复杂命令模式</a></li>
+    <li><a href="../chapter-14/index.html#14-5-托管阻塞模式" class="header">14.5 托管阻塞模式</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -153,6 +159,425 @@ Type to start searching
 <h1><a href="#第14章-资源管理模式" name="第14章-资源管理模式" class="anchor"><span class="anchor-link"></span></a>第14章——资源管理模式</h1>
 <p>大多数系统都面临着一个共同的问题，那就是你需要管理或展现资源：文件存储空间、计算能力、对数据库或 Web API 的访问、如打印机和读卡器等物理设备，诸如此类。你所创建的某个组件，可能会独自为系统的其余部分提供某种资源，又或者你可能需要将其与外部资源整合。在这一章中，我们将讨论处理反应式应用程序中资源的模式。我们将着重讨论以下几种模式：</p>
 <h2><a href="#14-1-资源封装模式" name="14-1-资源封装模式" class="anchor"><span class="anchor-link"></span></a>14.1 资源封装模式</h2>
+<blockquote>
+  <p>代码清单 14-1 亚马逊EC2实例作为工作者节点</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public Instance startInstance(AWSCredentials credentials) {
+  AmazonEC2Client amazonEC2Client = new AmazonEC2Client(credentials);
+
+  RunInstancesRequest runInstancesRequest =
+      new RunInstancesRequest()
+          .withImageId(&quot;&quot;)
+          .withInstanceType(&quot;m1.small&quot;)
+          .withMinCount(1)
+          .withMaxCount(1);
+
+  RunInstancesResult runInstancesResult =
+      amazonEC2Client.runInstances(runInstancesRequest);
+
+  Reservation reservation = runInstancesResult.getReservation();
+  List&lt;Instance&gt; instances = reservation.getInstances();
+
+  // there will be exactly one instance in this list, otherwise
+  // runInstances() would have thrown an exception
+  return instances.get(0);
+}
+</code></pre>
+<blockquote>
+  <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">private ExecutionContext executionContext;
+private CircuitBreaker circuitBreaker;
+
+public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
+  Future&lt;Instance&gt; f = circuitBreaker.callWithCircuitBreaker(
+    () -&gt; Futures.future(
+      () -&gt; startInstance(credentials), executionContext));
+
+  PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
+    new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
+      .match(AmazonClientException.class,
+             ex -&gt; ex.isRetryable(),
+             ex -&gt; startInstanceAsync(credentials))
+      .build();
+
+  return f.recoverWith(recovery, executionContext);
+}
+</code></pre>
+<blockquote>
+  <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public Future&lt;RunInstancesResult&gt; runInstancesAsync(
+    RunInstancesRequest request,
+    AmazonEC2Async client) {
+
+  Promise&lt;RunInstancesResult&gt; promise = Futures.promise();
+  client.runInstancesAsync(
+      request,
+      new AsyncHandler&lt;RunInstancesRequest, RunInstancesResult&gt;() {
+
+        @Override
+        public void onSuccess(RunInstancesRequest request,
+            RunInstancesResult result) {
+          promise.success(result);
+        }
+
+        @Override
+        public void onError(Exception exception) {
+          promise.failure(exception);
+        }
+      });
+  return promise.future();
+}
+</code></pre>
+<blockquote>
+  <p>代码清单 14-4 关闭 EC2 实例</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
+  AmazonEC2Client client, Instance... instances) {
+
+  List&lt;String&gt; ids = Arrays
+    .stream(instances)
+    .map(i -&gt; i.getInstanceId())
+    .collect(Collectors.toList());
+  TerminateInstancesRequest request = new TerminateInstancesRequest(ids);
+
+  Future&lt;TerminateInstancesResult&gt; f =
+    circuitBreaker.callWithCircuitBreaker(
+      () -&gt; Futures.future(() -&gt; client.terminateInstances(request),
+                           executionContext));
+
+  PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
+    new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
+      .match(AmazonClientException.class,
+             ex -&gt; ex.isRetryable(),
+             ex -&gt; terminateInstancesAsync(client, instances))
+      .build();
+
+  return f.recoverWith(recovery, executionContext);
+}
+</code></pre>
+<blockquote>
+  <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">class WorkerNode extends AbstractActor {
+  private final Cancellable checkTimer;
+
+  public WorkerNode(InetAddress address, FiniteDuration checkInterval) {
+    checkTimer =
+        getContext()
+            .system()
+            .scheduler()
+            .schedule(checkInterval, checkInterval, self(),
+                DoHealthCheck.instance,
+                getContext().dispatcher(), self());
+  }
+
+  @Override
+  public Receive createReceive() {
+    List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
+    return receiveBuilder().match(WorkerNodeMessage.class, msgs::add)
+      .match(DoHealthCheck.class, dhc -&gt; { /* perform check */ })
+      .match(Shutdown.class, s -&gt; {
+        msgs.stream().forEach(
+          msg -&gt; msg.replyTo().tell(
+            new WorkerCommandFailed(&quot;shutting down&quot;, msg.id()), self()));
+        /* ask Resource Pool to shut down this instance */
+      })
+      .match(WorkerNodeReady.class, wnr -&gt; {
+        /* send msgs to the worker */
+        getContext().become(initialized());
+      })
+      .build();
+  }
+
+  private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
+    /* forward commands and deal with responses from worker node */
+    return null;
+  }
+
+  @Override
+  public void postStop() {
+    checkTimer.cancel();
+  }
+}</code></pre>
+<h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
+<blockquote>
+  <p>代码清单 14-6 分离资源和任务的管理</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">class WorkerNodeForExecution extends AbstractActor {
+
+  @Override
+  public Receive createReceive() {
+    List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
+    return receiveBuilder()
+      .match(WorkerNodeMessage.class, msgs::add)
+      .match(Shutdown.class, s -&gt; {
+        msgs.stream().forEach(msg -&gt; {
+          WorkerCommandFailed failMsg =
+            new WorkerCommandFailed(&quot;shutting down&quot;, msg.id());
+          msg.replyTo().tell(failMsg, self());
+        });
+      })
+      .match(WorkerNodeReady.class, wnr -&gt; {
+        getContext().become(initialized());
+      })
+      .build();
+  }
+
+  private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
+    /* forward commands and deal with responses from worker node */
+    return null;
+  }
+}
+
+class WorkNodeForResourcePool extends AbstractActor {
+  private final Cancellable checkTimer;
+
+  public WorkNodeForResourcePool(InetAddress address,
+      FiniteDuration checkInterval) {
+    checkTimer = getContext().system().scheduler()
+        .schedule(checkInterval, checkInterval, self(),
+            DoHealthCheck.instance, getContext().dispatcher(), self());
+
+  }
+
+  @Override
+  public Receive createReceive() {
+    return receiveBuilder()
+      .match(DoHealthCheck.class, dhc -&gt; { /* perform check */ })
+      .match(Shutdown.class, s -&gt; {/* Cleans up this resource */})
+      .build();
+  }
+
+  @Override
+  public void postStop() {
+    checkTimer.cancel();
+  }
+}</code></pre>
+<h2><a href="#14-3-复杂命令模式" name="14-3-复杂命令模式" class="anchor"><span class="anchor-link"></span></a>14.3 复杂命令模式</h2>
+<blockquote>
+  <p>代码清单 14-7 批处理作业的基本构成</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public interface ProcessingLogic {
+  public PartialResult process(Stream&lt;DataElement&gt; input);
+}
+
+//
+public interface MergeLogic {
+  public Result merge(Collection&lt;PartialResult&gt; partialResults);
+}
+
+public class BatchJob {
+  public final String dataSelector;
+  public final ProcessingLogic processingLogic;
+  public final MergeLogic mergeLogic;
+
+  public BatchJob(String dataSelector,
+                  ProcessingLogic processingLogic, MergeLogic mergeLogic) {
+    this.dataSelector = dataSelector;
+    this.processingLogic = processingLogic;
+    this.mergeLogic = mergeLogic;
+  }
+
+  public BatchJob withDataSelector(String selector) {
+    return new BatchJob(selector, processingLogic, mergeLogic);
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 14-8 通过调用Nashorn JavaScript脚本引擎执行处理逻辑</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public class PartSuccess implements PartialResult {
+  public final int value;
+
+  public PartSuccess(int value) {
+    this.value = value;
+  }
+
+  @Override
+  public String toString() {
+    return &quot;ResultSuccess(&quot; + value + &quot;)&quot;;
+  }
+}
+
+public class PartFailure implements PartialResult {
+  public final Throwable failure;
+
+  public PartFailure(Throwable failure) {
+    this.failure = failure;
+  }
+
+  @Override
+  public String toString() {
+    return &quot;ResultFailure(&quot; + failure.getMessage() + &quot;)&quot;;
+  }
+}
+
+public class BatchJobJS {
+  public final String dataSelector;
+  public final String processingLogic;
+  public final String mergeLogic;
+
+  public BatchJobJS(String dataSelector,
+                    String processingLogic, String mergeLogic) {
+    this.dataSelector = dataSelector;
+    this.processingLogic = processingLogic;
+    this.mergeLogic = mergeLogic;
+  }
+
+  public BatchJobJS withDataSelector(String selector) {
+    return new BatchJobJS(selector, processingLogic, mergeLogic);
+  }
+}
+
+public class WorkerJS {
+  public PartialResult runJob(BatchJobJS job) {
+    ScriptEngine engine =
+      new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
+    Invocable invocable = (Invocable) engine;
+
+    try {
+      engine.eval(job.processingLogic);
+      final Stream&lt;DataElement&gt; input = provideData(job.dataSelector);
+      PartialResult result =
+        (PartialResult) invocable.invokeFunction(&quot;process&quot;, input);
+      return result;
+    } catch (Exception e) {
+      return new PartFailure(e);
+    }
+  }
+
+  private Stream&lt;DataElement&gt; provideData(String selector) {
+    /* fetch data from persistent storage in streaming fashion */
+    return Stream.of(1, 2, 3).map(DataElement::new);
+  }
+}</code></pre>
+<blockquote>
+  <p>job.js</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-js">var PartSuccess = Java.type(
+    &#39;chapter14.ComplexCommand.PartSuccess&#39;);
+
+var process = function (input) {
+    // &#39;input&#39; is a Java 8 Stream
+    var value = input.count();
+    return new PartSuccess(value);
+}</code></pre>
+<blockquote>
+  <p>代码清单 14-9 外部 DSL 使用了不同于宿主编程语言的语法</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-txt">FOREACH Car (_, _, year, price)
+SELECT year ? 1950 &amp;&amp; year &lt; 1960
+MEDIAN OF price
+REMEMBER AS p
+
+FOREACH Car (make, model, _, price)
+SELECT price &gt; p
+DISTINCT VALUES OF (make, model)
+RETURN AS RESULT</code></pre>
+<blockquote>
+  <p>代码清单 14-10 内部 DSL</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public static void akkaStreamDSL() {
+  RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
+    Source.&lt;DataElement&gt;empty()
+      .filter(new InRange(&quot;year&quot;, 1950, 1960))
+      .toMat(
+        Sink.fold(0L, new Median&lt;Long&gt;(&quot;price&quot;)),
+        Keep.&lt;NotUsed, CompletionStage&lt;Long&gt;&gt;right());
+
+  Source.&lt;DataElement&gt;empty()
+    .map(new Inject&lt;Long&gt;(p, &quot;p&quot;))
+    .filter(new Filter(&quot;price &gt; p&quot;))
+    .to(Sink.fold(
+      Collections.emptySet(),
+      new DistinctValues&lt;Pair&lt;String, String&gt;&gt;(&quot;make&quot;, &quot;model&quot;)));
+}</code></pre>
+<h2><a href="#14-5-托管阻塞模式" name="14-5-托管阻塞模式" class="anchor"><span class="anchor-link"></span></a>14.5 托管阻塞模式</h2>
+<blockquote>
+  <p>代码清单 14-11 维护一个私有的ExecutorService</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-java">public enum AccessRights {
+  READ_JOB_STATUS,
+  SUBMIT_JOB;
+
+  public static final AccessRights[] EMPTY = new AccessRights[] {};
+}
+
+public class CheckAccess {
+  public final String username;
+  public final String credentials;
+  public final AccessRights[] rights;
+  public final ActorRef replyTo;
+
+  public CheckAccess(String username, String credentials,
+      AccessRights[] rights, ActorRef replyTo) {
+    this.username = username;
+    this.credentials = credentials;
+    this.rights = rights;
+    this.replyTo = replyTo;
+  }
+}
+
+public class CheckAccessResult {
+  public final String username;
+  public final String credentials;
+  public final AccessRights[] rights;
+
+  public CheckAccessResult(CheckAccess ca, AccessRights[] rights) {
+    this.username = ca.username;
+    this.credentials = ca.credentials;
+    this.rights = rights;
+  }
+}
+
+public class AccessService extends AbstractActor {
+  private final ExecutorService pool;
+  private final DataSource db;
+
+  public AccessService(DataSource db, int poolSize, int queueSize) {
+    this.db = db;
+    pool = new ThreadPoolExecutor(
+        0, poolSize,
+        60, SECONDS, new LinkedBlockingDeque&lt;&gt;(queueSize));
+  }
+
+  @Override
+  public Receive createReceive() {
+    final ActorRef self = self();
+    return ReceiveBuilder.create()
+      .match(CheckAccess.class, ca -&gt; {
+        try {
+          pool.execute(() -&gt; checkAccess(db, ca, self));
+        } catch (RejectedExecutionException e) {
+          ca.replyTo.tell(
+            new CheckAccessResult(ca, AccessRights.EMPTY), self);
+        }
+      })
+      .build();
+  }
+
+  @Override
+  public void postStop() {
+    pool.shutdownNow();
+  }
+
+  private static void checkAccess(DataSource db,
+      CheckAccess ca, ActorRef self) {
+    try (Connection conn = db.getConnection()) {
+      final ResultSet result =
+          conn.createStatement().executeQuery(&quot;&lt;figure out access rights&gt;&quot;);
+      final List&lt;AccessRights&gt; rights = new LinkedList&lt;&gt;();
+      while (result.next()) {
+        rights.add(AccessRights.valueOf(result.getString(0)));
+      }
+      ca.replyTo.tell(
+          new CheckAccessResult(ca, rights.toArray(AccessRights.EMPTY)), self);
+    } catch (Exception e) {
+      ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
+    }
+  }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">

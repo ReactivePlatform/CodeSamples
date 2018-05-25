@@ -119,6 +119,7 @@ Type to start searching
   <li><a href="../chapter-11/index.html#第11章-测试反应式应用程序" class="header">第11章——测试反应式应用程序</a>
   <ul>
     <li><a href="../chapter-11/index.html#11-3-异步测试" class="header">11.3 异步测试</a></li>
+    <li><a href="../chapter-11/index.html#11-6-测试回弹性" class="header">11.6 测试回弹性</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -140,6 +141,7 @@ Type to start searching
   <li><a href="../chapter-11/index.html#第11章-测试反应式应用程序" class="header">第11章——测试反应式应用程序</a>
   <ul>
     <li><a href="../chapter-11/index.html#11-3-异步测试" class="header">11.3 异步测试</a></li>
+    <li><a href="../chapter-11/index.html#11-6-测试回弹性" class="header">11.6 测试回弹性</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -300,6 +302,273 @@ val replies = probe.receiveWhile(1.second) {
   case r @ Record(&quot;myID&quot;, _) ⇒ r
 }
 probe.expectMsg(0.seconds, EOF)</code></pre>
+<blockquote>
+  <p>代码清单 11-10 强制同步执行：仅对非阻塞处理安全</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val tr = new TranslationService
+val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val ec = SynchronousEventLoop
+val future = tr.translate(input, ec)
+future.value.get should be(Success(output))</code></pre>
+<blockquote>
+  <p>代码清单 11-11 使用 CallingThreadDispatcher 来处理调用线程上的消息</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val translationService = system.actorOf(
+  TranslationService.props.withDispatcher(&quot;akka.test.calling-thread-dispatcher&quot;))
+val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val probe = TestProbe()
+translationService ! Translate(input, probe.ref)
+probe.expectMsg(0.seconds, output)</code></pre>
+<blockquote>
+  <p>代码清单 11-12 将超时参数移到外部配置</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val tr = new TranslationService
+val input = &quot;Hur mår du?&quot;
+val output = &quot;How are you?&quot;
+val future = tr.translate(input)
+eventually {
+  future.value.get should be(Success(output))
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-13 异步地处理响应，从而创建完全反应式的测试</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val echo = echoService()
+val N = 10000
+val maxParallelism = 500
+val controller = system.actorOf(
+  Props[ParallelSLATester],
+  &quot;keepSLAparallelController&quot;)
+val future = controller ? (TestSLA(echo, N, maxParallelism, _))
+for (SLAResponse(timings, outstanding) ← future) yield {
+  val sorted = timings.sorted
+  val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
+  info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
+  val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
+  ninetyfifthPercentile should be &gt; SLA
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-14 使用 async 和 await 提高异步测试的可读性</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">async {
+  val input = &quot;Hur mår du?&quot;
+  val output = &quot;How are you?&quot;
+  await(translate(input).withTimeout(5.seconds)) should be(output)
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-15 在 JavaScript 中测试翻译服务</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-js">describe(&#39;Translator&#39;, function() {
+  describe(&#39;#translate()&#39;, function() {
+    it(&#39;should yield the correct result&#39;, function() {
+      return tr.translate(&#39;Hur mår du?&#39;)
+               .should.eventually.equal(&#39;How are you?&#39;);
+    })
+  })
+});</code></pre>
+<blockquote>
+  <p>代码清单 11-16 使用请求-响应工厂来生成测试流量</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAwithSupport&quot;)
+val latencySupport = new LatencyTestSupport(system)
+val latencies = latencySupport.measure(count = 10000, maxParallelism = 500) { i ⇒
+  val message = s&quot;test$i&quot;
+  SingleResult((echo ? (Request(message, _))), Response(message))
+}
+val lat = Await.result(latencies, 20.seconds)
+info(s&quot;latency info: $lat&quot;)
+lat.failureCount should be(0)
+val SLA = if (Helpers.isCiTest) 50.milliseconds else 10.milliseconds
+lat.quantile(0.99) should be &lt; SLA</code></pre>
+<blockquote>
+  <p>代码清单 11-17 简单的翻译 API</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class TranslateV1(query: String, replyTo: ActorRef)</code></pre>
+<blockquote>
+  <p>代码清单 11-18 将更严格的类型添加到翻译 API</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case class TranslateV2(
+  phrase:         String,
+  inputLanguage:  String,
+  outputLanguage: String,
+  replyTo:        ActorRef)
+
+sealed trait TranslationResponseV2
+case class TranslationV2(
+  inputPhrase:    String,
+  outputPhrase:   String,
+  inputLanguage:  String,
+  outputLanguage: String)
+case class TranslationErrorV2(
+  inputPhrase:    String,
+  inputLanguage:  String,
+  outputLanguage: String,
+  errorMessage:   String)</code></pre>
+<blockquote>
+  <p>代码清单 11-19 测试翻译版本适配器</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val v1 = TestProbe()
+val v2 = system.actorOf(propsV2(v1.ref))
+val client = TestProbe()
+
+// initiate a request to the adapter
+v2 ! TranslateV2(&quot;Hur mår du?&quot;, &quot;sv&quot;, &quot;en&quot;, client.ref)
+
+// verify that the adapter asks the V1 service back-end
+val req1 = v1.expectMsgType[TranslateV1]
+req1.query should be(&quot;sv:en:Hur mår du?&quot;)
+
+// initiate a reply
+req1.replyTo ! &quot;How are you?&quot;
+
+// verify that the adapter transforms it correctly
+client.expectMsg(TranslationV2(&quot;Hur mår du?&quot;, &quot;How are you?&quot;, &quot;sv&quot;, &quot;en&quot;))
+
+// now verify translation errors
+v2 ! TranslateV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;, client.ref)
+val req2 = v1.expectMsgType[TranslateV1]
+// this implicitly verifies that no other communication happened with V1
+req2.query should be(&quot;sv:en:Hur är läget?&quot;)
+req2.replyTo ! &quot;error:cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;
+client.expectMsg(TranslationErrorV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;,
+  &quot;cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;))
+
+v1.expectNoMessage(1.second)</code></pre>
+<blockquote>
+  <p>代码清单 11-20 模拟错误过程</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case object ExpectNominal
+case object ExpectError
+case class Unexpected(msg: Any)
+
+class MockV1(reporter: ActorRef) extends Actor {
+  def receive: Receive = initial
+
+  override def unhandled(msg: Any): Unit = {
+    reporter ! Unexpected(msg)
+  }
+
+  val initial: Receive = {
+    case ExpectNominal ⇒ context.become(expectingNominal)
+    case ExpectError   ⇒ context.become(expectingError)
+  }
+
+  def expectingNominal: Receive = {
+    case TranslateV1(&quot;sv:en:Hur mår du?&quot;, replyTo) ⇒
+      replyTo ! &quot;How are you?&quot;
+      context.become(initial)
+  }
+
+  def expectingError: Receive = {
+    case TranslateV1(other, replyTo) ⇒
+      replyTo ! s&quot;error:cannot parse input &#39;$other&#39;&quot;
+      context.become(initial)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-21 测试正确的错误处理</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">val asyncErrors = TestProbe()
+val v1 = system.actorOf(mockV1props(asyncErrors.ref))
+val v2 = system.actorOf(propsV2(v1))
+val client = TestProbe()
+
+// initiate a request to the adapter
+v1 ! ExpectNominal
+v2 ! TranslateV2(&quot;Hur mår du?&quot;, &quot;sv&quot;, &quot;en&quot;, client.ref)
+
+// verify that the adapter transforms it correctly
+client.expectMsg(TranslationV2(&quot;Hur mår du?&quot;, &quot;How are you?&quot;, &quot;sv&quot;, &quot;en&quot;))
+
+// non-blocking check for async errors
+asyncErrors.expectNoMessage(0.seconds)
+
+// now verify translation errors
+v1 ! ExpectError
+v2 ! TranslateV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;, client.ref)
+client.expectMsg(TranslationErrorV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;,
+  &quot;cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;))
+
+// final check for async errors
+asyncErrors.expectNoMessage(1.second)</code></pre>
+<h2><a href="#11-6-测试回弹性" name="11-6-测试回弹性" class="anchor"><span class="anchor-link"></span></a>11.6 测试回弹性</h2>
+<blockquote>
+  <p>代码清单 11-22 要测试的基本 Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class MyActor extends Actor {
+  def receive: PartialFunction[Any, Unit] = {
+    case _ ⇒ throw new NullPointerException
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-23 为被测 Actor 提供测试上下文</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class StepParent extends Actor {
+  override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
+    case thr ⇒ Restart
+  }
+  def receive: PartialFunction[Any, Unit] = {
+    case p: Props ⇒
+      sender ! context.actorOf(p, &quot;child&quot;)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-24 在 StepParent 的上下文中测试 Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class StepParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+  implicit val system: ActorSystem = ActorSystem()
+
+  &quot;An actor that throws an exception&quot; must {
+    &quot;Result in the supervisor returning a reference to that actor&quot; in {
+      val testProbe = TestProbe()
+      val parent = system.actorOf(Props[StepParent], &quot;stepParent&quot;)
+      parent.tell(Props[MyActor], testProbe.ref)
+      val child = testProbe.expectMsgType[ActorRef]
+      // Test whatever we want in the actor
+    }
+  }
+
+  override def afterAll(): Unit = {
+    val terminated = system.terminate()
+    Await.ready(terminated, Duration.Inf)
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-25 将失败报告给指定的 Actor</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">class FailureParent(failures: ActorRef) extends Actor {
+  val props: Props = Props[MyFailureParentActor]
+  val child: ActorRef = context.actorOf(props, &quot;child&quot;)
+  override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
+    case f ⇒ failures ! f; Stop
+  }
+  def receive: PartialFunction[Any, Unit] = {
+    case msg ⇒ child forward msg
+  }
+}</code></pre>
+<blockquote>
+  <p>代码清单 11-26 在测试中移除监督</p>
+</blockquote>
+<pre class="prettyprint"><code class="language-scala">case object TestFailureParentMessage
+
+class FailureParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+  implicit val system: ActorSystem = ActorSystem()
+
+  &quot;Using a FailureParent&quot; must {
+    &quot;Result in failures being collected and returned&quot; in {
+      val failures = TestProbe()
+      val failureParent = system.actorOf(Props(new FailureParent(failures.ref)))
+      failureParent ! TestFailureParentMessage
+      failures.expectMsgType[NullPointerException]
+    }
+  }
+
+  override def afterAll(): Unit = {
+    val terminated = system.terminate()
+    Await.ready(terminated, Duration.Inf)
+  }
+}</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">
