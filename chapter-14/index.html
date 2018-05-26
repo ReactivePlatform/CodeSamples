@@ -186,8 +186,8 @@ Type to start searching
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">private ExecutionContext executionContext;
-private CircuitBreaker circuitBreaker;
+<pre class="prettyprint"><code class="language-java">private ExecutionContext executionContext; // value from somewhere
+private CircuitBreaker circuitBreaker; // value from somewhere
 
 public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   Future&lt;Instance&gt; f = circuitBreaker.callWithCircuitBreaker(
@@ -197,7 +197,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
     new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
       .match(AmazonClientException.class,
-        ex -&gt; ex.isRetryable(),
+        AmazonClientException::isRetryable,
         ex -&gt; startInstanceAsync(credentials))
       .build();
 
@@ -217,7 +217,8 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       new AsyncHandler&lt;RunInstancesRequest, RunInstancesResult&gt;() {
 
         @Override
-        public void onSuccess(RunInstancesRequest request,
+        public void onSuccess(
+            RunInstancesRequest request,
             RunInstancesResult result) {
           promise.success(result);
         }
@@ -236,21 +237,21 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 <pre class="prettyprint"><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
   AmazonEC2Client client, Instance... instances) {
 
-  List&lt;String&gt; ids = Arrays
-    .stream(instances)
-    .map(i -&gt; i.getInstanceId())
+  List&lt;String&gt; ids = Arrays.stream(instances)
+    .map(Instance::getInstanceId)
     .collect(Collectors.toList());
   TerminateInstancesRequest request = new TerminateInstancesRequest(ids);
 
   Future&lt;TerminateInstancesResult&gt; f =
     circuitBreaker.callWithCircuitBreaker(
-      () -&gt; Futures.future(() -&gt; client.terminateInstances(request),
+      () -&gt; Futures.future(() -&gt;
+          client.terminateInstances(request),
         executionContext));
 
   PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
     new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
       .match(AmazonClientException.class,
-        ex -&gt; ex.isRetryable(),
+        AmazonClientException::isRetryable,
         ex -&gt; terminateInstancesAsync(client, instances))
       .build();
 
@@ -276,11 +277,12 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   @Override
   public Receive createReceive() {
     List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
-    return receiveBuilder().match(WorkerNodeMessage.class, msgs::add)
+    return receiveBuilder()
+      .match(WorkerNodeMessage.class, msgs::add)
       .match(DoHealthCheck.class, dhc -&gt; { /* perform check */ })
       .match(Shutdown.class, s -&gt; {
-        msgs.stream().forEach(
-          msg -&gt; msg.replyTo().tell(
+        msgs.forEach(msg -&gt;
+          msg.replyTo().tell(
             new WorkerCommandFailed(&quot;shutting down&quot;, msg.id()), self()));
         /* ask Resource Pool to shut down this instance */
       })
@@ -293,6 +295,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
     /* forward commands and deal with responses from worker node */
+    //...
     return null;
   }
 
@@ -313,7 +316,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
     return receiveBuilder()
       .match(WorkerNodeMessage.class, msgs::add)
       .match(Shutdown.class, s -&gt; {
-        msgs.stream().forEach(msg -&gt; {
+        msgs.forEach(msg -&gt; {
           WorkerCommandFailed failMsg =
             new WorkerCommandFailed(&quot;shutting down&quot;, msg.id());
           msg.replyTo().tell(failMsg, self());
@@ -327,6 +330,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
     /* forward commands and deal with responses from worker node */
+    //...
     return null;
   }
 }
@@ -334,11 +338,16 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 class WorkNodeForResourcePool extends AbstractActor {
   private final Cancellable checkTimer;
 
-  public WorkNodeForResourcePool(InetAddress address,
+  public WorkNodeForResourcePool(
+      InetAddress address,
       FiniteDuration checkInterval) {
     checkTimer = getContext().system().scheduler()
-        .schedule(checkInterval, checkInterval, self(),
-            DoHealthCheck.instance, getContext().dispatcher(), self());
+        .schedule(
+            checkInterval,
+            checkInterval,
+            self(),
+            DoHealthCheck.instance,
+            getContext().dispatcher(), self());
 
   }
 
@@ -374,7 +383,8 @@ public class BatchJob {
   public final MergeLogic mergeLogic;
 
   public BatchJob(String dataSelector,
-                  ProcessingLogic processingLogic, MergeLogic mergeLogic) {
+                  ProcessingLogic processingLogic,
+                  MergeLogic mergeLogic) {
     this.dataSelector = dataSelector;
     this.processingLogic = processingLogic;
     this.mergeLogic = mergeLogic;
@@ -419,7 +429,8 @@ public class BatchJobJS {
   public final String mergeLogic;
 
   public BatchJobJS(String dataSelector,
-                    String processingLogic, String mergeLogic) {
+                    String processingLogic,
+                    String mergeLogic) {
     this.dataSelector = dataSelector;
     this.processingLogic = processingLogic;
     this.mergeLogic = mergeLogic;
@@ -431,9 +442,10 @@ public class BatchJobJS {
 }
 
 public class WorkerJS {
+  private static final ScriptEngine engine =
+    new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
+
   public PartialResult runJob(BatchJobJS job) {
-    ScriptEngine engine =
-      new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
     Invocable invocable = (Invocable) engine;
 
     try {
@@ -539,7 +551,8 @@ public class AccessService extends AbstractActor {
     this.db = db;
     pool = new ThreadPoolExecutor(
         0, poolSize,
-        60, SECONDS, new LinkedBlockingDeque&lt;&gt;(queueSize));
+        60, SECONDS,
+        new LinkedBlockingDeque&lt;&gt;(queueSize));
   }
 
   @Override
@@ -566,13 +579,15 @@ public class AccessService extends AbstractActor {
       CheckAccess ca, ActorRef self) {
     try (Connection conn = db.getConnection()) {
       final ResultSet result =
-          conn.createStatement().executeQuery(&quot;&lt;figure out access rights&gt;&quot;);
+          conn.createStatement().executeQuery(&quot;&lt;get access rights&gt;&quot;);
       final List&lt;AccessRights&gt; rights = new LinkedList&lt;&gt;();
       while (result.next()) {
         rights.add(AccessRights.valueOf(result.getString(0)));
       }
       ca.replyTo.tell(
-          new CheckAccessResult(ca, rights.toArray(AccessRights.EMPTY)), self);
+          new CheckAccessResult(
+              ca, rights.toArray(AccessRights.EMPTY)),
+          self);
     } catch (Exception e) {
       ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
     }
