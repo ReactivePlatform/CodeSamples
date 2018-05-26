@@ -389,11 +389,15 @@ for (SLAResponse(timings, outstanding) ← future) yield {
 <pre class="prettyprint"><code class="language-scala">async {
   val echo = echoService(&quot;keepSLAwithSupport&quot;)
   val latencySupport = new LatencyTestSupport(system)
-  val latenciesFuture = latencySupport.measure(count = 10000, maxParallelism = 500) { i ⇒
+  val latenciesFuture = latencySupport.measure(
+    count = 10000,
+    maxParallelism = 500) { i ⇒
     val message = s&quot;test$i&quot;
     SingleResult((echo ? (Request(message, _))), Response(message))
   }
-  val latencies = await(akka.pattern.after(20.seconds, system.scheduler)(latenciesFuture))
+  val latencies = await(akka.pattern.after(20.seconds,
+    system.scheduler)(latenciesFuture))
+
   info(s&quot;latency info: $latencies&quot;)
   latencies.failureCount should be(0)
   val SLA = if (Helpers.isCiTest) 50.milliseconds else 10.milliseconds
