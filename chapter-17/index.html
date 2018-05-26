@@ -171,24 +171,32 @@ case class ShoppingCartRef(id: URI)
 <blockquote>
   <p>清单 17-1 一个最小化的购物车定义</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(items: Map[ItemRef, Int], owner: Option[CustomerRef]) {
+<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(
+  items: Map[ItemRef, Int],
+  owner: Option[CustomerRef]) {
   def setOwner(customer: CustomerRef): ShoppingCart = {
     require(owner.isEmpty, &quot;owner cannot be overwritten&quot;)
     copy(owner = Some(customer))
   }
 
   def addItem(item: ItemRef, count: Int): ShoppingCart = {
-    require(count &gt; 0, s&quot;count must be positive (trying to add $item with count $count)&quot;)
-    val currentCount = items.get(item).getOrElse(0)
+    require(
+      count &gt; 0,
+      s&quot;count must be positive (trying to add $item with count $count)&quot;)
+    val currentCount = items.getOrElse(item, 0)
     copy(items = items.updated(item, currentCount + count))
   }
 
   def removeItem(item: ItemRef, count: Int): ShoppingCart = {
-    require(count &gt; 0, s&quot;count must be positive (trying to remove $item with count $count)&quot;)
-    val currentCount = items.get(item).getOrElse(0)
+    require(
+      count &gt; 0,
+      s&quot;count must be positive (trying to remove $item with count $count)&quot;)
+    val currentCount = items.getOrElse(item, 0)
     val newCount = currentCount - count
-    if (newCount &lt;= 0) copy(items = items - item)
-    else copy(items = items.updated(item, newCount))
+    if (newCount &lt;= 0)
+      copy(items = items - item)
+    else
+      copy(items = items.updated(item, newCount))
   }
 
   // 代码清单 17-6
@@ -318,8 +326,10 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
    * not match then the message is dropped
    */
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case mc @ ManagerCommand(cmd, _, _) ⇒ cmd.shoppingCart.id.toString -&gt; mc
-    case mc @ ManagerQuery(query, _, _) ⇒ query.shoppingCart.id.toString -&gt; mc
+    case mc @ ManagerCommand(cmd, _, _) ⇒
+      cmd.shoppingCart.id.toString -&gt; mc
+    case mc @ ManagerQuery(query, _, _) ⇒
+      query.shoppingCart.id.toString -&gt; mc
   }
 
   /*
@@ -328,8 +338,10 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
    * that are forwarded
    */
   val extractShardId: ShardRegion.ExtractShardId = {
-    case ManagerCommand(cmd, _, _) ⇒ toHex(cmd.shoppingCart.id.hashCode &amp; 255)
-    case ManagerQuery(query, _, _) ⇒ toHex(query.shoppingCart.id.hashCode &amp; 255)
+    case ManagerCommand(cmd, _, _) ⇒
+      toHex(cmd.shoppingCart.id.hashCode &amp; 255)
+    case ManagerQuery(query, _, _) ⇒
+      toHex(query.shoppingCart.id.hashCode &amp; 255)
   }
 
   private def toHex(b: Int) =
@@ -371,24 +383,32 @@ startNode(sys2)</code></pre>
 <blockquote>
   <p>清单 17-6 将领域事件添加到业务逻辑</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(items: Map[ItemRef, Int], owner: Option[CustomerRef]) {
+<pre class="prettyprint"><code class="language-scala">case class ShoppingCart(
+  items: Map[ItemRef, Int],
+  owner: Option[CustomerRef]) {
   def setOwner(customer: CustomerRef): ShoppingCart = {
     require(owner.isEmpty, &quot;owner cannot be overwritten&quot;)
     copy(owner = Some(customer))
   }
 
   def addItem(item: ItemRef, count: Int): ShoppingCart = {
-    require(count &gt; 0, s&quot;count must be positive (trying to add $item with count $count)&quot;)
-    val currentCount = items.get(item).getOrElse(0)
+    require(
+      count &gt; 0,
+      s&quot;count must be positive (trying to add $item with count $count)&quot;)
+    val currentCount = items.getOrElse(item, 0)
     copy(items = items.updated(item, currentCount + count))
   }
 
   def removeItem(item: ItemRef, count: Int): ShoppingCart = {
-    require(count &gt; 0, s&quot;count must be positive (trying to remove $item with count $count)&quot;)
-    val currentCount = items.get(item).getOrElse(0)
+    require(
+      count &gt; 0,
+      s&quot;count must be positive (trying to remove $item with count $count)&quot;)
+    val currentCount = items.getOrElse(item, 0)
     val newCount = currentCount - count
-    if (newCount &lt;= 0) copy(items = items - item)
-    else copy(items = items.updated(item, newCount))
+    if (newCount &lt;= 0)
+      copy(items = items - item)
+    else
+      copy(items = items.updated(item, newCount))
   }
 
   // 代码清单 17-6
@@ -412,7 +432,7 @@ object ShoppingCart {
   // we expect the name to be the shopping card ID
   override def persistenceId: String = context.self.path.name
 
-  var shoppingCart: ShoppingCart = ShoppingCart.empty
+  private var shoppingCart: ShoppingCart = ShoppingCart.empty
 
   def receiveCommand: Receive = {
     case ManagerCommand(cmd, id, replyTo) ⇒
@@ -452,8 +472,9 @@ object ShoppingCart {
 <blockquote>
   <p>清单 17-8 在写日志期间对事件打标签</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class ShoppingCartTagging(system: ExtendedActorSystem) extends WriteEventAdapter {
-  def manifest(event: Any): String = &quot;&quot;
+<pre class="prettyprint"><code class="language-scala">class ShoppingCartTagging(system: ExtendedActorSystem)
+  extends WriteEventAdapter {
+  def manifest(event: Any): String = &quot;&quot; // no additional manifest needed
 
   def toJournal(event: Any): Any =
     event match {
@@ -475,9 +496,9 @@ class TopProductListener extends Actor with ActorLogging {
 
   import TopProductListener._
 
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  private implicit val materializer = ActorMaterializer()
 
-  val readJournal: LeveldbReadJournal =
+  private val readJournal: LeveldbReadJournal =
     PersistenceQuery(context.system)
       .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
 
@@ -489,11 +510,11 @@ class TopProductListener extends Actor with ActorLogging {
       val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) {
         (map, event) ⇒
           map.get(event.item) match {
-            case Some(holder) ⇒ {
-              holder.value += event.count;
+            case Some(holder) ⇒
+              holder.value += event.count
               map
-            }
-            case None ⇒ map.updated(event.item, new IntHolder(event.count))
+            case None ⇒
+              map.updated(event.item, new IntHolder(event.count))
           }
       }
       self ! TopProducts(0, histogram.map(p ⇒ (p._1, p._2.value)))
@@ -502,7 +523,8 @@ class TopProductListener extends Actor with ActorLogging {
   var topProducts = Map.empty[ItemRef, Int]
 
   def receive: Receive = {
-    case GetTopProducts(id, replyTo) ⇒ replyTo ! TopProducts(id, topProducts)
+    case GetTopProducts(id, replyTo) ⇒
+      replyTo ! TopProducts(id, topProducts)
     case TopProducts(_, products) ⇒
       topProducts = products
       log.info(&quot;new {}&quot;, products)
