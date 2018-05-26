@@ -274,7 +274,7 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
    */
   def this() = this(ShoppingCart.empty)
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case ManagerCommand(cmd, id, replyTo) ⇒
       try {
         val event = cmd match {
@@ -414,7 +414,7 @@ object ShoppingCart {
 
   var shoppingCart: ShoppingCart = ShoppingCart.empty
 
-  def receiveCommand: PartialFunction[Any, Unit] = {
+  def receiveCommand: Receive = {
     case ManagerCommand(cmd, id, replyTo) ⇒
       try {
         val event = cmd match {
@@ -443,7 +443,7 @@ object ShoppingCart {
       }
   }
 
-  def receiveRecover: PartialFunction[Any, Unit] = {
+  def receiveRecover: Receive = {
     case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
   }
 }
@@ -501,7 +501,7 @@ class TopProductListener extends Actor with ActorLogging {
 
   var topProducts = Map.empty[ItemRef, Int]
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case GetTopProducts(id, replyTo) ⇒ replyTo ! TopProducts(id, topProducts)
     case TopProducts(_, products) ⇒
       topProducts = products

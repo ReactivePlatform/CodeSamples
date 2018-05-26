@@ -177,7 +177,7 @@ Type to start searching
 
   request()
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case Job(id, data, replyTo) ⇒
       requested -= 1
       request()
@@ -202,7 +202,7 @@ Type to start searching
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case WorkRequest(worker, items) ⇒
       workStream.take(items).foreach {
         job ⇒
@@ -230,7 +230,7 @@ Type to start searching
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case job @ Job(id, _, replyTo) ⇒
       if (requestQueue.isEmpty) {
         if (workQueue.size &lt; 1000) workQueue :+= job
@@ -262,7 +262,7 @@ Type to start searching
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case job @ Job(id, _, replyTo) ⇒
       if (requestQueue.isEmpty) {
         if (workQueue.size &lt; 1000) workQueue :+= job
@@ -318,7 +318,7 @@ def shallEnqueue(atSize: Int): Boolean =
 private class IncomingQueue(manager: ActorRef) extends Actor {
   var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case job: Job ⇒
       workQueue = workQueue.dropWhile(_.consumed)
       if (workQueue.size &lt; 1000) {
@@ -393,7 +393,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
 
   request(lastTokenTime)
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case job: Job ⇒
       val time = now()
       if (Debug) if (requested == 1) println(s&quot;$time: received job&quot;)

@@ -158,9 +158,10 @@ Type to start searching
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">private object StorageFailed extends RuntimeException
 
+import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
+
 private def sendToStorage(job: Job): Future[StorageStatus] = {
-  import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
-  val f: Future[StorageStatus] = ???
+  val f: Future[StorageStatus] = ??? //...
   f.map {
     case StorageStatus.Failed =&gt; throw StorageFailed
     case other =&gt; other
@@ -177,7 +178,6 @@ private val breaker = CircuitBreaker(
 )
 
 def persist(job: Job): Future[StorageStatus] = {
-  import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
   breaker
     .withCircuitBreaker(sendToStorage(job))
     .recover {
