@@ -315,6 +315,7 @@ got response: got it!</code></pre>
   <p>代码清单15-5 基于单向消息传递的请求——响应模式</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
+
 amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
     conn.createChannel(function (err, ch) {
         var q = &#39;rpc_queue&#39;;
@@ -333,6 +334,7 @@ amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
   <p>代码清单15-6 监听与原始请求具有相同的关联ID的响应</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
+
 amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
     conn.createChannel(function (err, ch) {
         ch.assertQueue(&#39;responses&#39;, {}, function (err, q) {
@@ -382,10 +384,11 @@ S: 221 Bye
   <p>代码清单15-7 封装了多次 SMTP 交换所需要的信息</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class SendEmail(
-  sender:     String,
-  recipients: List[String],
-  body:       String, correlationID: UUID,
-  replyTo: ActorRef[SendEmailResult])
+  sender:        String,
+  recipients:    List[String],
+  body:          String,
+  correlationID: UUID,
+  replyTo:       ActorRef[SendEmailResult])
 </code></pre>
 <pre class="prettyprint"><code class="language-scala">case class SendEmailResult(
   correlationID: UUID,
@@ -406,16 +409,20 @@ S: 221 Bye
 <blockquote>
   <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case class SendEmail(sender: String, recipients: List[String],
-                     bodyLocation:  URL,
-                     correlationID: UUID,
-                     replyTo:       ActorRef[SendEmailResult])
+<pre class="prettyprint"><code class="language-scala">case class SendEmail(
+  sender:        String,
+  recipients:    List[String],
+  bodyLocation:  URL,
+  correlationID: UUID,
+  replyTo:       ActorRef[SendEmailResult])
 </code></pre>
 <h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
 <blockquote>
   <p>代码清单15-10 请求启动验证过程的简单协议</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case class StartVerificationProcess(userEmail: String, replyTo: ActorRef[VerificationProcessResponse]) extends MyCommands
+<pre class="prettyprint"><code class="language-scala">case class StartVerificationProcess(
+  userEmail: String,
+  replyTo:   ActorRef[VerificationProcessResponse]) extends MyCommands
 
 sealed trait VerificationProcessResponse
 
@@ -463,9 +470,7 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
               corrID)
             Same
         })
-        val request = SendEmail(
-          &quot;verification@example.com&quot;,
-          List(userEmail),
+        val request = SendEmail(&quot;verification@example.com&quot;, List(userEmail),
           constructBody(userEmail, corrID), corrID, childActor)
         emailGateway ! request
     }
@@ -532,14 +537,12 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
     Static {
       case StartVerificationProcess(userEmail, replyTo) ⇒
         val corrID = UUID.randomUUID()
-        val request = SendEmail(
-          &quot;verification@example.com&quot;,
-          List(userEmail),
+        val request = SendEmail(&quot;verification@example.com&quot;, List(userEmail),
           constructBody(userEmail, corrID), corrID, adapter)
         emailGateway ! request
         statusMap += corrID -&gt; (userEmail, replyTo)
-        ctx.schedule(5.seconds, ctx.self,
-          MyEmailResult(corrID, StatusCode.Failed, Some(&quot;timeout&quot;)))
+        ctx.schedule(5.seconds, ctx.self, MyEmailResult(
+          corrID, StatusCode.Failed, Some(&quot;timeout&quot;)))
       case MyEmailResult(corrID, status, expl) ⇒
         statusMap.get(corrID) match {
           case None ⇒
@@ -771,7 +774,7 @@ class PersistentSam(
   override val persistenceId: String)
   extends PersistentActor with AtLeastOnceDelivery with ActorLogging {
 
-  def receiveCommand: Actor.emptyBehavior.type = Actor.emptyBehavior
+  def receiveCommand: Receive = Actor.emptyBehavior
 
   override def preStart(): Unit = {
     context.become(talkToAlice())
@@ -781,7 +784,7 @@ class PersistentSam(
     log.debug(&quot;talking to Alice&quot;)
     var deliveryId: Long = 0
     deliver(alice)(id ⇒ {
-      deliveryId = id;
+      deliveryId = id
       ChangeBudget(-amount, self, persistenceId)
     })
 
@@ -799,7 +802,7 @@ class PersistentSam(
     }: Receive)
   }
 
-  def talkToBob(): Actor.emptyBehavior.type = {
+  def talkToBob(): Receive = {
     context.system.terminate()
     Actor.emptyBehavior
   }

@@ -163,11 +163,11 @@ Type to start searching
   <p>代码清单16-1 在拉取输入的工作者内部处理昂贵的计算</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Worker(manager: ActorRef) extends Actor {
-  val mc = new MathContext(100, RoundingMode.HALF_EVEN)
-  val plus = BigDecimal(1, mc)
-  val minus = BigDecimal(-1, mc)
+  private val mc = new MathContext(100, RoundingMode.HALF_EVEN)
+  private val plus = BigDecimal(1, mc)
+  private val minus = BigDecimal(-1, mc)
 
-  var requested = 0
+  private var requested = 0
 
   def request(): Unit =
     if (requested &lt; 5) {
@@ -192,22 +192,22 @@ Type to start searching
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
 
-  val workStream: Iterator[Job] =
+  private val workStream: Iterator[Job] =
     Iterator from 1 map (x ⇒ Job(x, x, self)) take 1000000
 
-  val aggregator: (BigDecimal, BigDecimal) ⇒ BigDecimal = (x: BigDecimal, y: BigDecimal) ⇒ x + y
-  var approximation = BigDecimal(0, new MathContext(10000, RoundingMode.HALF_EVEN))
+  private val aggregator: (BigDecimal, BigDecimal) ⇒ BigDecimal = (x: BigDecimal, y: BigDecimal) ⇒ x + y
+  private val mc = new MathContext(10000, RoundingMode.HALF_EVEN)
+  private var approximation = BigDecimal(0, mc)
 
-  var outstandingWork = 0
+  private var outstandingWork = 0
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
   def receive: Receive = {
     case WorkRequest(worker, items) ⇒
-      workStream.take(items).foreach {
-        job ⇒
-          worker ! job
-          outstandingWork += 1
+      workStream.take(items).foreach { job ⇒
+        worker ! job
+        outstandingWork += 1
       }
     case JobResult(id, report) ⇒
       approximation = aggregator(approximation, report)
@@ -238,15 +238,20 @@ Type to start searching
       } else {
         val WorkRequest(worker, items) = requestQueue.head
         worker ! job
-        if (items &gt; 1) worker ! DummyWork(items - 1)
+        if (items &gt; 1) {
+          worker ! DummyWork(items - 1)
+        }
         requestQueue = requestQueue.drop(1)
       }
     case wr @ WorkRequest(worker, items) ⇒
       if (workQueue.isEmpty) {
-        if (!requestQueue.contains(worker)) requestQueue :+= wr
+        requestQueue :+= wr
       } else {
         workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
-        if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
+        val sent = Math.min(workQueue.size, items)
+        if (sent &lt; items) {
+          worker ! DummyWork(items - sent)
+        }
         workQueue = workQueue.drop(items)
       }
   }
@@ -270,15 +275,20 @@ Type to start searching
       } else {
         val WorkRequest(worker, items) = requestQueue.head
         worker ! job
-        if (items &gt; 1) worker ! DummyWork(items - 1)
+        if (items &gt; 1) {
+          worker ! DummyWork(items - 1)
+        }
         requestQueue = requestQueue.drop(1)
       }
     case wr @ WorkRequest(worker, items) ⇒
       if (workQueue.isEmpty) {
-        if (!requestQueue.contains(worker)) requestQueue :+= wr
+        requestQueue :+= wr
       } else {
         workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
-        if (workQueue.size &lt; items) worker ! DummyWork(items - workQueue.size)
+        val sent = Math.min(workQueue.size, items)
+        if (sent &lt; items) {
+          worker ! DummyWork(items - sent)
+        }
         workQueue = workQueue.drop(items)
       }
   }
@@ -289,7 +299,7 @@ Type to start searching
   <p>DropPattern.scala</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val queueThreshold = 1000
-val dropThreshold = 1500
+val dropThreshold = 1384
 
 def random: ThreadLocalRandom = ThreadLocalRandom.current
 
@@ -305,8 +315,11 @@ def shallEnqueue(atSize: Int): Boolean =
 <pre class="prettyprint"><code class="language-scala">case job @ Job(id, _, replyTo) ⇒
   if (requestQueue.isEmpty) {
     val atSize = workQueue.size
-    if (shallEnqueue(atSize)) workQueue :+= job
-    else if (atSize &lt; dropThreshold) replyTo ! JobRejected(id)
+    if (shallEnqueue(atSize)) {
+      workQueue :+= job
+    } else if (atSize &lt; dropThreshold) {
+      replyTo ! JobRejected(id)
+    }
   } else {</code></pre>
 <blockquote>
   <p>DropPatternWithProtection.scala</p>
@@ -316,7 +329,7 @@ def shallEnqueue(atSize: Int): Boolean =
 }
 
 private class IncomingQueue(manager: ActorRef) extends Actor {
-  var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
+  private var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
 
   def receive: Receive = {
     case job: Job ⇒
@@ -341,13 +354,15 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   batchSize:     Int) extends Actor {
   def now(): Long = System.nanoTime()
 
-  val nanoSecondsBetweenTokens: Long = 1000000000L / ratePerSecond
+  private val nanoSecondsBetweenTokens: Long =
+    1000000000L / ratePerSecond
 
-  var tokenBucket: Int = bucketSize
-  var lastTokenTime: Long = now()
+  private var tokenBucket: Int = bucketSize
+  private var lastTokenTime: Long = now()
 
   def refillBucket(time: Long): Unit = {
-    val accrued = (time - lastTokenTime) * ratePerSecond / 1000000000L
+    val accrued = (time -
+      lastTokenTime) * ratePerSecond / 1000000000L
     if (tokenBucket + accrued &gt;= bucketSize) {
       tokenBucket = bucketSize
       lastTokenTime = time
@@ -358,11 +373,15 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   }
 
   def consumeToken(time: Long): Unit = {
+    // always refill first since we do it upon activity and not scheduled
     refillBucket(time)
     tokenBucket -= 1
   }
 
-  var requested = 0
+  /**
+   * second part: managing the pull pattern’s demand
+   */
+  private var requested = 0
 
   def request(time: Long): Unit =
     if (tokenBucket - requested &gt;= batchSize) {
@@ -371,32 +390,41 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       if (tokenBucket &gt; 0) {
         sendRequest(time, tokenBucket)
       } else {
-        val timeForNextToken = lastTokenTime + nanoSecondsBetweenTokens - time
+        val timeForNextToken =
+          lastTokenTime + nanoSecondsBetweenTokens - time
         context.system.scheduler
           .scheduleOnce(
             timeForNextToken.nanos,
             workSource,
             WorkRequest(self, 1))(context.dispatcher)
         requested = 1
-        if (Debug)
+        if (Debug) {
           println(s&quot;$time: request(1) scheduled for ${time + timeForNextToken}&quot;)
+        }
       }
-    } else if (Debug)
+    } else if (Debug) {
       println(s&quot;$time: not requesting (requested=$requested tokenBucket=$tokenBucket)&quot;)
+    }
 
   def sendRequest(time: Long, items: Int): Unit = {
-    if (Debug)
+    if (Debug) {
       println(s&quot;$time: requesting $items items (requested=$requested tokenBucket=$tokenBucket)&quot;)
+    }
     workSource ! WorkRequest(self, items)
     requested += items
   }
 
   request(lastTokenTime)
 
+  /**
+   * third part: using the above for rate-regulated message forwarding
+   */
   def receive: Receive = {
     case job: Job ⇒
       val time = now()
-      if (Debug) if (requested == 1) println(s&quot;$time: received job&quot;)
+      if (Debug &amp;&amp; requested == 1) {
+        println(s&quot;$time: received job&quot;)
+      }
       consumeToken(time)
       requested -= 1
       request(time)
