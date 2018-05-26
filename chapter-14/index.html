@@ -197,8 +197,8 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
     new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
       .match(AmazonClientException.class,
-             ex -&gt; ex.isRetryable(),
-             ex -&gt; startInstanceAsync(credentials))
+        ex -&gt; ex.isRetryable(),
+        ex -&gt; startInstanceAsync(credentials))
       .build();
 
   return f.recoverWith(recovery, executionContext);
@@ -245,13 +245,13 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   Future&lt;TerminateInstancesResult&gt; f =
     circuitBreaker.callWithCircuitBreaker(
       () -&gt; Futures.future(() -&gt; client.terminateInstances(request),
-                           executionContext));
+        executionContext));
 
   PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
     new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
       .match(AmazonClientException.class,
-             ex -&gt; ex.isRetryable(),
-             ex -&gt; terminateInstancesAsync(client, instances))
+        ex -&gt; ex.isRetryable(),
+        ex -&gt; terminateInstancesAsync(client, instances))
       .build();
 
   return f.recoverWith(recovery, executionContext);

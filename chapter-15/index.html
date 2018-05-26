@@ -242,6 +242,7 @@ Content-Length: 22
 <pre class="prettyprint"><code class="language-scala">object RequestResponseActors {
 
   case class Request(msg: String)
+
   case class Response(msg: String)
 
   class Responder extends Actor {
@@ -268,7 +269,8 @@ Content-Length: 22
     val requester = sys.actorOf(Props(new Requester(responder)), &quot;requester&quot;)
   }
 
-}</code></pre>
+}
+</code></pre>
 <p><em>运行结果</em></p>
 <pre class="prettyprint"><code class="language-output">got request: hello
 got response: got it!</code></pre>
@@ -278,6 +280,7 @@ got response: got it!</code></pre>
 <pre class="prettyprint"><code class="language-scala">object RequestResponseTypedActors {
 
   case class Request(msg: String, replyTo: ActorRef[Response])
+
   case class Response(msg: String)
 
   val responder: Behavior[Request] =
@@ -306,13 +309,14 @@ got response: got it!</code></pre>
       }
     })
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单15-5 基于单向消息传递的请求——响应模式</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
-amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
-    conn.createChannel(function(err, ch) {
+amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
+    conn.createChannel(function (err, ch) {
         var q = &#39;rpc_queue&#39;;
         ch.assertQueue(q, {durable: false});
         ch.prefetch(1);
@@ -329,19 +333,22 @@ amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
   <p>代码清单15-6 监听与原始请求具有相同的关联ID的响应</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
-amqp.connect(&#39;amqp://localhost&#39;, function(err, conn) {
-    conn.createChannel(function(err, ch) {
-        ch.assertQueue(&#39;responses&#39;, {}, function(err, q) {
+amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
+    conn.createChannel(function (err, ch) {
+        ch.assertQueue(&#39;responses&#39;, {}, function (err, q) {
             var corr = uuid.v1();
-            ch.consume(q.queue, function(msg) {
+            ch.consume(q.queue, function (msg) {
                 if (msg.properties.correlationId === corr) {
                     console.log(&#39;got response: %s&#39;, msg.content.toString());
-                    setTimeout(function() { conn.close(); process.exit(0) }, 500);
+                    setTimeout(function () {
+                        conn.close();
+                        process.exit(0)
+                    }, 500);
                 }
             }, {noAck: true});
             ch.sendToQueue(&#39;rpc_queue&#39;,
                 new Buffer(&#39;hello&#39;),
-                { correlationId: corr, replyTo: q.queue });
+                {correlationId: corr, replyTo: q.queue});
         });
     });
 });</code></pre>
@@ -378,11 +385,13 @@ S: 221 Bye
   sender:     String,
   recipients: List[String],
   body:       String, correlationID: UUID,
-  replyTo: ActorRef[SendEmailResult])</code></pre>
+  replyTo: ActorRef[SendEmailResult])
+</code></pre>
 <pre class="prettyprint"><code class="language-scala">case class SendEmailResult(
   correlationID: UUID,
   status:        StatusCode,
-  explanation:   Option[String]) extends Result</code></pre>
+  explanation:   Option[String]) extends Result
+</code></pre>
 <blockquote>
   <p>代码清单15-8 分离电子邮件主体，使得其可以按需投递</p>
 </blockquote>
@@ -392,14 +401,16 @@ S: 221 Bye
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
   override def payload: Source[String] = body
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class SendEmail(sender: String, recipients: List[String],
                      bodyLocation:  URL,
                      correlationID: UUID,
-                     replyTo:       ActorRef[SendEmailResult])</code></pre>
+                     replyTo:       ActorRef[SendEmailResult])
+</code></pre>
 <h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
 <blockquote>
   <p>代码清单15-10 请求启动验证过程的简单协议</p>
@@ -410,7 +421,8 @@ sealed trait VerificationProcessResponse
 
 case class VerificationProcessStarted(userEmail: String) extends VerificationProcessResponse
 
-case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse</code></pre>
+case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse
+</code></pre>
 <blockquote>
   <p>代码清单15-11 一个转发结果的匿名子Actor</p>
 </blockquote>
@@ -457,7 +469,8 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
           constructBody(userEmail, corrID), corrID, childActor)
         emailGateway ! request
     }
-  }</code></pre>
+  }
+</code></pre>
 <blockquote>
   <p>代码清单15-12 由询问模式所产生的Future，并进行了转换</p>
 </blockquote>
@@ -502,7 +515,8 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
             VerificationProcessFailed(userEmail)
         }.foreach(result ⇒ replyTo ! result)
     }
-  }</code></pre>
+  }
+</code></pre>
 <blockquote>
   <p>代码清单15-13 不使用内置支持实现询问模式</p>
 </blockquote>
@@ -548,7 +562,8 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
             statusMap -= corrID
         }
     }
-  }.narrow[StartVerificationProcess]</code></pre>
+  }.narrow[StartVerificationProcess]
+</code></pre>
 <h2><a href="#15-5-聚合器模式" name="15-5-聚合器模式" class="anchor"><span class="anchor-link"></span></a>15.5 聚合器模式</h2>
 <blockquote>
   <p>代码清单15-14 使用for推导式来聚合三个Future表达式的结果。</p>
@@ -628,7 +643,8 @@ def frontPage(
         topNews ! GetTopNews(childRef)
         ctx.schedule(1.second, childRef, ReceiveTimeout)
     }
-  }</code></pre>
+  }
+</code></pre>
 <blockquote>
   <p>代码清单15-16 使用一个构建器来更加直接地表达领域模型</p>
 </blockquote>
@@ -660,7 +676,8 @@ def frontPage(
       personalNews.get.filterNot(topSet.contains)
     FrontPageResult(user, css.get, allNews)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单15-17 添加第4个服务，降低了代码的可读性</p>
 </blockquote>
@@ -693,7 +710,9 @@ for {
   <p>代码清单15-18 使用Actor实现上面的（信息）交换</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
+
 case object ChangeBudgetDone
+
 case class CannotChangeBudget(reason: String)
 
 class Sam(
@@ -736,11 +755,13 @@ class Alice extends Actor {
     case Terminated(saga) ⇒
       alreadyDone -= saga
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单15-19 向预算消息添加持久性</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class AliceConfirmedChange(deliveryId: Long)
+
 case class AliceDeniedChange(deliveryId: Long)
 
 class PersistentSam(
@@ -791,18 +812,22 @@ class PersistentSam(
       confirmDelivery(deliveryId)
       context.stop(self)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单15-20 Alice Actor的持久化版本</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class BudgetChanged(amount: BigDecimal, persistenceId: String)
+
 case object CleanupDoneList
+
 case class ChangeDone(persistenceId: String)
 
 class PersistentAlice extends PersistentActor with ActorLogging {
   def persistenceId: String = &quot;Alice&quot;
 
   implicit val mat: ActorMaterializer = ActorMaterializer()
+
   import context.dispatcher
 
   var alreadyDone: Set[String] = Set.empty
@@ -851,7 +876,8 @@ class PersistentAlice extends PersistentActor with ActorLogging {
   override def postStop(): Unit = {
     cleanupTimer.cancel()
   }
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">

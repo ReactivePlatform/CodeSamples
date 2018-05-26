@@ -359,13 +359,13 @@ for (SLAResponse(timings, outstanding) ← future) yield {
 <blockquote>
   <p>代码清单 11-15 在 JavaScript 中测试翻译服务</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">describe(&#39;Translator&#39;, function() {
-  describe(&#39;#translate()&#39;, function() {
-    it(&#39;should yield the correct result&#39;, function() {
-      return tr.translate(&#39;Hur mår du?&#39;)
-               .should.eventually.equal(&#39;How are you?&#39;);
+<pre class="prettyprint"><code class="language-js">describe(&#39;Translator&#39;, function () {
+    describe(&#39;#translate()&#39;, function () {
+        it(&#39;should yield the correct result&#39;, function () {
+            return tr.translate(&#39;Hur mår du?&#39;)
+                .should.eventually.equal(&#39;How are you?&#39;);
+        })
     })
-  })
 });</code></pre>
 <blockquote>
   <p>代码清单 11-16 使用请求-响应工厂来生成测试流量</p>
@@ -384,7 +384,8 @@ lat.quantile(0.99) should be &lt; SLA</code></pre>
 <blockquote>
   <p>代码清单 11-17 简单的翻译 API</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case class TranslateV1(query: String, replyTo: ActorRef)</code></pre>
+<pre class="prettyprint"><code class="language-scala">case class TranslateV1(query: String, replyTo: ActorRef)
+</code></pre>
 <blockquote>
   <p>代码清单 11-18 将更严格的类型添加到翻译 API</p>
 </blockquote>
@@ -395,16 +396,19 @@ lat.quantile(0.99) should be &lt; SLA</code></pre>
   replyTo:        ActorRef)
 
 sealed trait TranslationResponseV2
+
 case class TranslationV2(
   inputPhrase:    String,
   outputPhrase:   String,
   inputLanguage:  String,
   outputLanguage: String)
+
 case class TranslationErrorV2(
   inputPhrase:    String,
   inputLanguage:  String,
   outputLanguage: String,
-  errorMessage:   String)</code></pre>
+  errorMessage:   String)
+</code></pre>
 <blockquote>
   <p>代码清单 11-19 测试翻译版本适配器</p>
 </blockquote>
@@ -439,7 +443,9 @@ v1.expectNoMessage(1.second)</code></pre>
   <p>代码清单 11-20 模拟错误过程</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case object ExpectNominal
+
 case object ExpectError
+
 case class Unexpected(msg: Any)
 
 class MockV1(reporter: ActorRef) extends Actor {
@@ -465,7 +471,8 @@ class MockV1(reporter: ActorRef) extends Actor {
       replyTo ! s&quot;error:cannot parse input &#39;$other&#39;&quot;
       context.become(initial)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单 11-21 测试正确的错误处理</p>
 </blockquote>
@@ -500,7 +507,8 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
   def receive: PartialFunction[Any, Unit] = {
     case _ ⇒ throw new NullPointerException
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单 11-23 为被测 Actor 提供测试上下文</p>
 </blockquote>
@@ -508,11 +516,13 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
     case thr ⇒ Restart
   }
+
   def receive: PartialFunction[Any, Unit] = {
     case p: Props ⇒
       sender ! context.actorOf(p, &quot;child&quot;)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单 11-24 在 StepParent 的上下文中测试 Actor</p>
 </blockquote>
@@ -533,7 +543,8 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
     val terminated = system.terminate()
     Await.ready(terminated, Duration.Inf)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单 11-25 将失败报告给指定的 Actor</p>
 </blockquote>
@@ -543,10 +554,12 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
     case f ⇒ failures ! f; Stop
   }
+
   def receive: PartialFunction[Any, Unit] = {
     case msg ⇒ child forward msg
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单 11-26 在测试中移除监督</p>
 </blockquote>
@@ -568,7 +581,8 @@ class FailureParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     val terminated = system.terminate()
     Await.ready(terminated, Duration.Inf)
   }
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">

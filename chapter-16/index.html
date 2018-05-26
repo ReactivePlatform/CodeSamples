@@ -168,6 +168,7 @@ Type to start searching
   val minus = BigDecimal(-1, mc)
 
   var requested = 0
+
   def request(): Unit =
     if (requested &lt; 5) {
       manager ! WorkRequest(self, 10)
@@ -184,7 +185,8 @@ Type to start searching
       val result = sign / data
       replyTo ! JobResult(id, result)
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单16-2 按工作者所请求的数目给它们提供任务</p>
 </blockquote>
@@ -215,7 +217,8 @@ Type to start searching
         context.system.terminate()
       }
   }
-}</code></pre>
+}
+</code></pre>
 <h2><a href="#16-2-托管队列模式" name="16-2-托管队列模式" class="anchor"><span class="anchor-link"></span></a>16.2 托管队列模式</h2>
 <blockquote>
   <p>代码清单16-3 管理一个工作队列以对过载作出反应</p>
@@ -247,7 +250,8 @@ Type to start searching
         workQueue = workQueue.drop(items)
       }
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>QueuePattern.scala</p>
 </blockquote>
@@ -278,7 +282,8 @@ Type to start searching
         workQueue = workQueue.drop(items)
       }
   }
-}</code></pre>
+}
+</code></pre>
 <h2><a href="#16-3-丢弃模式" name="16-3-丢弃模式" class="anchor"><span class="anchor-link"></span></a>16.3 丢弃模式</h2>
 <blockquote>
   <p>DropPattern.scala</p>
@@ -322,7 +327,8 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
         manager ! envelope
       }
   }
-}</code></pre>
+}
+</code></pre>
 <h2><a href="#16-4-限流模式" name="16-4-限流模式" class="anchor"><span class="anchor-link"></span></a>16.4 限流模式</h2>
 <blockquote>
   <p>代码清单16-4 根据特定速率使用令牌桶来拉取工作</p>
@@ -334,6 +340,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   bucketSize:    Int,
   batchSize:     Int) extends Actor {
   def now(): Long = System.nanoTime()
+
   val nanoSecondsBetweenTokens: Long = 1000000000L / ratePerSecond
 
   var tokenBucket: Int = bucketSize
@@ -349,12 +356,14 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       lastTokenTime += accrued * nanoSecondsBetweenTokens
     }
   }
+
   def consumeToken(time: Long): Unit = {
     refillBucket(time)
     tokenBucket -= 1
   }
 
   var requested = 0
+
   def request(time: Long): Unit =
     if (tokenBucket - requested &gt;= batchSize) {
       sendRequest(time, batchSize)
@@ -374,6 +383,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       }
     } else if (Debug)
       println(s&quot;$time: not requesting (requested=$requested tokenBucket=$tokenBucket)&quot;)
+
   def sendRequest(time: Long, items: Int): Unit = {
     if (Debug)
       println(s&quot;$time: requesting $items items (requested=$requested tokenBucket=$tokenBucket)&quot;)
@@ -392,7 +402,8 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       request(time)
       calculator ! job
   }
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-16/index.md" title="Edit this page" class="md-source-file md-edit">

@@ -223,8 +223,8 @@ final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre>
   <p>AskActorWithJava8.java</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">CompletionStage&lt;Response&gt; future =
-        ask(actorRef, request, timeout)
-                .thenApply(Response.class::cast);
+  ask(actorRef, request, timeout)
+    .thenApply(Response.class::cast);
 future.thenAccept(response -&gt; AskActorWithJava8.processIt(response));</code></pre>
 <h2><a href="#2-4-对失败作出反应" name="2-4-对失败作出反应" class="anchor"><span class="anchor-link"></span></a>2.4 对失败作出反应</h2>
 <blockquote>

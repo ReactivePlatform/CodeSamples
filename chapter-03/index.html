@@ -157,7 +157,7 @@ Type to start searching
 <blockquote>
   <p>代码清单3-1 不安全的、可变的消息类，可能会隐含非预期的行为</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">import java.util.Date;
+<pre class="prettyprint"><code class="language-java"><br/>import java.util.Date;
 
 public class Unsafe {
   private Date timestamp;
@@ -183,7 +183,7 @@ public class Unsafe {
 <blockquote>
   <p>代码清单 3-2 不可变的消息类，其行为是可预知的，并易于推断</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">import java.util.Date;
+<pre class="prettyprint"><code class="language-java"><br/>import java.util.Date;
 
 public class Immutable {
   private final Date timestamp;
@@ -207,7 +207,8 @@ public class Immutable {
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">import java.util.Date
 
-case class Message(timestamp: Date, message: String)</code></pre>
+case class Message(timestamp: Date, message: String)
+</code></pre>
 <blockquote>
   <p>UsingStringBuffer.java</p>
 </blockquote>
@@ -267,9 +268,9 @@ return next;</code></pre>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">final List&lt;Integer&gt; numbers = Arrays.asList(1, 2, 3);
 final List&lt;Integer&gt; numbersPlusOne =
-        numbers.stream()
-                .map(number -&gt; number + 1)
-                .collect(Collectors.toList());</code></pre>
+  numbers.stream()
+    .map(number -&gt; number + 1)
+    .collect(Collectors.toList());</code></pre>
 <p><em>Python REPL</em></p>
 <pre class="prettyprint"><code class="language-output"><br/>&gt;&gt;&gt; def addOne(x):
 ... returnx+1
@@ -287,9 +288,9 @@ final List&lt;Integer&gt; numbersPlusOne =
 var counter = 0;
 
 http.createServer(function (req, res) {
-  counter++;
-  res.writeHead(200, {&#39;Content-Type&#39;: &#39;text/plain&#39;});
-  res.end(&#39;Sending response: &#39; + counter + &#39; via callback!\n&#39;);
+    counter++;
+    res.writeHead(200, {&#39;Content-Type&#39;: &#39;text/plain&#39;});
+    res.end(&#39;Sending response: &#39; + counter + &#39; via callback!\n&#39;);
 }).listen(8888, &#39;127.0.0.1&#39;);
 
 console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre>
@@ -299,33 +300,34 @@ console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre>
 <pre class="prettyprint"><code class="language-go">package main
 
 import (
-    &quot;fmt&quot;
-    &quot;time&quot;
+	&quot;fmt&quot;
+	&quot;time&quot;
 )
 
 func main() {
 	iterations := 10
-    myChannel := make(chan int)
+	myChannel := make(chan int)
 
-    go producer(myChannel, iterations)
-    go consumer(myChannel, iterations)
+	go producer(myChannel, iterations)
+	go consumer(myChannel, iterations)
 
-    time.Sleep(500 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func producer(myChannel chan int, iterations int) {
-    for i := 1; i &lt;= iterations; i++ {
-        fmt.Println(&quot;Sending: &quot;, i)
-        myChannel &lt;- i
-    }   
+	for i := 1; i &lt;= iterations; i++ {
+		fmt.Println(&quot;Sending: &quot;, i)
+		myChannel &lt;- i
+	}
 }
 
 func consumer(myChannel chan int, iterations int) {
-    for i := 1; i &lt;= iterations; i++ {
-        recVal := &lt;-myChannel
-        fmt.Println(&quot;Received: &quot;, recVal)
-    }   
-}</code></pre>
+	for i := 1; i &lt;= iterations; i++ {
+		recVal := &lt;-myChannel
+		fmt.Println(&quot;Received: &quot;, recVal)
+	}
+}
+</code></pre>
 <blockquote>
   <p>代码清单3-5 从更快的数据源获取结果</p>
 </blockquote>
@@ -340,13 +342,13 @@ func consumer(myChannel chan int, iterations int) {
   }
 
   public Object retrieveCustomer(final long id) {
-        final CompletableFuture&lt;Object&gt; cacheFuture = CompletableFuture
-                .supplyAsync(() -&gt; cacheRetriever.getCustomer(id));
-        final CompletableFuture&lt;Object&gt; dbFuture = CompletableFuture
-                .supplyAsync(() -&gt; dbRetriever.getCustomer(id));
+    final CompletableFuture&lt;Object&gt; cacheFuture = CompletableFuture
+      .supplyAsync(() -&gt; cacheRetriever.getCustomer(id));
+    final CompletableFuture&lt;Object&gt; dbFuture = CompletableFuture
+      .supplyAsync(() -&gt; dbRetriever.getCustomer(id));
 
-        return CompletableFuture.anyOf(cacheFuture, dbFuture);
-    }
+    return CompletableFuture.anyOf(cacheFuture, dbFuture);
+  }
 }</code></pre>
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
@@ -376,7 +378,8 @@ func consumer(myChannel chan int, iterations int) {
     local ← localInventoryFuture
     overall ← overallInventoryFutureByWarehouse
   } yield (local, overall)
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
@@ -399,10 +402,10 @@ import io.reactivex.Observable;
 
 public class RxJavaExample {
   public void observe(String[] strings) {
-        Observable.fromArray(strings).subscribe((s) -&gt; {
-                System.out.println(&quot;Received &quot; + s);
-        });
-    }
+    Observable.fromArray(strings).subscribe((s) -&gt; {
+      System.out.println(&quot;Received &quot; + s);
+    });
+  }
 }</code></pre>
 <blockquote>
   <p>RxJavaExampleDriver.java</p>
@@ -427,7 +430,9 @@ import akka.actor._
 import akka.event.LoggingReceive
 
 case object Start
+
 case class CounterMessage(counterValue: Int)
+
 case class CounterTooLargeException(message: String) extends Exception(message)
 
 class SupervisorActor extends Actor with ActorLogging {
@@ -482,7 +487,8 @@ object Example extends App {
   val system = ActorSystem(&quot;counter-supervision-example&quot;)
   val supervisor = system.actorOf(Props[SupervisorActor])
   supervisor ! Start
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">

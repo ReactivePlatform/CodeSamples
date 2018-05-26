@@ -163,7 +163,9 @@ Type to start searching
   <p>DomainObject.scala</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class ItemRef(id: URI)
+
 case class CustomerRef(id: URI)
+
 case class ShoppingCartRef(id: URI)
 </code></pre>
 <blockquote>
@@ -195,12 +197,14 @@ case class ShoppingCartRef(id: URI)
     case ItemAdded(_, item, count)   ⇒ addItem(item, count)
     case ItemRemoved(_, item, count) ⇒ removeItem(item, count)
   }
+
   // 代码清单 17-6
 }
 
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>清单 17-2 用于和购物车对象通信的消息</p>
 </blockquote>
@@ -248,14 +252,19 @@ sealed trait Result extends ShoppingCartMessage
 
 case class GetItemsResult(
   shoppingCart: ShoppingCartRef,
-  items:        Map[ItemRef, Int]) extends Result</code></pre>
+  items:        Map[ItemRef, Int]) extends Result
+</code></pre>
 <blockquote>
   <p>清单 17-3 一个购物车管理者 Actor</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case class ManagerCommand(cmd: Command, id: Long, replyTo: ActorRef)
+
 case class ManagerEvent(id: Long, event: Event)
+
 case class ManagerQuery(cmd: Query, id: Long, replyTo: ActorRef)
+
 case class ManagerResult(id: Long, result: Result)
+
 case class ManagerRejection(id: Long, reason: String)
 
 class Manager(var shoppingCart: ShoppingCart) extends Actor {
@@ -296,7 +305,8 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
   }
-}</code></pre>
+}
+</code></pre>
 <h2><a href="#17-2-分片模式" name="17-2-分片模式" class="anchor"><span class="anchor-link"></span></a>17.2 分片模式</h2>
 <blockquote>
   <p>清单 17-4 为购物车定义分片算法</p>
@@ -331,7 +341,8 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
   private val hexDigits = &quot;0123456789ABCDEF&quot;
 
   val RegionName = &quot;ShoppingCart&quot;
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>清单 17-5 启动一个群集来托管分片</p>
 </blockquote>
@@ -386,12 +397,14 @@ startNode(sys2)</code></pre>
     case ItemAdded(_, item, count)   ⇒ addItem(item, count)
     case ItemRemoved(_, item, count) ⇒ removeItem(item, count)
   }
+
   // 代码清单 17-6
 }
 
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>清单 17-7 持久化一个事件溯源领域对象</p>
 </blockquote>
@@ -433,7 +446,8 @@ object ShoppingCart {
   def receiveRecover: PartialFunction[Any, Unit] = {
     case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
   }
-}</code></pre>
+}
+</code></pre>
 <h2><a href="#17-4-事件流模式" name="17-4-事件流模式" class="anchor"><span class="anchor-link"></span></a>17.4 事件流模式</h2>
 <blockquote>
   <p>清单 17-8 在写日志期间对事件打标签</p>
@@ -446,16 +460,21 @@ object ShoppingCart {
       case s: ShoppingCartMessage ⇒ Tagged(event, Set(&quot;shoppingCart&quot;))
       case other                  ⇒ other
     }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>清单 17-9 一个正在监听事件流的 Actor</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">object TopProductListener {
+
   private class IntHolder(var value: Int)
+
 }
 
 class TopProductListener extends Actor with ActorLogging {
+
   import TopProductListener._
+
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   val readJournal: LeveldbReadJournal =
@@ -470,8 +489,11 @@ class TopProductListener extends Actor with ActorLogging {
       val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) {
         (map, event) ⇒
           map.get(event.item) match {
-            case Some(holder) ⇒ { holder.value += event.count; map }
-            case None         ⇒ map.updated(event.item, new IntHolder(event.count))
+            case Some(holder) ⇒ {
+              holder.value += event.count;
+              map
+            }
+            case None ⇒ map.updated(event.item, new IntHolder(event.count))
           }
       }
       self ! TopProducts(0, histogram.map(p ⇒ (p._1, p._2.value)))
@@ -485,7 +507,8 @@ class TopProductListener extends Actor with ActorLogging {
       topProducts = products
       log.info(&quot;new {}&quot;, products)
   }
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-17/index.md" title="Edit this page" class="md-source-file md-edit">

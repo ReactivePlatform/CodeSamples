@@ -168,6 +168,7 @@ private def sendToStorage(job: Job): Future[StorageStatus] = {
 }
 
 import scala.concurrent.duration._
+
 private val breaker = CircuitBreaker(
   system.scheduler,
   5,
@@ -184,7 +185,8 @@ def persist(job: Job): Future[StorageStatus] = {
       case _: TimeoutException =&gt; StorageStatus.Unknown
       case _: CircuitBreakerOpenException =&gt; StorageStatus.Failed
     }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单12-2 使用速率限制器保护组件</p>
 </blockquote>
@@ -199,12 +201,15 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
     Array.fill(requests)(onePeriodAgo)
   }
   private var position = 0
+
   private def lastTime = startTimes(position)
+
   private def enqueue(time: Deadline): Unit = {
     startTimes(position) = time
     position += 1
     if (position == requests) position = 0
   }
+
   def call[T](block: ⇒ Future[T]): Future[T] = {
     val now = Deadline.now
     if ((now - lastTime) &lt; period) {
@@ -214,7 +219,8 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
       block
     }
   }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单12-3 断路器：限制来自同一个客户端的请求</p>
 </blockquote>
@@ -227,7 +233,8 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
     .recover {
       case RateLimitExceeded ⇒ StorageStatus.Failed
     }
-}</code></pre>
+}
+</code></pre>
 <blockquote>
   <p>代码清单12-4 门控一个客户端</p>
 </blockquote>
@@ -244,7 +251,8 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case RateLimitExceeded              ⇒ StorageStatus.Failed
       case _: CircuitBreakerOpenException ⇒ StorageStatus.Gated
     }
-}</code></pre>
+}
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-12/index.md" title="Edit this page" class="md-source-file md-edit">
