@@ -520,7 +520,7 @@ class TopProductListener extends Actor with ActorLogging {
       self ! TopProducts(0, histogram.map(p ⇒ (p._1, p._2.value)))
     }
 
-  var topProducts = Map.empty[ItemRef, Int]
+  private var topProducts = Map.empty[ItemRef, Int]
 
   def receive: Receive = {
     case GetTopProducts(id, replyTo) ⇒

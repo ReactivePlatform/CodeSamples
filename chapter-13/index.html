@@ -327,7 +327,7 @@ object Persistence {
 
   private val applied = mutable.Queue.empty[Replicate]
 
-  val name: String =
+  private val name: String =
     Cluster(context.system).selfAddress.toString.replaceAll(&quot;[:/]&quot;, &quot;_&quot;)
 
   def receive: Receive = readPersisted(name) match {
@@ -385,10 +385,10 @@ object Persistence {
   private val applied = mutable.Queue.empty[Replicate]
   private var awaitingInitialState = Option.empty[ActorRef]
 
-  val name: String =
+  private val name: String =
     Cluster(context.system).selfAddress.toString.replaceAll(&quot;[:/]&quot;, &quot;_&quot;)
-  val cluster = Cluster(context.system)
-  val random = new Random
+  private val cluster = Cluster(context.system)
+  private val random = new Random
 
   private var tickTask = Option.empty[Cancellable]
 
@@ -724,8 +724,8 @@ val Aborted: Status =
   <p>代码清单 13-12 使用 Akka Distributed Data 来传播状态变更</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class ClientInterface extends Actor with ActorLogging {
-  val replicator: ActorRef = DistributedData(context.system).replicator
-  implicit val cluster: Cluster = Cluster(context.system)
+  private val replicator: ActorRef = DistributedData(context.system).replicator
+  private implicit val cluster: Cluster = Cluster(context.system)
 
   def receive: Receive = {
     case Submit(job) ⇒
@@ -757,10 +757,10 @@ val Aborted: Status =
   <p>代码清单 13-13 引入对于任务的请求标志</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Executor extends Actor with ActorLogging {
-  val replicator: ActorRef = DistributedData(context.system).replicator
-  implicit val cluster: Cluster = Cluster(context.system)
+  private val replicator: ActorRef = DistributedData(context.system).replicator
+  private implicit val cluster: Cluster = Cluster(context.system)
 
-  var lastState = Map.empty[String, Status]
+  private var lastState = Map.empty[String, Status]
 
   replicator ! Replicator.Subscribe(StorageComponent, self)
 
@@ -814,7 +814,7 @@ private case class SendInitialData(toReplica: ActorRef)
 private case class InitialData(map: Map[String, JsValue])
 
 class Replica extends Actor with Stash {
-  var map = Map.empty[String, JsValue]
+  private var map = Map.empty[String, JsValue]
 
   def receive: Receive = {
     case InitialData(m) ⇒

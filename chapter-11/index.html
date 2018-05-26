@@ -479,7 +479,7 @@ class MockV1(reporter: ActorRef) extends Actor {
     reporter ! Unexpected(msg)
   }
 
-  val initial: Receive = {
+  private val initial: Receive = {
     case ExpectNominal ⇒ context.become(expectingNominal)
     case ExpectError   ⇒ context.become(expectingError)
   }
@@ -572,8 +572,8 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
   <p>代码清单 11-25 将失败报告给指定的 Actor</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class FailureParent(failures: ActorRef) extends Actor {
-  val props: Props = Props[MyFailureParentActor]
-  val child: ActorRef = context.actorOf(props, &quot;child&quot;)
+  private val props: Props = Props[MyFailureParentActor]
+  private val child: ActorRef = context.actorOf(props, &quot;child&quot;)
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
     case f ⇒ failures ! f; Stop
   }

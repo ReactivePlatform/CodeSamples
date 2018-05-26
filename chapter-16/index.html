@@ -225,8 +225,8 @@ Type to start searching
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
 
-  var workQueue: Queue[Job] = Queue.empty[Job]
-  var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
+  private var workQueue: Queue[Job] = Queue.empty[Job]
+  private var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
@@ -262,8 +262,8 @@ Type to start searching
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
 
-  var workQueue: Queue[Job] = Queue.empty[Job]
-  var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
+  private var workQueue: Queue[Job] = Queue.empty[Job]
+  private var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
 
   (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
 
@@ -298,8 +298,8 @@ Type to start searching
 <blockquote>
   <p>DropPattern.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val queueThreshold = 1000
-val dropThreshold = 1384
+<pre class="prettyprint"><code class="language-scala">private val queueThreshold = 1000
+private val dropThreshold = 1384
 
 def random: ThreadLocalRandom = ThreadLocalRandom.current
 
