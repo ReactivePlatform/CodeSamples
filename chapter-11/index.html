@@ -222,6 +222,7 @@ assert(duration &lt; 1050.millis, &quot;tick came in late&quot;)
   <p>代码清单 11-5 确定第 95 百分位的延迟</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+
 val echo = echoService(&quot;keepSLA&quot;)
 val N = 200
 val timings = for (i ← 1 to N) yield {
@@ -243,6 +244,7 @@ ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre>
   <p>代码清单 11-6 用 Ask 模式并行地生成测试样本</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAfuture&quot;)
+
 val N = 10000
 val timingFutures = for (i ← 1 to N) yield {
   val string = s&quot;test$i&quot;
@@ -251,25 +253,30 @@ val timingFutures = for (i ← 1 to N) yield {
     case Response(`string`) ⇒ Timestamp.now - start
   }
 }
+
 val futureOfTimings = Future.sequence(timingFutures)
 val timings = Await.result(futureOfTimings, 5.seconds)
 // discard top 5%
 val sorted = timings.sorted
 val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
+
 val SLA = if (Helpers.isCiTest) 500.milliseconds else 100.milliseconds
+
 ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre>
 <blockquote>
   <p>代码清单 11-7 使用自定义 Actor 来限制并行测试样本的数量</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAparallel&quot;)
 val probe = TestProbe()
+
 val N = 10000
 val maxParallelism = 500
 val controller = system.actorOf(
   Props[ParallelSLATester],
   &quot;keepSLAparallelController&quot;)
 controller ! TestSLA(echo, N, maxParallelism, probe.ref)
+
 val result = Try(probe.expectMsgType[SLAResponse]).recover {
   case ae: AssertionError ⇒
     controller ! AbortSLATest
@@ -277,11 +284,13 @@ val result = Try(probe.expectMsgType[SLAResponse]).recover {
     info(s&quot;controller timed out, state so far is $result&quot;)
     throw ae
 }.get
+
 // discard top 5%
 val sorted = result.timings.sorted
 val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
+
 ninetyfifthPercentile should be &lt; SLA</code></pre>
 <blockquote>
   <p>代码清单 11-8 验证没有收到额外的消息</p>
