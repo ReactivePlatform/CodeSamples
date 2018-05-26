@@ -207,10 +207,13 @@ probe.expectMsg(1.second, output)</code></pre>
   <p>代码清单 11-4 使用 TestProbe 接收调度程序的响应</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+
 val start = Timestamp.now
 scheduler ! Schedule(probe.ref, &quot;tick&quot;, 1.second)
 probe.expectMsg(2.seconds, &quot;tick&quot;)
+
 val stop = Timestamp.now
+
 val duration = stop - start
 assert(duration &gt; 950.millis, &quot;tick came in early&quot;)
 assert(duration &lt; 1050.millis, &quot;tick came in late&quot;)
@@ -234,6 +237,7 @@ val sorted = timings.sorted
 val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 1.millisecond
+
 ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre>
 <blockquote>
   <p>代码清单 11-6 用 Ask 模式并行地生成测试样本</p>
