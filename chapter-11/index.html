@@ -395,7 +395,8 @@ for (SLAResponse(timings, outstanding) ← future) yield {
     val message = s&quot;test$i&quot;
     SingleResult((echo ? (Request(message, _))), Response(message))
   }
-  val latencies = await(akka.pattern.after(20.seconds,
+  val latencies = await(akka.pattern.after(
+    20.seconds,
     system.scheduler)(latenciesFuture))
 
   info(s&quot;latency info: $latencies&quot;)
@@ -461,7 +462,7 @@ req2.replyTo ! &quot;error:cannot parse input &#39;sv:en:Hur är läget?&#39;&qu
 client.expectMsg(TranslationErrorV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;,
   &quot;cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;))
 
-v1.expectNoMessage(1.second)</code></pre>
+v1.expectNoMessage(3.second)</code></pre>
 <blockquote>
   <p>代码清单 11-20 模拟错误过程</p>
 </blockquote>
@@ -527,11 +528,10 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
   <p>代码清单 11-22 要测试的基本 Actor</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class MyActor extends Actor {
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case _ ⇒ throw new NullPointerException
   }
-}
-</code></pre>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-23 为被测 Actor 提供测试上下文</p>
 </blockquote>
@@ -540,12 +540,11 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
     case thr ⇒ Restart
   }
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case p: Props ⇒
       sender ! context.actorOf(p, &quot;child&quot;)
   }
-}
-</code></pre>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-24 在 StepParent 的上下文中测试 Actor</p>
 </blockquote>
@@ -558,6 +557,7 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
       val parent = system.actorOf(Props[StepParent], &quot;stepParent&quot;)
       parent.tell(Props[MyActor], testProbe.ref)
       val child = testProbe.expectMsgType[ActorRef]
+      // ...
       // Test whatever we want in the actor
     }
   }
@@ -578,7 +578,7 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
     case f ⇒ failures ! f; Stop
   }
 
-  def receive: PartialFunction[Any, Unit] = {
+  def receive: Receive = {
     case msg ⇒ child forward msg
   }
 }
@@ -588,7 +588,8 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">case object TestFailureParentMessage
 
-class FailureParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+class FailureParentSpec extends WordSpec
+  with Matchers with BeforeAndAfterAll {
   implicit val system: ActorSystem = ActorSystem()
 
   &quot;Using a FailureParent&quot; must {
