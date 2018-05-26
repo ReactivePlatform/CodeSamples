@@ -353,7 +353,8 @@ func consumer(myChannel chan int, iterations int) {
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool.commonPool())
+<pre class="prettyprint"><code class="language-scala">implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(
+  ForkJoinPool.commonPool())
 
 def getProductInventoryByPostalCode(
   productSku: Long,
