@@ -404,9 +404,8 @@ import io.reactivex.Observable;
 
 public class RxJavaExample {
   public void observe(String[] strings) {
-    Observable.fromArray(strings).subscribe((s) -&gt; {
-      System.out.println(&quot;Received &quot; + s);
-    });
+    Observable.fromArray(strings).subscribe((s) -&gt;
+      System.out.println(&quot;Received &quot; + s));
   }
 }</code></pre>
 <blockquote>

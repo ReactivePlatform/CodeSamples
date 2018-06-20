@@ -368,16 +368,16 @@ class WorkNodeForResourcePool extends AbstractActor {
 <blockquote>
   <p>代码清单 14-7 批处理作业的基本构成</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public interface ProcessingLogic {
-  public PartialResult process(Stream&lt;DataElement&gt; input);
+<pre class="prettyprint"><code class="language-java">interface ProcessingLogic {
+  PartialResult process(Stream&lt;DataElement&gt; input);
 }
 
 //
-public interface MergeLogic {
-  public Result merge(Collection&lt;PartialResult&gt; partialResults);
+interface MergeLogic {
+  Result merge(Collection&lt;PartialResult&gt; partialResults);
 }
 
-public class BatchJob {
+class BatchJob {
   public final String dataSelector;
   public final ProcessingLogic processingLogic;
   public final MergeLogic mergeLogic;
@@ -397,7 +397,7 @@ public class BatchJob {
 <blockquote>
   <p>代码清单 14-8 通过调用Nashorn JavaScript脚本引擎执行处理逻辑</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class PartSuccess implements PartialResult {
+<pre class="prettyprint"><code class="language-java">class PartSuccess implements PartialResult {
   public final int value;
 
   public PartSuccess(int value) {
@@ -410,7 +410,7 @@ public class BatchJob {
   }
 }
 
-public class PartFailure implements PartialResult {
+class PartFailure implements PartialResult {
   public final Throwable failure;
 
   public PartFailure(Throwable failure) {
@@ -423,7 +423,7 @@ public class PartFailure implements PartialResult {
   }
 }
 
-public class BatchJobJS {
+class BatchJobJS {
   public final String dataSelector;
   public final String processingLogic;
   public final String mergeLogic;
@@ -441,7 +441,7 @@ public class BatchJobJS {
   }
 }
 
-public class WorkerJS {
+class WorkerJS {
   private static final ScriptEngine engine =
     new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
 
@@ -490,13 +490,13 @@ RETURN AS RESULT</code></pre>
 <blockquote>
   <p>代码清单 14-10 内部 DSL</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public static void akkaStreamDSL() {
+<pre class="prettyprint"><code class="language-java">static void akkaStreamDSL() {
   RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
     Source.&lt;DataElement&gt;empty()
       .filter(new InRange(&quot;year&quot;, 1950, 1960))
       .toMat(
         Sink.fold(0L, new Median&lt;Long&gt;(&quot;price&quot;)),
-        Keep.&lt;NotUsed, CompletionStage&lt;Long&gt;&gt;right());
+        Keep.right());
 
   Source.&lt;DataElement&gt;empty()
     .map(new Inject&lt;Long&gt;(p, &quot;p&quot;))

@@ -613,25 +613,24 @@ private def consolidate(
   <p>代码清单 13-8 使用 CKite 来实现键值存储</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class KVStore extends StateMachine {
-  private var map = Map[String, String]()
+  private var map = mutable.Map[String, String]()
   private var lastIndex: Long = 0
 
-  def applyWrite = {
-    case (index, Put(key: String, value: String)) ⇒ {
+  def applyWrite: PartialFunction[(Long, WriteCommand[_]), String] = {
+    case (index, Put(key: String, value: String)) ⇒
       map.put(key, value)
       lastIndex = index
       value
-    }
   }
 
-  def applyRead = {
+  def applyRead: PartialFunction[ReadCommand[_], Option[String]] = {
     case Get(key) ⇒ map.get(key)
   }
 
   def getLastAppliedIndex: Long = lastIndex
 
-  def restoreSnapshot(byteBuffer: ByteBuffer) = {
-    map = Serializer.deserialize[Map[String, String]](byteBuffer.array())
+  def restoreSnapshot(byteBuffer: ByteBuffer): Unit = {
+    map = Serializer.deserialize[mutable.Map[String, String]](byteBuffer.array())
   }
 
   def takeSnapshot(): ByteBuffer =
@@ -657,9 +656,9 @@ private def consolidate(
 <blockquote>
   <p>ckite api</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val consistentRead = ckite.read(Get(key))
-val possibleStaleRead = ckite.readLocal(Get(key))
-val write = ckite.write(Put(key, value))</code></pre>
+<pre class="prettyprint"><code class="language-scala">val consistentRead: Future[Option[String]] = ckite.read(Get(key))
+val possibleStaleRead: Future[Option[String]] = ckite.readLocal(Get(key))
+val write: Future[String] = ckite.write(Put(key, value))</code></pre>
 <blockquote>
   <p>代码清单 13-10 图13-1中图形的代码表示</p>
 </blockquote>
@@ -788,8 +787,8 @@ val Aborted: Status =
       val current = ch.get(StorageComponent).entries
       for {
         (job, status) ← current.iterator
-        if (status == Aborted)
-        if (!lastState.get(job).contains(Aborted))
+        if status == Aborted
+        if !lastState.get(job).contains(Aborted)
       } {
         log.info(&quot;aborting job {}&quot;, job)
         lastState = current

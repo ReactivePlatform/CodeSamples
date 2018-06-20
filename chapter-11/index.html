@@ -393,7 +393,7 @@ for (SLAResponse(timings, outstanding) ← future) yield {
     count = 10000,
     maxParallelism = 500) { i ⇒
     val message = s&quot;test$i&quot;
-    SingleResult((echo ? (Request(message, _))), Response(message))
+    SingleResult(echo ? (Request(message, _)), Response(message))
   }
   val latencies = await(akka.pattern.after(
     20.seconds,
@@ -537,7 +537,7 @@ asyncErrors.expectNoMessage(1.second)</code></pre>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">class StepParent extends Actor {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case thr ⇒ Restart
+    case ex ⇒ Restart
   }
 
   def receive: Receive = {
