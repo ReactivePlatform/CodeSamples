@@ -732,14 +732,14 @@ val Aborted: Status =
       log.info(&quot;submitting job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
-        ORMap.empty[Status],
+        ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds),
         Some(s&quot;submit $job&quot;))(_ + (job -&gt; New))
     case Cancel(job) ⇒
       log.info(&quot;cancelling job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
-        ORMap.empty[Status],
+        ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds),
         Some(s&quot;cancel $job&quot;))(_ + (job -&gt; Cancelled))
     case r: Replicator.UpdateResponse[_] ⇒
@@ -769,7 +769,7 @@ val Aborted: Status =
       log.info(&quot;executing job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
-        ORMap.empty[Status],
+        ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds), Some(job)) { map ⇒
           require(map.get(job).contains(New))
           map + (job -&gt; Executing)
@@ -778,7 +778,7 @@ val Aborted: Status =
       log.info(&quot;job {} finished&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
-        ORMap.empty[Status],
+        ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds))(_ + (job -&gt; Finished))
     case Replicator.UpdateSuccess(StorageComponent, Some(job)) ⇒
       log.info(&quot;starting job {}&quot;, job)
