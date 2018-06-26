@@ -179,7 +179,7 @@ public class Unsafe {
   public StringBuffer getMessage() {
     return message;
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/Unsafe.java#L12-L35">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 3-2 不可变的消息类，其行为是可预知的，并易于推断</p>
 </blockquote>
@@ -201,14 +201,14 @@ public class Immutable {
   public String getMessage() {
     return message;
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/Immutable.java#L12-L31">Full source at GitHub</a>
 <blockquote>
   <p>Message.scala</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">import java.util.Date
 
 case class Message(timestamp: Date, message: String)
-</code></pre>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/scala/chapter03/Message.scala#L13-L16">Full source at GitHub</a>
 <blockquote>
   <p>UsingStringBuffer.java</p>
 </blockquote>
@@ -217,7 +217,7 @@ final StringBuffer reversed = original.reverse();
 System.out.println(String.format(
     &quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;,
     original,
-    reversed));</code></pre>
+    reversed));</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/UsingStringBuffer.java#L13-L18">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 3-3 引用透明性：允许代换预先计算好的值</p>
 </blockquote>
@@ -239,7 +239,7 @@ System.out.println(String.format(
     }
     return root;
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/Rooter.java#L13-L31">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-4 因副作用而受限的可用性</p>
 </blockquote>
@@ -254,7 +254,7 @@ System.out.println(String.format(
     this.count += Math.incrementExact(this.count);
     return this.count;
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/SideEffecting.java#L15-L26">Full source at GitHub</a>
 <blockquote>
   <p>IntSeeding.java</p>
 </blockquote>
@@ -262,7 +262,7 @@ System.out.println(String.format(
 if (logger.isDebugEnabled()) {
   logger.debug(&quot;Next is &quot; + se.next());
 }
-return next;</code></pre>
+return next;</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/IntSeeding.java#L27-L31">Full source at GitHub</a>
 <blockquote>
   <p>UsingMapFunction.java</p>
 </blockquote>
@@ -270,7 +270,7 @@ return next;</code></pre>
 final List&lt;Integer&gt; numbersPlusOne =
   numbers.stream()
     .map(number -&gt; number + 1)
-    .collect(Collectors.toList());</code></pre>
+    .collect(Collectors.toList());</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/java/chapter03/UsingMapFunction.java#L17-L21">Full source at GitHub</a>
 <p><em>Python REPL</em></p>
 <pre class="prettyprint"><code class="language-output"><br/>&gt;&gt;&gt; def addOne(x):
 ... returnx+1
@@ -278,7 +278,7 @@ final List&lt;Integer&gt; numbersPlusOne =
 &gt;&gt;&gt; myFunction = addOne
 &gt;&gt;&gt; myFunction(3)
 4
-</code></pre>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/src/main/python/output/myFunction.py.output#L4-L11">Full source at GitHub</a>
 <h2><a href="#3-4-对反应式设计的现有支持" name="3-4-对反应式设计的现有支持" class="anchor"><span class="anchor-link"></span></a>3.4 对反应式设计的现有支持</h2>
 <blockquote>
   <p>sample.js</p>
@@ -293,7 +293,7 @@ http.createServer(function (req, res) {
     res.end(&#39;Sending response: &#39; + counter + &#39; via callback!\n&#39;);
 }).listen(8888, &#39;127.0.0.1&#39;);
 
-console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre>
+console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/eventloop/src/main/js/sample.js#L3-L13">Full source at GitHub</a>
 <blockquote>
   <p>sample.go</p>
 </blockquote>
@@ -327,7 +327,7 @@ func consumer(myChannel chan int, iterations int) {
 		fmt.Println(&quot;Received: &quot;, recVal)
 	}
 }
-</code></pre>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/csp/src/main/go/sample.go#L3-L33">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-5 从更快的数据源获取结果</p>
 </blockquote>
@@ -349,7 +349,7 @@ func consumer(myChannel chan int, iterations int) {
 
     return CompletableFuture.anyOf(cacheFuture, dbFuture);
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/futures-and-promises/src/main/java/chapter03/future/ParallelRetrievalExample.java#L15-L33">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
@@ -381,7 +381,7 @@ def getProductInventoryByPostalCode(
     overall ← overallInventoryFutureByWarehouse
   } yield (local, overall)
 }
-</code></pre>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L29-L57">Full source at GitHub</a>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
@@ -394,7 +394,7 @@ val resultFuture = async {
     inventoryService.currentInventoryOverallByWarehouse(productSku)
   }
   (await(localInventoryFuture), await(overallInventoryFutureByWarehouse))
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L41-L50">Full source at GitHub</a>
 <blockquote>
   <p>RxJavaExample.java</p>
 </blockquote>
@@ -407,7 +407,7 @@ public class RxJavaExample {
     Observable.fromArray(strings).subscribe((s) -&gt;
       System.out.println(&quot;Received &quot; + s));
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExample.java#L9-L18">Full source at GitHub</a>
 <blockquote>
   <p>RxJavaExampleDriver.java</p>
 </blockquote>
@@ -420,7 +420,7 @@ public class RxJavaExampleDriver {
     String[] strings = {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;};
     rxJavaExample.observe(strings);
   }
-}</code></pre>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExampleDriver.java#L9-L18">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-7 一个使用 Akka 的Actor的例子</p>
 </blockquote>
@@ -489,7 +489,7 @@ object Example extends App {
   val supervisor = system.actorOf(Props[SupervisorActor])
   supervisor ! Start
 }
-</code></pre>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">
