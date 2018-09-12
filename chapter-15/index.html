@@ -167,75 +167,67 @@ Type to start searching
 <pre class="prettyprint"><code class="language-java">public class Server {
   static final int SERVER_PORT = 8888;
 
-  static public void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     // bind a socket for receiving packets
-    try (final DatagramSocket socket =
-        new DatagramSocket(SERVER_PORT)) {
+    try (final DatagramSocket socket = new DatagramSocket(SERVER_PORT)) {
 
       // receive one packet
       final byte[] buffer = new byte[1500];
-      final DatagramPacket packet1 =
-          new DatagramPacket(buffer, buffer.length);
+      final DatagramPacket packet1 = new DatagramPacket(buffer, buffer.length);
       socket.receive(packet1);
 
       final SocketAddress sender = packet1.getSocketAddress();
-      System.out.println(&quot;server: received &quot; +
-          new String(packet1.getData()));
+      System.out.println(&quot;server: received &quot; + new String(packet1.getData()));
       System.out.println(&quot;server: sender was &quot; + sender);
 
       // send response back
       final byte[] response = &quot;got it!&quot;.getBytes();
-      final DatagramPacket packet2 =
-          new DatagramPacket(response, response.length, sender);
+      final DatagramPacket packet2 = new DatagramPacket(response, response.length, sender);
       socket.send(packet2);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/java/chapter15/Server.java#L18-L44">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Server.java#L19-L41">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-2 客户端发送一个请求，然后阻塞直到接收到服务器的响应</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public class Client {
-  static public void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     // get local socket with random port
     try (final DatagramSocket socket = new DatagramSocket()) {
 
       // send message to server
       final byte[] request = &quot;hello&quot;.getBytes();
-      final SocketAddress serverAddress =
-          new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
-      final DatagramPacket packet1 =
-          new DatagramPacket(request, request.length, serverAddress);
+      final SocketAddress serverAddress = new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
+      final DatagramPacket packet1 = new DatagramPacket(request, request.length, serverAddress);
       socket.send(packet1);
 
       // receive one packet
       final byte[] buffer = new byte[1500];
-      final DatagramPacket packet2 =
-          new DatagramPacket(buffer, buffer.length);
+      final DatagramPacket packet2 = new DatagramPacket(buffer, buffer.length);
       socket.receive(packet2);
 
       final SocketAddress sender = packet2.getSocketAddress();
-      System.out.println(&quot;client: received &quot; +
-          new String(packet2.getData()));
+      System.out.println(&quot;client: received &quot; + new String(packet2.getData()));
       System.out.println(&quot;client: sender was &quot; + sender);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/java/chapter15/Client.java#L20-L45">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Client.java#L21-L42">Full source at GitHub</a>
 <p><em>Server 的输出结果</em></p>
 <pre class="prettyprint"><code class="language-output">server: received hello
-server: sender was /127.0.0.1:55589</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/server.output#L2-L3">Full source at GitHub</a>
+server: sender was /127.0.0.1:55589</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/server.output#L2-L3">Full source at GitHub</a>
 <p><em>Client 的可能输出结果</em></p>
 <pre class="prettyprint"><code class="language-output">client: received got it!
-client: sender was /127.0.0.1:8888</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/client.output#L2-L3">Full source at GitHub</a>
+client: sender was /127.0.0.1:8888</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/client.output#L2-L3">Full source at GitHub</a>
 <p><em>HTTP Request Header</em></p>
 <pre class="prettyprint"><code class="language-header">GET /request?msg=hello HTTP/1.1
 Host: client-interface.our.application.domain
-Accept: application/json</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/http-request.header#L2-L4">Full source at GitHub</a>
+Accept: application/json</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/http-request.header#L2-L4">Full source at GitHub</a>
 <p><em>HTTP Response Header</em></p>
 <pre class="prettyprint"><code class="language-header">HTTP/1.1 200 OK
 ...
 Content-Type: application/json
 Content-Length: 22
-{&quot;response&quot;:&quot;got it!&quot;}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/http-response.header#L2-L6">Full source at GitHub</a>
+{&quot;response&quot;:&quot;got it!&quot;}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/http-response.header#L2-L6">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-3 使用Akka UntypedActor 来建模请求——响应模式</p>
 </blockquote>
@@ -270,10 +262,10 @@ Content-Length: 22
   }
 
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/RequestResponseActors.scala#L16-L47">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseActors.scala#L16-L47">Full source at GitHub</a>
 <p><em>运行结果</em></p>
 <pre class="prettyprint"><code class="language-output">got request: hello
-got response: got it!</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/request-response-actors.output#L2-L3">Full source at GitHub</a>
+got response: got it!</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/request-response-actors.output#L2-L3">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-4 在请求消息中显式地包含响应地址</p>
 </blockquote>
@@ -310,7 +302,7 @@ got response: got it!</code></pre><a href="https://github.com/ReactivePlatform/r
     })
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/RequestResponseTypedActors.scala#L17-L50">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseTypedActors.scala#L17-L50">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-5 基于单向消息传递的请求——响应模式</p>
 </blockquote>
@@ -329,7 +321,7 @@ amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
             ch.ack(msg);
         });
     });
-});</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/js/request-response.js#L5-L20">Full source at GitHub</a>
+});</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/js/request-response.js#L5-L20">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-6 监听与原始请求具有相同的关联ID的响应</p>
 </blockquote>
@@ -353,7 +345,7 @@ amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
                 {correlationId: corr, replyTo: q.queue});
         });
     });
-});</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/js/request-response-2way.js#L5-L25">Full source at GitHub</a>
+});</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/js/request-response-2way.js#L5-L25">Full source at GitHub</a>
 <h2><a href="#15-2-消息自包含模式" name="15-2-消息自包含模式" class="anchor"><span class="anchor-link"></span></a>15.2 消息自包含模式</h2>
 <p><em>SMTP</em></p>
 <pre class="prettyprint"><code class="language-protocal"><br/>S: 220 mailhost.example.com ESMTP Postfix
@@ -379,7 +371,7 @@ C: .
 S: 250 Ok, queued as 4567876345
 C: QUIT
 S: 221 Bye
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/output/smtp.protocal#L3-L27">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/smtp.protocal#L3-L27">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-7 封装了多次 SMTP 交换所需要的信息</p>
 </blockquote>
@@ -389,12 +381,12 @@ S: 221 Bye
   body:          String,
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/SendEmail.scala#L18-L24">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/SendEmail.scala#L18-L24">Full source at GitHub</a>
 <pre class="prettyprint"><code class="language-scala">case class SendEmailResult(
   correlationID: UUID,
   status:        StatusCode,
   explanation:   Option[String]) extends Result
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/Result.scala#L20-L24">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/Result.scala#L20-L24">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-8 分离电子邮件主体，使得其可以按需投递</p>
 </blockquote>
@@ -405,7 +397,7 @@ S: 221 Bye
   replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
   override def payload: Source[String] = body
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L26">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L26">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
 </blockquote>
@@ -415,7 +407,7 @@ S: 221 Bye
   bodyLocation:  URL,
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/pullable/SendEmail.scala#L20-L26">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/pullable/SendEmail.scala#L20-L26">Full source at GitHub</a>
 <h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
 <blockquote>
   <p>代码清单15-10 请求启动验证过程的简单协议</p>
@@ -429,7 +421,7 @@ sealed trait VerificationProcessResponse
 case class VerificationProcessStarted(userEmail: String) extends VerificationProcessResponse
 
 case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L20-L29">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L20-L29">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-11 一个转发结果的匿名子Actor</p>
 </blockquote>
@@ -475,7 +467,7 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
         emailGateway ! request
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L68">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L68">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-12 由询问模式所产生的Future，并进行了转换</p>
 </blockquote>
@@ -521,7 +513,7 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
         }.foreach(result ⇒ replyTo ! result)
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L72-L114">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L72-L114">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-13 不使用内置支持实现询问模式</p>
 </blockquote>
@@ -566,7 +558,7 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
         }
     }
   }.narrow[StartVerificationProcess]
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L118-L159">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L118-L159">Full source at GitHub</a>
 <h2><a href="#15-5-聚合器模式" name="15-5-聚合器模式" class="anchor"><span class="anchor-link"></span></a>15.5 聚合器模式</h2>
 <blockquote>
   <p>代码清单15-14 使用for推导式来聚合三个Future表达式的结果。</p>
@@ -613,7 +605,7 @@ case class VerificationProcessFailed(userEmail: String) extends VerificationProc
         }
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L155">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L155">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-15 使用子Actor替代Future组合子的使用</p>
 </blockquote>
@@ -647,7 +639,7 @@ def frontPage(
         ctx.schedule(1.second, childRef, ReceiveTimeout)
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/Aggregator.scala#L79-L109">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L79-L109">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-16 使用一个构建器来更加直接地表达领域模型</p>
 </blockquote>
@@ -680,7 +672,7 @@ def frontPage(
     FrontPageResult(user, css.get, allNews)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L75">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L75">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-17 添加第4个服务，降低了代码的可读性</p>
 </blockquote>
@@ -707,7 +699,7 @@ for {
   case NoOverride ⇒ // nothing to do here
   case Override(css, news) ⇒
     replyTo ! FrontPageResult(user, css, news)
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/Aggregator.scala#L190-L213">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L190-L213">Full source at GitHub</a>
 <h2><a href="#15-7-业务握手协议-又名可靠投递模式-" name="15-7-业务握手协议-又名可靠投递模式-" class="anchor"><span class="anchor-link"></span></a>15.7 业务握手协议（又名可靠投递模式）</h2>
 <blockquote>
   <p>代码清单15-18 使用Actor实现上面的（信息）交换</p>
@@ -759,7 +751,7 @@ class Alice extends Actor {
       alreadyDone -= saga
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L39-L86">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L39-L86">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-19 向预算消息添加持久性</p>
 </blockquote>
@@ -816,7 +808,7 @@ class PersistentSam(
       context.stop(self)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L138-L191">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L138-L191">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-20 Alice Actor的持久化版本</p>
 </blockquote>
@@ -880,7 +872,7 @@ class PersistentAlice extends PersistentActor with ActorLogging {
     cleanupTimer.cancel()
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L195-L255">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L195-L255">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">

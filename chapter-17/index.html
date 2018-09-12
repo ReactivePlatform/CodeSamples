@@ -167,7 +167,7 @@ Type to start searching
 case class CustomerRef(id: URI)
 
 case class ShoppingCartRef(id: URI)
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/DomainObject.scala#L13-L18">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L13-L18">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-1 一个最小化的购物车定义</p>
 </blockquote>
@@ -212,7 +212,7 @@ case class ShoppingCartRef(id: URI)
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-2 用于和购物车对象通信的消息</p>
 </blockquote>
@@ -261,7 +261,7 @@ sealed trait Result extends ShoppingCartMessage
 case class GetItemsResult(
   shoppingCart: ShoppingCartRef,
   items:        Map[ItemRef, Int]) extends Result
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/ShoppingCartMessage.scala#L11-L56">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/ShoppingCartMessage.scala#L11-L56">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-3 一个购物车管理者 Actor</p>
 </blockquote>
@@ -314,7 +314,7 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/ObjectManager.scala#L16-L65">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/ObjectManager.scala#L16-L65">Full source at GitHub</a>
 <h2><a href="#17-2-分片模式" name="17-2-分片模式" class="anchor"><span class="anchor-link"></span></a>17.2 分片模式</h2>
 <blockquote>
   <p>清单 17-4 为购物车定义分片算法</p>
@@ -354,7 +354,7 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
 
   val RegionName = &quot;ShoppingCart&quot;
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/Sharding.scala#L19-L54">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L19-L54">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-5 启动一个群集来托管分片</p>
 </blockquote>
@@ -374,11 +374,11 @@ def startNode(sys: ActorSystem): Unit = {
 startNode(sys1)
 
 val sys2 = ActorSystem(&quot;ShardingExample&quot;, clusterConfig)
-startNode(sys2)</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/Sharding.scala#L73-L89">Full source at GitHub</a>
+startNode(sys2)</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L73-L89">Full source at GitHub</a>
 <blockquote>
   <p>Sharding.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val manager = ClusterSharding(sys1).shardRegion(ShardSupport.RegionName)</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/Sharding.scala#L98">Full source at GitHub</a>
+<pre class="prettyprint"><code class="language-scala">val manager = ClusterSharding(sys1).shardRegion(ShardSupport.RegionName)</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L98">Full source at GitHub</a>
 <h2><a href="#17-3-事件溯源模式" name="17-3-事件溯源模式" class="anchor"><span class="anchor-link"></span></a>17.3 事件溯源模式</h2>
 <blockquote>
   <p>清单 17-6 将领域事件添加到业务逻辑</p>
@@ -424,7 +424,7 @@ startNode(sys2)</code></pre><a href="https://github.com/ReactivePlatform/reactiv
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-7 持久化一个事件溯源领域对象</p>
 </blockquote>
@@ -467,7 +467,7 @@ object ShoppingCart {
     case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/EventSourcing.scala#L18-L57">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventSourcing.scala#L18-L57">Full source at GitHub</a>
 <h2><a href="#17-4-事件流模式" name="17-4-事件流模式" class="anchor"><span class="anchor-link"></span></a>17.4 事件流模式</h2>
 <blockquote>
   <p>清单 17-8 在写日志期间对事件打标签</p>
@@ -482,7 +482,7 @@ object ShoppingCart {
       case other                  ⇒ other
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/EventStream.scala#L23-L33">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L23-L33">Full source at GitHub</a>
 <blockquote>
   <p>清单 17-9 一个正在监听事件流的 Actor</p>
 </blockquote>
@@ -530,7 +530,7 @@ class TopProductListener extends Actor with ActorLogging {
       log.info(&quot;new {}&quot;, products)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter17/src/main/scala/chapter17/EventStream.scala#L91-L135">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L91-L135">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-17/index.md" title="Edit this page" class="md-source-file md-edit">
