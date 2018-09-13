@@ -172,7 +172,8 @@ Type to start searching
           .withMinCount(1)
           .withMaxCount(1);
 
-  RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
+  RunInstancesResult runInstancesResult =
+      amazonEC2Client.runInstances(runInstancesRequest);
 
   Reservation reservation = runInstancesResult.getReservation();
   List&lt;Instance&gt; instances = reservation.getInstances();
@@ -181,7 +182,7 @@ Type to start searching
   // runInstances() would have thrown an exception
   return instances.get(0);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L40-L59">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L39-L59">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
@@ -189,26 +190,26 @@ Type to start searching
 private CircuitBreaker circuitBreaker; // value from somewhere
 
 public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
-  Future&lt;Instance&gt; f =
-      circuitBreaker.callWithCircuitBreaker(
-          () -&gt; Futures.future(() -&gt; startInstance(credentials), executionContext));
+  Future&lt;Instance&gt; f = circuitBreaker.callWithCircuitBreaker(
+    () -&gt; Futures.future(
+      () -&gt; startInstance(credentials), executionContext));
 
   PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
-      new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
-          .match(
-              AmazonClientException.class,
-              AmazonClientException::isRetryable,
-              ex -&gt; startInstanceAsync(credentials))
-          .build();
+    new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
+      .match(AmazonClientException.class,
+        AmazonClientException::isRetryable,
+        ex -&gt; startInstanceAsync(credentials))
+      .build();
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L63-L81">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L63-L80">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public Future&lt;RunInstancesResult&gt; runInstancesAsync(
-    RunInstancesRequest request, AmazonEC2Async client) {
+    RunInstancesRequest request,
+    AmazonEC2Async client) {
 
   Promise&lt;RunInstancesResult&gt; promise = Futures.promise();
   client.runInstancesAsync(
@@ -216,7 +217,9 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       new AsyncHandler&lt;RunInstancesRequest, RunInstancesResult&gt;() {
 
         @Override
-        public void onSuccess(RunInstancesRequest request, RunInstancesResult result) {
+        public void onSuccess(
+            RunInstancesRequest request,
+            RunInstancesResult result) {
           promise.success(result);
         }
 
@@ -227,32 +230,34 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       });
   return promise.future();
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L85-L105">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L84-L107">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-4 关闭 EC2 实例</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
-    AmazonEC2Client client, Instance... instances) {
+  AmazonEC2Client client, Instance... instances) {
 
-  List&lt;String&gt; ids =
-      Arrays.stream(instances).map(Instance::getInstanceId).collect(Collectors.toList());
+  List&lt;String&gt; ids = Arrays.stream(instances)
+    .map(Instance::getInstanceId)
+    .collect(Collectors.toList());
   TerminateInstancesRequest request = new TerminateInstancesRequest(ids);
 
   Future&lt;TerminateInstancesResult&gt; f =
-      circuitBreaker.callWithCircuitBreaker(
-          () -&gt; Futures.future(() -&gt; client.terminateInstances(request), executionContext));
+    circuitBreaker.callWithCircuitBreaker(
+      () -&gt; Futures.future(() -&gt;
+          client.terminateInstances(request),
+        executionContext));
 
   PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
-      new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
-          .match(
-              AmazonClientException.class,
-              AmazonClientException::isRetryable,
-              ex -&gt; terminateInstancesAsync(client, instances))
-          .build();
+    new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
+      .match(AmazonClientException.class,
+        AmazonClientException::isRetryable,
+        ex -&gt; terminateInstancesAsync(client, instances))
+      .build();
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L109-L130">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L111-L134">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
 </blockquote>
@@ -264,46 +269,33 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
         getContext()
             .system()
             .scheduler()
-            .schedule(
-                checkInterval,
-                checkInterval,
-                self(),
+            .schedule(checkInterval, checkInterval, self(),
                 DoHealthCheck.instance,
-                getContext().dispatcher(),
-                self());
+                getContext().dispatcher(), self());
   }
 
   @Override
   public Receive createReceive() {
     List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
     return receiveBuilder()
-        .match(WorkerNodeMessage.class, msgs::add)
-        .match(
-            DoHealthCheck.class,
-            dhc -&gt; {
-              /* perform check */
-            })
-        .match(
-            Shutdown.class,
-            s -&gt; {
-              msgs.forEach(
-                  msg -&gt;
-                      msg.replyTo()
-                          .tell(new WorkerCommandFailed(&quot;shutting down&quot;, msg.id()), self()));
-              /* ask Resource Pool to shut down this instance */
-            })
-        .match(
-            WorkerNodeReady.class,
-            wnr -&gt; {
-              /* send msgs to the worker */
-              getContext().become(initialized());
-            })
-        .build();
+      .match(WorkerNodeMessage.class, msgs::add)
+      .match(DoHealthCheck.class, dhc -&gt; { /* perform check */ })
+      .match(Shutdown.class, s -&gt; {
+        msgs.forEach(msg -&gt;
+          msg.replyTo().tell(
+            new WorkerCommandFailed(&quot;shutting down&quot;, msg.id()), self()));
+        /* ask Resource Pool to shut down this instance */
+      })
+      .match(WorkerNodeReady.class, wnr -&gt; {
+        /* send msgs to the worker */
+        getContext().become(initialized());
+      })
+      .build();
   }
 
   private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
     /* forward commands and deal with responses from worker node */
-    // ...
+    //...
     return null;
   }
 
@@ -311,7 +303,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L162-L217">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L166-L208">Full source at GitHub</a>
 <h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
 <blockquote>
   <p>代码清单 14-6 分离资源和任务的管理</p>
@@ -322,28 +314,23 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public Receive createReceive() {
     List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
     return receiveBuilder()
-        .match(WorkerNodeMessage.class, msgs::add)
-        .match(
-            Shutdown.class,
-            s -&gt; {
-              msgs.forEach(
-                  msg -&gt; {
-                    WorkerCommandFailed failMsg =
-                        new WorkerCommandFailed(&quot;shutting down&quot;, msg.id());
-                    msg.replyTo().tell(failMsg, self());
-                  });
-            })
-        .match(
-            WorkerNodeReady.class,
-            wnr -&gt; {
-              getContext().become(initialized());
-            })
-        .build();
+      .match(WorkerNodeMessage.class, msgs::add)
+      .match(Shutdown.class, s -&gt; {
+        msgs.forEach(msg -&gt; {
+          WorkerCommandFailed failMsg =
+            new WorkerCommandFailed(&quot;shutting down&quot;, msg.id());
+          msg.replyTo().tell(failMsg, self());
+        });
+      })
+      .match(WorkerNodeReady.class, wnr -&gt; {
+        getContext().become(initialized());
+      })
+      .build();
   }
 
   private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
     /* forward commands and deal with responses from worker node */
-    // ...
+    //...
     return null;
   }
 }
@@ -351,41 +338,32 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 class WorkNodeForResourcePool extends AbstractActor {
   private final Cancellable checkTimer;
 
-  public WorkNodeForResourcePool(InetAddress address, FiniteDuration checkInterval) {
-    checkTimer =
-        getContext()
-            .system()
-            .scheduler()
-            .schedule(
-                checkInterval,
-                checkInterval,
-                self(),
-                DoHealthCheck.instance,
-                getContext().dispatcher(),
-                self());
+  public WorkNodeForResourcePool(
+      InetAddress address,
+      FiniteDuration checkInterval) {
+    checkTimer = getContext().system().scheduler()
+        .schedule(
+            checkInterval,
+            checkInterval,
+            self(),
+            DoHealthCheck.instance,
+            getContext().dispatcher(), self());
+
   }
 
   @Override
   public Receive createReceive() {
     return receiveBuilder()
-        .match(
-            DoHealthCheck.class,
-            dhc -&gt; {
-              /* perform check */
-            })
-        .match(
-            Shutdown.class,
-            s -&gt; {
-              /* Cleans up this resource */
-            })
-        .build();
+      .match(DoHealthCheck.class, dhc -&gt; { /* perform check */ })
+      .match(Shutdown.class, s -&gt; {/* Cleans up this resource */})
+      .build();
   }
 
   @Override
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L24-L93">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L23-L78">Full source at GitHub</a>
 <h2><a href="#14-3-复杂命令模式" name="14-3-复杂命令模式" class="anchor"><span class="anchor-link"></span></a>14.3 复杂命令模式</h2>
 <blockquote>
   <p>代码清单 14-7 批处理作业的基本构成</p>
@@ -404,7 +382,9 @@ public class BatchJob {
   public final ProcessingLogic processingLogic;
   public final MergeLogic mergeLogic;
 
-  public BatchJob(String dataSelector, ProcessingLogic processingLogic, MergeLogic mergeLogic) {
+  public BatchJob(String dataSelector,
+                  ProcessingLogic processingLogic,
+                  MergeLogic mergeLogic) {
     this.dataSelector = dataSelector;
     this.processingLogic = processingLogic;
     this.mergeLogic = mergeLogic;
@@ -413,7 +393,7 @@ public class BatchJob {
   public BatchJob withDataSelector(String selector) {
     return new BatchJob(selector, processingLogic, mergeLogic);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L109-L132">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L115-L140">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-8 通过调用Nashorn JavaScript脚本引擎执行处理逻辑</p>
 </blockquote>
@@ -448,7 +428,9 @@ public class BatchJobJS {
   public final String processingLogic;
   public final String mergeLogic;
 
-  public BatchJobJS(String dataSelector, String processingLogic, String mergeLogic) {
+  public BatchJobJS(String dataSelector,
+                    String processingLogic,
+                    String mergeLogic) {
     this.dataSelector = dataSelector;
     this.processingLogic = processingLogic;
     this.mergeLogic = mergeLogic;
@@ -460,7 +442,8 @@ public class BatchJobJS {
 }
 
 public class WorkerJS {
-  private static final ScriptEngine engine = new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
+  private static final ScriptEngine engine =
+    new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
 
   public PartialResult runJob(BatchJobJS job) {
     Invocable invocable = (Invocable) engine;
@@ -468,7 +451,8 @@ public class WorkerJS {
     try {
       engine.eval(job.processingLogic);
       final Stream&lt;DataElement&gt; input = provideData(job.dataSelector);
-      PartialResult result = (PartialResult) invocable.invokeFunction(&quot;process&quot;, input);
+      PartialResult result =
+        (PartialResult) invocable.invokeFunction(&quot;process&quot;, input);
       return result;
     } catch (Exception e) {
       return new PartFailure(e);
@@ -479,7 +463,7 @@ public class WorkerJS {
     /* fetch data from persistent storage in streaming fashion */
     return Stream.of(1, 2, 3).map(DataElement::new);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L43-L105">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L45-L111">Full source at GitHub</a>
 <blockquote>
   <p>job.js</p>
 </blockquote>
@@ -508,17 +492,19 @@ RETURN AS RESULT</code></pre><a href="https://github.com/ReactivePlatform/reacti
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public static void akkaStreamDSL() {
   RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
-      Source.&lt;DataElement&gt;empty()
-          .filter(new InRange(&quot;year&quot;, 1950, 1960))
-          .toMat(Sink.fold(0L, new Median&lt;Long&gt;(&quot;price&quot;)), Keep.right());
+    Source.&lt;DataElement&gt;empty()
+      .filter(new InRange(&quot;year&quot;, 1950, 1960))
+      .toMat(
+        Sink.fold(0L, new Median&lt;Long&gt;(&quot;price&quot;)),
+        Keep.right());
 
   Source.&lt;DataElement&gt;empty()
-      .map(new Inject&lt;Long&gt;(p, &quot;p&quot;))
-      .filter(new Filter(&quot;price &gt; p&quot;))
-      .to(
-          Sink.fold(
-              Collections.emptySet(), new DistinctValues&lt;Pair&lt;String, String&gt;&gt;(&quot;make&quot;, &quot;model&quot;)));
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L217-L229">Full source at GitHub</a>
+    .map(new Inject&lt;Long&gt;(p, &quot;p&quot;))
+    .filter(new Filter(&quot;price &gt; p&quot;))
+    .to(Sink.fold(
+      Collections.emptySet(),
+      new DistinctValues&lt;Pair&lt;String, String&gt;&gt;(&quot;make&quot;, &quot;model&quot;)));
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L227-L241">Full source at GitHub</a>
 <h2><a href="#14-5-托管阻塞模式" name="14-5-托管阻塞模式" class="anchor"><span class="anchor-link"></span></a>14.5 托管阻塞模式</h2>
 <blockquote>
   <p>代码清单 14-11 维护一个私有的ExecutorService</p>
@@ -536,8 +522,8 @@ public class CheckAccess {
   public final AccessRights[] rights;
   public final ActorRef replyTo;
 
-  public CheckAccess(
-      String username, String credentials, AccessRights[] rights, ActorRef replyTo) {
+  public CheckAccess(String username, String credentials,
+      AccessRights[] rights, ActorRef replyTo) {
     this.username = username;
     this.credentials = credentials;
     this.rights = rights;
@@ -563,23 +549,25 @@ public class AccessService extends AbstractActor {
 
   public AccessService(DataSource db, int poolSize, int queueSize) {
     this.db = db;
-    pool = new ThreadPoolExecutor(0, poolSize, 60, SECONDS, new LinkedBlockingDeque&lt;&gt;(queueSize));
+    pool = new ThreadPoolExecutor(
+        0, poolSize,
+        60, SECONDS,
+        new LinkedBlockingDeque&lt;&gt;(queueSize));
   }
 
   @Override
   public Receive createReceive() {
     final ActorRef self = self();
     return ReceiveBuilder.create()
-        .match(
-            CheckAccess.class,
-            ca -&gt; {
-              try {
-                pool.execute(() -&gt; checkAccess(db, ca, self));
-              } catch (RejectedExecutionException e) {
-                ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
-              }
-            })
-        .build();
+      .match(CheckAccess.class, ca -&gt; {
+        try {
+          pool.execute(() -&gt; checkAccess(db, ca, self));
+        } catch (RejectedExecutionException e) {
+          ca.replyTo.tell(
+            new CheckAccessResult(ca, AccessRights.EMPTY), self);
+        }
+      })
+      .build();
   }
 
   @Override
@@ -587,19 +575,24 @@ public class AccessService extends AbstractActor {
     pool.shutdownNow();
   }
 
-  private static void checkAccess(DataSource db, CheckAccess ca, ActorRef self) {
+  private static void checkAccess(DataSource db,
+      CheckAccess ca, ActorRef self) {
     try (Connection conn = db.getConnection()) {
-      final ResultSet result = conn.createStatement().executeQuery(&quot;&lt;get access rights&gt;&quot;);
+      final ResultSet result =
+          conn.createStatement().executeQuery(&quot;&lt;get access rights&gt;&quot;);
       final List&lt;AccessRights&gt; rights = new LinkedList&lt;&gt;();
       while (result.next()) {
         rights.add(AccessRights.valueOf(result.getString(0)));
       }
-      ca.replyTo.tell(new CheckAccessResult(ca, rights.toArray(AccessRights.EMPTY)), self);
+      ca.replyTo.tell(
+          new CheckAccessResult(
+              ca, rights.toArray(AccessRights.EMPTY)),
+          self);
     } catch (Exception e) {
       ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L27-L103">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L26-L109">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">

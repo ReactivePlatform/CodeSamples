@@ -167,51 +167,59 @@ Type to start searching
 <pre class="prettyprint"><code class="language-java">public class Server {
   static final int SERVER_PORT = 8888;
 
-  public static void main(String[] args) throws IOException {
+  static public void main(String[] args) throws IOException {
     // bind a socket for receiving packets
-    try (final DatagramSocket socket = new DatagramSocket(SERVER_PORT)) {
+    try (final DatagramSocket socket =
+        new DatagramSocket(SERVER_PORT)) {
 
       // receive one packet
       final byte[] buffer = new byte[1500];
-      final DatagramPacket packet1 = new DatagramPacket(buffer, buffer.length);
+      final DatagramPacket packet1 =
+          new DatagramPacket(buffer, buffer.length);
       socket.receive(packet1);
 
       final SocketAddress sender = packet1.getSocketAddress();
-      System.out.println(&quot;server: received &quot; + new String(packet1.getData()));
+      System.out.println(&quot;server: received &quot; +
+          new String(packet1.getData()));
       System.out.println(&quot;server: sender was &quot; + sender);
 
       // send response back
       final byte[] response = &quot;got it!&quot;.getBytes();
-      final DatagramPacket packet2 = new DatagramPacket(response, response.length, sender);
+      final DatagramPacket packet2 =
+          new DatagramPacket(response, response.length, sender);
       socket.send(packet2);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Server.java#L19-L41">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Server.java#L18-L44">Full source at GitHub</a>
 <blockquote>
   <p>代码清单15-2 客户端发送一个请求，然后阻塞直到接收到服务器的响应</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public class Client {
-  public static void main(String[] args) throws IOException {
+  static public void main(String[] args) throws IOException {
     // get local socket with random port
     try (final DatagramSocket socket = new DatagramSocket()) {
 
       // send message to server
       final byte[] request = &quot;hello&quot;.getBytes();
-      final SocketAddress serverAddress = new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
-      final DatagramPacket packet1 = new DatagramPacket(request, request.length, serverAddress);
+      final SocketAddress serverAddress =
+          new InetSocketAddress(&quot;localhost&quot;, SERVER_PORT);
+      final DatagramPacket packet1 =
+          new DatagramPacket(request, request.length, serverAddress);
       socket.send(packet1);
 
       // receive one packet
       final byte[] buffer = new byte[1500];
-      final DatagramPacket packet2 = new DatagramPacket(buffer, buffer.length);
+      final DatagramPacket packet2 =
+          new DatagramPacket(buffer, buffer.length);
       socket.receive(packet2);
 
       final SocketAddress sender = packet2.getSocketAddress();
-      System.out.println(&quot;client: received &quot; + new String(packet2.getData()));
+      System.out.println(&quot;client: received &quot; +
+          new String(packet2.getData()));
       System.out.println(&quot;client: sender was &quot; + sender);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Client.java#L21-L42">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/java/chapter15/Client.java#L20-L45">Full source at GitHub</a>
 <p><em>Server 的输出结果</em></p>
 <pre class="prettyprint"><code class="language-output">server: received hello
 server: sender was /127.0.0.1:55589</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter15/src/main/output/server.output#L2-L3">Full source at GitHub</a>

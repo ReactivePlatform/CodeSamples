@@ -182,7 +182,7 @@ public Image retrieveImages(String key) {
       return fallback;
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/ImageServiceController.java#L16-L38">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/ImageServiceController.java#L15-L37">Full source at GitHub</a>
 <h2><a href="#2-2-利用并行性" name="2-2-利用并行性" class="anchor"><span class="anchor-link"></span></a>2.2 利用并行性</h2>
 <blockquote>
   <p>SimpleFunction.scala</p>
@@ -195,7 +195,7 @@ public Image retrieveImages(String key) {
 ReplyB b = computeB();
 ReplyC c = computeC();
 
-Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L45-L49">Full source at GitHub</a>
+Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L47-L51">Full source at GitHub</a>
 <blockquote>
   <p>ParallelExecutionWithJavaFuture.java</p>
 </blockquote>
@@ -203,7 +203,7 @@ Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactiveP
 Future&lt;ReplyB&gt; b = taskB();
 Future&lt;ReplyC&gt; c = taskC();
 
-Result r = aggregate(a.get(), b.get(), c.get());</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L52-L56">Full source at GitHub</a>
+Result r = aggregate(a.get(), b.get(), c.get());</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L55-L59">Full source at GitHub</a>
 <blockquote>
   <p>ParallelExecutionWithScalaFuture.scala</p>
 </blockquote>
@@ -218,13 +218,14 @@ val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
 </blockquote>
 <pre class="prettyprint"><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;, 8080);
 socket.getOutputStream().write(requestMessageBytes);
-final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/BlockingSocketRead.java#L17-L19">Full source at GitHub</a>
+final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/BlockingSocketRead.java#L16-L18">Full source at GitHub</a>
 <blockquote>
   <p>AskActorWithJava8.java</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">CompletionStage&lt;Response&gt; future =
-    ask(actorRef, request, timeout).thenApply(Response.class::cast);
-future.thenAccept(AskActorWithJava8::processIt);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/AskActorWithJava8.java#L55-L57">Full source at GitHub</a>
+  ask(actorRef, request, timeout)
+    .thenApply(Response.class::cast);
+future.thenAccept(AskActorWithJava8::processIt);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter02/src/main/java/AskActorWithJava8.java#L55-L58">Full source at GitHub</a>
 <h2><a href="#2-4-对失败作出反应" name="2-4-对失败作出反应" class="anchor"><span class="anchor-link"></span></a>2.4 对失败作出反应</h2>
 <blockquote>
   <p>ExceptionHandler.scala</p>
