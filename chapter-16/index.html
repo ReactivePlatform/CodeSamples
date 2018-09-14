@@ -186,7 +186,7 @@ Type to start searching
       replyTo ! JobResult(id, result)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/PullPattern.scala#L23-L47">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/PullPattern.scala#L23-L47">Full source at GitHub</a>
 <blockquote>
   <p>代码清单16-2 按工作者所请求的数目给它们提供任务</p>
 </blockquote>
@@ -218,7 +218,7 @@ Type to start searching
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/PullPattern.scala#L51-L79">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/PullPattern.scala#L51-L79">Full source at GitHub</a>
 <h2><a href="#16-2-托管队列模式" name="16-2-托管队列模式" class="anchor"><span class="anchor-link"></span></a>16.2 托管队列模式</h2>
 <blockquote>
   <p>代码清单16-3 管理一个工作队列以对过载作出反应</p>
@@ -256,44 +256,37 @@ Type to start searching
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/QueuePattern.scala#L33-L66">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/QueuePattern.scala#L33-L66">Full source at GitHub</a>
 <blockquote>
   <p>QueuePattern.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class Manager extends Actor {
+<pre class="prettyprint"><code class="language-scala">class Worker(manager: ActorRef) extends Actor {
+  private val plus = BigDecimal(1, mc)
+  private val minus = BigDecimal(-1, mc)
 
-  private var workQueue: Queue[Job] = Queue.empty[Job]
-  private var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
+  private var requested = 0
 
-  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
+  def request(): Unit =
+    if (requested &lt; 5) {
+      manager ! WorkRequest(self, 10)
+      requested += 10
+    }
+
+  request()
 
   def receive: Receive = {
-    case job @ Job(id, _, replyTo) ⇒
-      if (requestQueue.isEmpty) {
-        if (workQueue.size &lt; 1000) workQueue :+= job
-        else replyTo ! JobRejected(id)
-      } else {
-        val WorkRequest(worker, items) = requestQueue.head
-        worker ! job
-        if (items &gt; 1) {
-          worker ! DummyWork(items - 1)
-        }
-        requestQueue = requestQueue.drop(1)
-      }
-    case wr @ WorkRequest(worker, items) ⇒
-      if (workQueue.isEmpty) {
-        requestQueue :+= wr
-      } else {
-        workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
-        val sent = Math.min(workQueue.size, items)
-        if (sent &lt; items) {
-          worker ! DummyWork(items - sent)
-        }
-        workQueue = workQueue.drop(items)
-      }
+    case Job(id, data, replyTo) ⇒
+      requested -= 1
+      request()
+      val sign = if ((data &amp; 1) == 1) plus else minus
+      val result = sign / data
+      replyTo ! JobResult(id, result)
+    case DummyWork(count) ⇒
+      requested -= count
+      request()
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/QueuePattern.scala#L33-L66">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/QueuePattern.scala#L72-L98">Full source at GitHub</a>
 <h2><a href="#16-3-丢弃模式" name="16-3-丢弃模式" class="anchor"><span class="anchor-link"></span></a>16.3 丢弃模式</h2>
 <blockquote>
   <p>DropPattern.scala</p>
@@ -308,7 +301,7 @@ def shallEnqueue(atSize: Int): Boolean =
     val dropFactor = (atSize - queueThreshold) &gt;&gt; 6
     random.nextInt(dropFactor + 2) == 0
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/DropPattern.scala#L40-L50">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/DropPattern.scala#L40-L50">Full source at GitHub</a>
 <blockquote>
   <p>DropPattern.scala</p>
 </blockquote>
@@ -320,7 +313,7 @@ def shallEnqueue(atSize: Int): Boolean =
     } else if (atSize &lt; dropThreshold) {
       replyTo ! JobRejected(id)
     }
-  } else {</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/DropPattern.scala#L57-L65">Full source at GitHub</a>
+  } else {</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/DropPattern.scala#L57-L65">Full source at GitHub</a>
 <blockquote>
   <p>DropPatternWithProtection.scala</p>
 </blockquote>
@@ -341,7 +334,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/DropPatternWithProtection.scala#L39-L56">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/DropPatternWithProtection.scala#L39-L56">Full source at GitHub</a>
 <h2><a href="#16-4-限流模式" name="16-4-限流模式" class="anchor"><span class="anchor-link"></span></a>16.4 限流模式</h2>
 <blockquote>
   <p>代码清单16-4 根据特定速率使用令牌桶来拉取工作</p>
@@ -431,7 +424,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       calculator ! job
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter16/src/main/scala/chapter16/ThrottlingPattern.scala#L151-L236">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter16/src/main/scala/chapter16/ThrottlingPattern.scala#L151-L236">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-16/index.md" title="Edit this page" class="md-source-file md-edit">

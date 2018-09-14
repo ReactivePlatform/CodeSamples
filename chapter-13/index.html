@@ -172,7 +172,7 @@ case class PutRejected(key: String, value: JsValue) extends Result
 case class Get(key: String, replyTo: ActorRef) extends Command
 
 case class GetResult(key: String, value: Option[JsValue]) extends Result
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/KVStoreUtils.scala#L45-L58">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/KVStoreUtils.scala#L45-L58">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-1 单例作为主动副本来接管</p>
 </blockquote>
@@ -199,7 +199,7 @@ case class GetResult(key: String, value: Option[JsValue]) extends Result
 
   val running: Receive = ??? //...
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L42-L65">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L42-L65">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-2 主动副本传播复制请求</p>
 </blockquote>
@@ -284,7 +284,7 @@ case class GetResult(key: String, value: Option[JsValue]) extends Result
   private def replicaOn(addr: Address): ActorSelection =
     context.actorSelection(
       localReplica.path.toStringWithAddress(addr))
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L72-L153">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L72-L153">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-3 通过将JSON文件写入到本地磁盘来实现持久化</p>
 </blockquote>
@@ -316,7 +316,7 @@ object Persistence {
     else Database(0, Map.empty)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/KVStoreUtils.scala#L11-L39">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/KVStoreUtils.scala#L11-L39">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-4 被动副本追踪它们是否是最新的版本</p>
 </blockquote>
@@ -373,7 +373,7 @@ object Persistence {
     prevOutstanding: Set[Int],
     waiting:         TreeMap[Int, Replicate]): Unit = ???
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L166-L219">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L166-L219">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-5 被动副本在滞后过多时请求一份全量更新</p>
 </blockquote>
@@ -468,7 +468,7 @@ object Persistence {
   private def replicaOn(addr: Address): ActorSelection =
     context.actorSelection(self.path.toStringWithAddress(addr))
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L226-L317">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L226-L317">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-6 计算直接可应用的队列前段的长度</p>
 </blockquote>
@@ -508,7 +508,7 @@ private def consolidate(
       askedFor, nextWaiting)
   } else caughtUp(nextStore, nextExpectedSeq)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L347-L383">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L347-L383">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-7 确定更新队列里的数据缺口是否可以被一一填补</p>
 </blockquote>
@@ -607,7 +607,7 @@ private def consolidate(
   def scheduleTick(): Unit = ???
 
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L405-L500">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActivePassive.scala#L405-L500">Full source at GitHub</a>
 <h2><a href="#13-2-多主复制模式" name="13-2-多主复制模式" class="anchor"><span class="anchor-link"></span></a>13.2 多主复制模式</h2>
 <blockquote>
   <p>代码清单 13-8 使用 CKite 来实现键值存储</p>
@@ -637,7 +637,7 @@ private def consolidate(
     ByteBuffer.wrap(Serializer.serialize(map))
 
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L26-L51">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/ckite/KVStore.scala#L26-L51">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-9 按照复制状态机来实例化KVStore</p>
 </blockquote>
@@ -652,13 +652,13 @@ private def consolidate(
 
   HttpServer(ckite).start()
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L55-L66">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/ckite/KVStore.scala#L55-L66">Full source at GitHub</a>
 <blockquote>
   <p>ckite api</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">val consistentRead: Future[Option[String]] = ckite.read(Get(key))
 val possibleStaleRead: Future[Option[String]] = ckite.readLocal(Get(key))
-val write: Future[String] = ckite.write(Put(key, value))</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L76-L78">Full source at GitHub</a>
+val write: Future[String] = ckite.write(Put(key, value))</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/ckite/KVStore.scala#L76-L78">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-10 图13-1中图形的代码表示</p>
 </blockquote>
@@ -685,7 +685,7 @@ val Finished: Status =
 val Cancelled: Status =
   Status(&quot;cancelled&quot;)(Set(New, Scheduled), Set(Aborted))
 val Aborted: Status =
-  Status(&quot;aborted&quot;)(Set(Cancelled, Executing), Set(Finished))</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L20-L43">Full source at GitHub</a>
+  Status(&quot;aborted&quot;)(Set(Cancelled, Executing), Set(Finished))</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L20-L43">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-11 合并两个状态来产生第三个合并后的状态</p>
 </blockquote>
@@ -718,7 +718,7 @@ val Aborted: Status =
 
   innerLoop(right, Set.empty)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L47-L76">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L47-L76">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-12 使用 Akka Distributed Data 来传播状态变更</p>
 </blockquote>
@@ -751,7 +751,7 @@ val Aborted: Status =
       log.info(&quot;overall status: {}&quot;, g.get(StorageComponent))
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L92-L121">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L92-L121">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-13 引入对于任务的请求标志</p>
 </blockquote>
@@ -795,7 +795,7 @@ val Aborted: Status =
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L125-L165">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L125-L165">Full source at GitHub</a>
 <h2><a href="#13-3-主动-主动复制模式" name="13-3-主动-主动复制模式" class="anchor"><span class="anchor-link"></span></a>13.3 主动-主动复制模式</h2>
 <blockquote>
   <p>代码清单 13-14 用无协调工作的实现来开始主动-主动复制模式</p>
@@ -836,7 +836,7 @@ class Replica extends Actor with Stash {
     case SendInitialData(toReplica) ⇒ toReplica ! InitialData(map)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L22-L58">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L22-L58">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-15 封装对于单个客户端请求的知悉情况</p>
 </blockquote>
@@ -904,7 +904,7 @@ private object Known {
     Known(deadline, winners.head, losers, Set.empty)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L66-L130">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L66-L130">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-16 将副本当作子Actor管理</p>
 </blockquote>
@@ -988,7 +988,7 @@ private object Known {
     }
 
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L134-L220">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L134-L220">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-17 按序发送回复</p>
 </blockquote>
@@ -1000,7 +1000,7 @@ private object Known {
       sendReplies()
     case _ ⇒
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L188-L196">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L188-L196">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-18 一旦timeout，就强迫将“missing”回复转为“known”回复</p>
 </blockquote>
@@ -1017,7 +1017,7 @@ private object Known {
     }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L171-L184">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L171-L184">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 13-19 终止并替换未完成的副本</p>
 </blockquote>
@@ -1038,7 +1038,7 @@ private def replaceReplica(r: ActorRef, terminate: Boolean): Unit =
     replicas.head ! SendInitialData(replica)
     replicas += replica
   }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L200-L217">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter13/src/main/scala/chapter13/ActiveActive.scala#L200-L217">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-13/index.md" title="Edit this page" class="md-source-file md-edit">
