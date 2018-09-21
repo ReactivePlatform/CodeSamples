@@ -186,7 +186,7 @@ def persist(job: Job): Future[StorageStatus] = {
       case _: CircuitBreakerOpenException =&gt; StorageStatus.Failed
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter12/src/main/scala/chapter12/StorageComponent.scala#L20-L50">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageComponent.scala#L20-L50">Full source at GitHub</a>
 <blockquote>
   <p>代码清单12-2 使用速率限制器保护组件</p>
 </blockquote>
@@ -220,7 +220,7 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
     }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter12/src/main/scala/chapter12/RateLimiter.scala#L14-L44">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter12/src/main/scala/chapter12/RateLimiter.scala#L14-L44">Full source at GitHub</a>
 <blockquote>
   <p>代码清单12-3 断路器：限制来自同一个客户端的请求</p>
 </blockquote>
@@ -234,7 +234,7 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case RateLimitExceeded ⇒ StorageStatus.Failed
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter12/src/main/scala/chapter12/StorageClient.scala#L19-L29">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageClient.scala#L19-L29">Full source at GitHub</a>
 <blockquote>
   <p>代码清单12-4 门控一个客户端</p>
 </blockquote>
@@ -252,7 +252,7 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case _: CircuitBreakerOpenException ⇒ StorageStatus.Gated
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/chapter12/src/main/scala/chapter12/GatedStorageClient.scala#L22-L36">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter12/src/main/scala/chapter12/GatedStorageClient.scala#L22-L36">Full source at GitHub</a>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-12/index.md" title="Edit this page" class="md-source-file md-edit">
