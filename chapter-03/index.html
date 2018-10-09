@@ -347,7 +347,7 @@ func consumer(myChannel chan int, iterations int) {
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala"><br/>def getProductInventoryByPostalCode(
+<pre class="prettyprint"><code class="language-scala">def getProductInventoryByPostalCode(
   productSku: Long,
   postalCode: String): Future[(Long, Map[String, Long])] = {
   // Provide the thread pool to be applied
@@ -369,7 +369,7 @@ func consumer(myChannel chan int, iterations int) {
     overall ← overallInventoryFutureByWarehouse
   } yield (local, overall)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L29-L52">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L29-L51">Full source at GitHub</a>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
