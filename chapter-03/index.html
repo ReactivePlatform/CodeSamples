@@ -5,38 +5,40 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.4.0, mkdocs-material=2.2.2">
+<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
+<meta name="lang:search.language" content="">
+<meta name="lang:search.pipeline.stopwords" content="true">
+<meta name="lang:search.pipeline.trimmer" content="true">
 <meta name="lang:search.result.none" content="No matching documents">
 <meta name="lang:search.result.one" content="1 matching document">
 <meta name="lang:search.result.other" content="# matching documents">
-<meta name="lang:search.language" content="">
 <meta name="lang:search.tokenizer" content="[\s\-]+">
 
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
 <title>第3章——行业工具 · </title>
-<link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
+<link rel="stylesheet" href="../assets/stylesheets/application.451f80e5.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
 <link rel="stylesheet" href="../lib/prettify/prettify.css">
-<script src="../lib/modernizr/modernizr.min.js"></script>
+<script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
 <style>
 body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}
 code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+<link rel="stylesheet" href="../assets/fonts/material-icons.css">
 <link rel="stylesheet" href="../assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
 >
-<input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
-<input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
-<label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+<input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+<input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+<label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
 <header class="md-header" data-md-component="header">
 <nav class="md-header-nav md-grid">
 <div class="md-flex">
@@ -46,7 +48,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </a>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
-<label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+<label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
 </div>
 <div class="md-flex__cell md-flex__cell--stretch">
 <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
@@ -58,14 +60,14 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </div>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
-<label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+<label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
 <div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="search"></label>
-<div class="md-search__inner">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
 <form class="md-search__form" name="search">
-<input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
-<label class="md-icon md-search__icon" for="search"></label>
-<button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+<input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+<label class="md-icon md-search__icon" for="__search"></label>
+<button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button>
 </form>
 <div class="md-search__output">
 <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -93,9 +95,10 @@ Type to start searching
 <div class="md-sidebar__inner">
 <nav class="md-nav md-nav--primary" data-md-level="0" style="visibility: hidden">
 <label class="md-nav__title md-nav__title--site" for="drawer">
+<a href="../index.html" title="" class="md-nav__button md-logo">
 <span class="md-nav__button md-logo">
 <i class="md-icon">local_library</i>
-</span>
+</a>
 <a href="../index.html" title="">
 </a>
 </label>
@@ -114,7 +117,7 @@ Type to start searching
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="toc">Table of contents</label>
+<label class="md-nav__title" for="__toc">Table of contents</label>
 <ul>
   <li><a href="../chapter-03/index.html#第3章-行业工具" class="header">第3章——行业工具</a>
   <ul>
@@ -124,11 +127,14 @@ Type to start searching
 </ul>
 </nav>
 
-<div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 1.0.0
-</div>
 </nav>
-
+<ul style="display: none">
+<li class="md-nav__item md-version" id="project.version">
+<label class="md-nav__link" for="__version">
+<i class="md-icon" title="Version">label_outline</i> 1.0.0
+</label>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -136,7 +142,7 @@ Type to start searching
 <div class="md-sidebar__scrollwrap">
 <div class="md-sidebar__inner">
 <nav class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="toc">Table of contents</label>
+<label class="md-nav__title" for="__toc">Table of contents</label>
 <ul>
   <li><a href="../chapter-03/index.html#第3章-行业工具" class="header">第3章——行业工具</a>
   <ul>
@@ -179,7 +185,7 @@ public class Unsafe {
   public StringBuffer getMessage() {
     return message;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/Unsafe.java#L12-L35">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Unsafe.java#L12-L35">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 3-2 不可变的消息类，其行为是可预知的，并易于推断</p>
 </blockquote>
@@ -201,20 +207,20 @@ public class Immutable {
   public String getMessage() {
     return message;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/Immutable.java#L13-L32">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Immutable.java#L13-L32">Full source at GitHub</a>
 <blockquote>
   <p>Message.scala</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-scala">import java.util.Date
 
-case class Message(timestamp: Date, message: String)
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/scala/chapter03/Message.scala#L13-L16">Full source at GitHub</a>
+final case class Message(timestamp: Date, message: String)
+</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/scala/chapter03/Message.scala#L13-L16">Full source at GitHub</a>
 <blockquote>
   <p>UsingStringBuffer.java</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">final StringBuffer original = new StringBuffer(&quot;foo&quot;);
 final StringBuffer reversed = original.reverse();
-System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;, original, reversed));</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingStringBuffer.java#L14-L16">Full source at GitHub</a>
+System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;, original, reversed));</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingStringBuffer.java#L14-L16">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 3-3 引用透明性：允许代换预先计算好的值</p>
 </blockquote>
@@ -236,7 +242,7 @@ System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&
     }
     return root;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/Rooter.java#L14-L32">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Rooter.java#L14-L32">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-4 因副作用而受限的可用性</p>
 </blockquote>
@@ -251,7 +257,7 @@ System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&
     this.count += Math.incrementExact(this.count);
     return this.count;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/SideEffecting.java#L16-L27">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/SideEffecting.java#L16-L27">Full source at GitHub</a>
 <blockquote>
   <p>IntSeeding.java</p>
 </blockquote>
@@ -259,13 +265,13 @@ System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&
 if (logger.isDebugEnabled()) {
   logger.debug(&quot;Next is &quot; + se.next());
 }
-return next;</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/IntSeeding.java#L28-L32">Full source at GitHub</a>
+return next;</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/IntSeeding.java#L28-L32">Full source at GitHub</a>
 <blockquote>
   <p>UsingMapFunction.java</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">final List&lt;Integer&gt; numbers = Arrays.asList(1, 2, 3);
 final List&lt;Integer&gt; numbersPlusOne =
-    numbers.stream().map(number -&gt; number + 1).collect(Collectors.toList());</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingMapFunction.java#L18-L20">Full source at GitHub</a>
+    numbers.stream().map(number -&gt; number + 1).collect(Collectors.toList());</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingMapFunction.java#L18-L20">Full source at GitHub</a>
 <p><em>Python REPL</em></p>
 <pre class="prettyprint"><code class="language-output"><br/>&gt;&gt;&gt; def addOne(x):
 ... returnx+1
@@ -273,7 +279,7 @@ final List&lt;Integer&gt; numbersPlusOne =
 &gt;&gt;&gt; myFunction = addOne
 &gt;&gt;&gt; myFunction(3)
 4
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/src/main/python/output/myFunction.py.output#L4-L11">Full source at GitHub</a>
+</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/python/output/myFunction.py.output#L4-L11">Full source at GitHub</a>
 <h2><a href="#3-4-对反应式设计的现有支持" name="3-4-对反应式设计的现有支持" class="anchor"><span class="anchor-link"></span></a>3.4 对反应式设计的现有支持</h2>
 <blockquote>
   <p>sample.js</p>
@@ -288,7 +294,7 @@ http.createServer(function (req, res) {
     res.end(&#39;Sending response: &#39; + counter + &#39; via callback!\n&#39;);
 }).listen(8888, &#39;127.0.0.1&#39;);
 
-console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/eventloop/src/main/js/sample.js#L3-L13">Full source at GitHub</a>
+console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/eventloop/src/main/js/sample.js#L3-L13">Full source at GitHub</a>
 <blockquote>
   <p>sample.go</p>
 </blockquote>
@@ -322,7 +328,7 @@ func consumer(myChannel chan int, iterations int) {
 		fmt.Println(&quot;Received: &quot;, recVal)
 	}
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/csp/src/main/go/sample.go#L3-L33">Full source at GitHub</a>
+</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/csp/src/main/go/sample.go#L3-L33">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-5 从更快的数据源获取结果</p>
 </blockquote>
@@ -343,7 +349,7 @@ func consumer(myChannel chan int, iterations int) {
 
     return CompletableFuture.anyOf(cacheFuture, dbFuture);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/futures-and-promises/src/main/java/chapter03/future/ParallelRetrievalExample.java#L16-L33">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/java/chapter03/future/ParallelRetrievalExample.java#L16-L33">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
@@ -371,7 +377,7 @@ def getProductInventoryByPostalCode(
     overall ← overallInventoryFutureByWarehouse
   } yield (local, overall)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L29-L53">Full source at GitHub</a>
+</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L28-L52">Full source at GitHub</a>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
@@ -384,7 +390,7 @@ val resultFuture = async {
     inventoryService.currentInventoryOverallByWarehouse(productSku)
   }
   (await(localInventoryFuture), await(overallInventoryFutureByWarehouse))
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L38-L47">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L37-L46">Full source at GitHub</a>
 <blockquote>
   <p>RxJavaExample.java</p>
 </blockquote>
@@ -396,20 +402,20 @@ public class RxJavaExample {
   public void observe(String[] strings) {
     Observable.fromArray(strings).subscribe((s) -&gt; System.out.println(&quot;Received &quot; + s));
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExample.java#L10-L18">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExample.java#L10-L18">Full source at GitHub</a>
 <blockquote>
   <p>RxJavaExampleDriver.java</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
 
 public class RxJavaExampleDriver {
-  private static final RxJavaExample rxJavaExample = new RxJavaExample();
+  private static final RxJavaExample RX_JAVA_EXAMPLE = new RxJavaExample();
 
   public static void main(String[] args) {
     String[] strings = {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;};
-    rxJavaExample.observe(strings);
+    RX_JAVA_EXAMPLE.observe(strings);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExampleDriver.java#L10-L19">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExampleDriver.java#L10-L19">Full source at GitHub</a>
 <blockquote>
   <p>代码清单3-7 一个使用 Akka 的Actor的例子</p>
 </blockquote>
@@ -421,9 +427,9 @@ import akka.event.LoggingReceive
 
 case object Start
 
-case class CounterMessage(counterValue: Int)
+final case class CounterMessage(counterValue: Int)
 
-case class CounterTooLargeException(message: String) extends Exception(message)
+final case class CounterTooLargeException(message: String) extends Exception(message)
 
 class SupervisorActor extends Actor with ActorLogging {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
@@ -478,10 +484,10 @@ object Example extends App {
   val supervisor = system.actorOf(Props[SupervisorActor])
   supervisor ! Start
 }
-</code></pre><a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77">Full source at GitHub</a>
+</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77">Full source at GitHub</a>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/reactive-design-patterns-cn/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -539,7 +545,7 @@ and
 </footer>
 
 </div>
-<script src="../assets/javascripts/application.5165553b.js"></script>
+<script src="../assets/javascripts/application.583bbe55.js"></script>
 <script src="../assets/javascripts/paradox-material-theme.js"></script>
 <script>app.initialize({version:"0.17",url:{base:"../."}})</script>
 <script type="text/javascript" src="../lib/prettify/prettify.js"></script>
