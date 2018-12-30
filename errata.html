@@ -124,6 +124,7 @@ Type to start searching
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
     <li><a href="errata.html#第二章" class="header">第二章</a></li>
     <li><a href="errata.html#第三章" class="header">第三章</a></li>
+    <li><a href="errata.html#第十三章" class="header">第十三章</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -150,6 +151,7 @@ Type to start searching
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
     <li><a href="errata.html#第二章" class="header">第二章</a></li>
     <li><a href="errata.html#第三章" class="header">第三章</a></li>
+    <li><a href="errata.html#第十三章" class="header">第十三章</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -286,6 +288,20 @@ Type to start searching
 <p>在 RxJava 2.x 的版本中&hellip;.</p>
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p>这里的<code>RxJava</code> 的第二个 <code>x</code> 需要小写，属于 typo。</p>
+<hr/>
+<h3><a href="#第十三章" name="第十三章" class="anchor"><span class="anchor-link"></span></a>第十三章</h3>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>220</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<p>代码清单 13-15：</p>
+<pre class="prettyprint"><code class="language-scala">  case SeqResult(_, res, replica, _) if res != right ⇒ replica
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-scala">  case SeqResult(_, result, replica, _) if res != right ⇒ replica
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>代码清单中的这个部分，因为<code>res</code> shallow 了外面的 <code>add</code>方法中的<code>res</code>参数，所以 实际上比较的类型是不相关的，会造成状态无法收敛到<code>Known</code>。通过重新命名解决了这个问题。</p>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/errata.md" title="Edit this page" class="md-source-file md-edit">
