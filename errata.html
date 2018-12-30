@@ -213,6 +213,26 @@ Type to start searching
 </code></pre>
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p>在反应式编程中，我们应该尽可能地利用不可变，类似于在 Scala 中，我们需要尽可能地使用 <code>val</code> 而不是 <code>var</code>,并且保持和 2.2.2 小节的 Scala 代码清单对齐（其中使用的是<code>val</code>）。</p>
+<hr/>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>20</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-java">    Future&lt;ReplyA&gt; a = taskA();
+    Future&lt;ReplyB&gt; b = taskB();
+    Future&lt;ReplyC&gt; c = taskC();
+
+    Result r = aggregate(a.get(), b.get(), c.get());
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">    final Future&lt;ReplyA&gt; a = taskA();
+    final Future&lt;ReplyB&gt; b = taskB();
+    final Future&lt;ReplyC&gt; c = taskC();
+
+    final Result r = aggregate(a.get(), b.get(), c.get());
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>在反应式编程中，我们应该尽可能地利用不可变，类似于在 Scala 中，我们需要尽可能地使用 <code>val</code> 而不是 <code>var</code>,并且保持和 2.2.2 小节的 Scala 代码清单对齐（其中使用的是<code>val</code>）。</p>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/errata.md" title="Edit this page" class="md-source-file md-edit">
