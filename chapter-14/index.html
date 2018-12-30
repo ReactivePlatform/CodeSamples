@@ -190,7 +190,7 @@ Type to start searching
   // runInstances() would have thrown an exception
   return instances.get(0);
 }
-</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L43-L65">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L43-L65">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
@@ -212,7 +212,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L69-L87">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L69-L87">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
 </blockquote>
@@ -236,7 +236,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       });
   return promise.future();
 }
-</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L91-L111">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L91-L111">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-4 关闭 EC2 实例</p>
 </blockquote>
@@ -261,7 +261,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L115-L136">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L115-L136">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
 </blockquote>
@@ -320,7 +320,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L168-L223">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L168-L223">Full source at GitHub</a>
 <h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
 <blockquote>
   <p>代码清单 14-6 分离资源和任务的管理</p>
@@ -390,7 +390,7 @@ class WorkNodeForResourcePool extends AbstractActor {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L24-L89">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L24-L89">Full source at GitHub</a>
 <h2><a href="#14-3-复杂命令模式" name="14-3-复杂命令模式" class="anchor"><span class="anchor-link"></span></a>14.3 复杂命令模式</h2>
 <blockquote>
   <p>代码清单 14-7 批处理作业的基本构成</p>
@@ -418,7 +418,7 @@ public class BatchJob {
   public BatchJob withDataSelector(String selector) {
     return new BatchJob(selector, processingLogic, mergeLogic);
   }
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L109-L132">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L109-L132">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-8 通过调用Nashorn JavaScript脚本引擎执行处理逻辑</p>
 </blockquote>
@@ -484,7 +484,7 @@ public class WorkerJS {
     /* fetch data from persistent storage in streaming fashion */
     return Stream.of(1, 2, 3).map(DataElement::new);
   }
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L43-L105">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L43-L105">Full source at GitHub</a>
 <blockquote>
   <p>job.js</p>
 </blockquote>
@@ -495,7 +495,7 @@ var process = function (input) {
     // &#39;input&#39; is a Java 8 Stream
     var value = input.count();
     return new PartSuccess(value);
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/job.js#L8-L15">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/job.js#L8-L15">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-9 外部 DSL 使用了不同于宿主编程语言的语法</p>
 </blockquote>
@@ -507,7 +507,7 @@ REMEMBER AS p
 FOREACH Car (make, model, _, price)
 SELECT price &gt; p
 DISTINCT VALUES OF (make, model)
-RETURN AS RESULT</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/dsl.txt#L8-L16">Full source at GitHub</a>
+RETURN AS RESULT</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/dsl.txt#L8-L16">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-10 内部 DSL</p>
 </blockquote>
@@ -523,7 +523,7 @@ RETURN AS RESULT</code></pre><a href="https://github.com/scala-steward/Reactive-
       .to(
           Sink.fold(
               Collections.emptySet(), new DistinctValues&lt;Pair&lt;String, String&gt;&gt;(&quot;make&quot;, &quot;model&quot;)));
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L217-L229">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L217-L229">Full source at GitHub</a>
 <h2><a href="#14-5-托管阻塞模式" name="14-5-托管阻塞模式" class="anchor"><span class="anchor-link"></span></a>14.5 托管阻塞模式</h2>
 <blockquote>
   <p>代码清单 14-11 维护一个私有的ExecutorService</p>
@@ -611,10 +611,10 @@ public class AccessService extends AbstractActor {
       ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
     }
   }
-}</code></pre><a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L29-L112">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L29-L112">Full source at GitHub</a>
 </div>
 <div>
-<a href="https://github.com/scala-steward/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
