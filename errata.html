@@ -410,6 +410,56 @@ Type to start searching
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p>切换到新版本客户端的推荐写法，旧版本写法已经废弃。其他包括代码清单中添加了<code>final</code>关键字。</p>
 <hr/>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>235</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<p>代码清单 14-5：</p>
+<pre class="prettyprint"><code class="language-java">    public WorkerNode(final InetAddress address, final FiniteDuration checkInterval) {
+      checkTimer =
+          getContext()
+              .system()
+              .scheduler()
+              .schedule(
+                  checkInterval,
+                  checkInterval,
+                  self(),
+                  DoHealthCheck.instance,
+                  getContext().dispatcher(),
+                  self());
+    }
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">    public WorkerNode(final InetAddress address, final Duration checkInterval) {
+      checkTimer =
+          getContext()
+              .getSystem()
+              .getScheduler()
+              .schedule(
+                  checkInterval,
+                  checkInterval,
+                  self(),
+                  DoHealthCheck.INSTANCE,
+                  getContext().dispatcher(),
+                  self());
+    }
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>切换到新版本 Akka 中更加 Java native 的写法。并且针对静态类成员 <code>DoHealthCheck.instance</code> 应用大写格式。</p>
+<hr/>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>235</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<p>代码清单 14-5：</p>
+<pre class="prettyprint"><code class="language-java">    private PartialFunction&lt;Object, BoxedUnit&gt; initialized()
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">    private Receive initialized()
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>切换到新版本 Akka 中更加 Java native 的写法。更加直接地是用 <code>AbstractActor</code> 提供的基础设施。</p>
+<hr/>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/errata.md" title="Edit this page" class="md-source-file md-edit">
