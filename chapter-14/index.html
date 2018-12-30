@@ -345,7 +345,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
         .build();
   }
 
-  private PartialFunction&lt;Object, BoxedUnit&gt; initialized() {
+  private Receive initialized() {
     /* forward commands and deal with responses from worker node */
     // ...
     return null;
@@ -389,7 +389,7 @@ class WorkNodeForResourcePool extends AbstractActor {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L24-L89">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L22-L87">Full source at GitHub</a>
 <h2><a href="#14-3-复杂命令模式" name="14-3-复杂命令模式" class="anchor"><span class="anchor-link"></span></a>14.3 复杂命令模式</h2>
 <blockquote>
   <p>代码清单 14-7 批处理作业的基本构成</p>

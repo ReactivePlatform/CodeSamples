@@ -460,6 +460,17 @@ Type to start searching
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p>切换到新版本 Akka 中更加 Java native 的写法。更加直接地是用 <code>AbstractActor</code> 提供的基础设施。</p>
 <hr/>
+<p>240</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<p>代码清单 14-5：</p>
+<pre class="prettyprint"><code class="language-java">    private PartialFunction&lt;Object, BoxedUnit&gt; initialized()
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">    private Receive initialized()
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>切换到新版本 Akka 中更加 Java native 的写法。更加直接地是用 <code>AbstractActor</code> 提供的基础设施。</p>
+<hr/>
 <h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
 <h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
 <p>247</p>
