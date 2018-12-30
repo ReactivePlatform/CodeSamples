@@ -197,19 +197,19 @@ public Image retrieveImages(String key) {
 <blockquote>
   <p>SequentialExecution.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">ReplyA a = computeA();
-ReplyB b = computeB();
-ReplyC c = computeC();
+<pre class="prettyprint"><code class="language-java">final ReplyA a = computeA();
+final ReplyB b = computeB();
+final ReplyC c = computeC();
 
-Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L45-L49">Full source at GitHub</a>
+final Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L45-L49">Full source at GitHub</a>
 <blockquote>
   <p>ParallelExecutionWithJavaFuture.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">Future&lt;ReplyA&gt; a = taskA();
-Future&lt;ReplyB&gt; b = taskB();
-Future&lt;ReplyC&gt; c = taskC();
+<pre class="prettyprint"><code class="language-java">final Future&lt;ReplyA&gt; a = taskA();
+final Future&lt;ReplyB&gt; b = taskB();
+final Future&lt;ReplyC&gt; c = taskC();
 
-Result r = aggregate(a.get(), b.get(), c.get());</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L59-L63">Full source at GitHub</a>
+final Result r = aggregate(a.get(), b.get(), c.get());</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L59-L63">Full source at GitHub</a>
 <blockquote>
   <p>ParallelExecutionWithScalaFuture.scala</p>
 </blockquote>

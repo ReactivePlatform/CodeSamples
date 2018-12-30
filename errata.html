@@ -122,6 +122,7 @@ Type to start searching
   <li><a href="errata.html#勘误" class="header">勘误</a>
   <ul>
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
+    <li><a href="errata.html#第二章" class="header">第二章</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -146,6 +147,7 @@ Type to start searching
   <li><a href="errata.html#勘误" class="header">勘误</a>
   <ul>
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
+    <li><a href="errata.html#第二章" class="header">第二章</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -191,6 +193,26 @@ Type to start searching
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p><code>case class</code> 如果不带 <code>final</code> 标识符，在 Java 中依然是可以继承的，造成非常不好的体验。通常来说，对于需要和 Java 进行交互的库来说，在编写时 <code>case class</code> 需要定义为 <code>final case class</code> 从而限定他们在 <code>Java</code> 中的可继承性。而对于 <code>case object</code>来说，因为天然等于加了<code>final</code>，所以不需要了。</p>
 <hr/>
+<h3><a href="#第二章" name="第二章" class="anchor"><span class="anchor-link"></span></a>第二章</h3>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>19</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-java">    ReplyA a = computeA();
+    ReplyB b = computeB();
+    ReplyC c = computeC();
+
+    Result r = aggregate(a, b, c);
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">    final ReplyA a = computeA();
+    final ReplyB b = computeB();
+    final ReplyC c = computeC();
+
+    final Result r = aggregate(a, b, c);
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>在反应式编程中，我们应该尽可能地利用不可变，类似于在 Scala 中，我们需要尽可能地使用 <code>val</code> 而不是 <code>var</code>,并且保持和 2.2.2 小节的 Scala 代码清单对齐（其中使用的是<code>val</code>）。</p>
 </div>
 <div>
 <a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/errata.md" title="Edit this page" class="md-source-file md-edit">
