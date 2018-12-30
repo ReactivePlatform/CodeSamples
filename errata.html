@@ -160,7 +160,7 @@ Type to start searching
 <div class="md-content__searchable">
 <h1><a href="#勘误" name="勘误" class="anchor"><span class="anchor-link"></span></a>勘误</h1>
 <blockquote>
-  <p>本书的勘误将第一时间在这个页面进行同步。并按照章节和页码的升序进行排列。</p>
+  <p>本书的勘误将第一时间在这个页面进行同步。并按照章节和页码的升序进行排列。本书原著的勘误也会进行第一时间的合并， 在本书中文版出版时，我们已经合并了原著到2018年三月份的勘误。<a href="https://manning-content.s3.amazonaws.com/download/5/7e201ec-e305-4493-817c-954eb5a3803c/Kuhn_ReactiveDesignPatterns_err2.html">外版勘误地址</a></p>
 </blockquote>
 <p>勘误的模板为</p>
 <pre><code>### 章节
@@ -194,6 +194,20 @@ Type to start searching
 <p><code>case class</code> 如果不带 <code>final</code> 标识符，在 Java 中依然是可以继承的，造成非常不好的体验。通常来说，对于需要和 Java 进行交互的库来说，在编写时 <code>case class</code> 需要定义为 <code>final case class</code> 从而限定他们在 <code>Java</code> 中的可继承性。而对于 <code>case object</code>来说，因为天然等于加了<code>final</code>，所以不需要了。</p>
 <hr/>
 <h3><a href="#第二章" name="第二章" class="anchor"><span class="anchor-link"></span></a>第二章</h3>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>15</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-java">  public Images cache;
+  public Images database;
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-java">  private Images cache;
+  private Images database;
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>这里暴露了<code>ImageServiceController</code>的内部成员，需要将可见性设置为<code>private</code>.</p>
+<hr/>
 <h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
 <h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
 <p>19</p>
