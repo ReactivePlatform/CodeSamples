@@ -244,12 +244,11 @@ val sorted = timings.sorted
 val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 1.millisecond
-//sometimes below assertion will fail with SLA not matched.
-ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L151-L169">Full source at GitHub</a>
+ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L151-L168">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 11-6 用 Ask 模式并行地生成测试样本</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAfuture&quot;)
+<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAWithFuture&quot;)
 
 val N = 10000
 val timingFutures = for (i ← 1 to N) yield {
@@ -269,7 +268,7 @@ info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentil
 
 val SLA = if (Helpers.isCiTest) 500.milliseconds else 100.milliseconds
 
-ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L179-L199">Full source at GitHub</a>
+ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L178-L198">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 11-7 使用自定义 Actor 来限制并行测试样本的数量</p>
 </blockquote>
@@ -297,7 +296,7 @@ val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
 
-ninetyfifthPercentile should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L207-L231">Full source at GitHub</a>
+ninetyfifthPercentile should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L206-L230">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 11-8 验证没有收到额外的消息</p>
 </blockquote>
@@ -368,7 +367,7 @@ for (SLAResponse(timings, outstanding) ← future) yield {
   val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
 
   ninetyfifthPercentile should be &gt; SLA
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L239-L254">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L238-L253">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 11-14 使用 async 和 await 提高异步测试的可读性</p>
 </blockquote>
@@ -409,7 +408,7 @@ for (SLAResponse(timings, outstanding) ← future) yield {
   val SLA = if (Helpers.isCiTest) 50.milliseconds else 10.milliseconds
   latencies.quantile(0.99) should be &lt; SLA
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L267-L285">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L266-L284">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 11-17 简单的翻译 API</p>
 </blockquote>

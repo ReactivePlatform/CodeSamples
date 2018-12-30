@@ -124,6 +124,7 @@ Type to start searching
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
     <li><a href="errata.html#第二章" class="header">第二章</a></li>
     <li><a href="errata.html#第三章" class="header">第三章</a></li>
+    <li><a href="errata.html#第十一章" class="header">第十一章</a></li>
     <li><a href="errata.html#第十三章" class="header">第十三章</a></li>
   </ul></li>
 </ul>
@@ -151,6 +152,7 @@ Type to start searching
     <li><a href="errata.html#全书代码清单更新" class="header">全书代码清单更新</a></li>
     <li><a href="errata.html#第二章" class="header">第二章</a></li>
     <li><a href="errata.html#第三章" class="header">第三章</a></li>
+    <li><a href="errata.html#第十一章" class="header">第十一章</a></li>
     <li><a href="errata.html#第十三章" class="header">第十三章</a></li>
   </ul></li>
 </ul>
@@ -306,6 +308,74 @@ Type to start searching
 </code></pre>
 <h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
 <p>静态的成员变量，应该推荐使用大写加下划线的形式。</p>
+<p>&mdash;</p>
+<h3><a href="#第十一章" name="第十一章" class="anchor"><span class="anchor-link"></span></a>第十一章</h3>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>143</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-scala">  val echo = echoService(&quot;keepSLAfuture&quot;)
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-scala">  val echo = echoService(&quot;keepSLAWithFuture&quot;)
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>typo</p>
+<hr/>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>144</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-scala">  val echo = echoService(&quot;keepSLAparallel&quot;)
+</code></pre>
+<p>和</p>
+<pre class="prettyprint"><code class="language-scala">      val controller = system.actorOf(
+        Props[ParallelSLATester],
+        &quot;keepSLAparallelController&quot;)
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-scala">  val echo = echoService(&quot;keepSLAInParallel&quot;)
+</code></pre>
+<p>和</p>
+<pre class="prettyprint"><code class="language-scala">      val controller = system.actorOf(
+        Props[ParallelSLATester],
+        &quot;keepSLAInParallelController&quot;)
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<p>typo</p>
+<hr/>
+<h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
+<h4><a href="#页码" name="页码" class="anchor"><span class="anchor-link"></span></a>页码</h4>
+<p>149</p>
+<h4><a href="#原文" name="原文" class="anchor"><span class="anchor-link"></span></a>原文</h4>
+<pre class="prettyprint"><code class="language-scala">      val controller = system.actorOf(
+        Props[ParallelSLATester],
+        &quot;keepSLAparallelController&quot;)
+</code></pre>
+<h4><a href="#修正" name="修正" class="anchor"><span class="anchor-link"></span></a>修正</h4>
+<pre class="prettyprint"><code class="language-scala">      val controller = system.actorOf(
+        Props[ParallelSLATester],
+        &quot;keepSLAInParallelAndAsyncController&quot;)
+</code></pre>
+<h4><a href="#说明" name="说明" class="anchor"><span class="anchor-link"></span></a>说明</h4>
+<ol>
+  <li>typo</li>
+  <li>因为在 <code>ParallelSLATester</code> 中，对应的<code>context.stop(self)</code>是一个异步动作，所以在快速运行多个测试的时候， 会出现偶发的：<code>akka.actor.InvalidActorNameException</code>，所以进行改名对当前的用例来说是比较直接安全的一种做法。 感兴趣的读者可以看下下面的错误信息：</li>
+</ol>
+<pre><code>[info] - must keep its SLA when used in parallel and handling responses asynchronously *** FAILED ***
+[info]   akka.actor.InvalidActorNameException: actor name [keepSLAparallelController] is not unique!
+[info]   at akka.actor.dungeon.ChildrenContainer$NormalChildrenContainer.reserve(ChildrenContainer.scala:129)
+[info]   at akka.actor.dungeon.Children.reserveChild(Children.scala:134)
+[info]   at akka.actor.dungeon.Children.reserveChild$(Children.scala:132)
+[info]   at akka.actor.ActorCell.reserveChild(ActorCell.scala:431)
+[info]   at akka.actor.dungeon.Children.makeChild(Children.scala:272)
+[info]   at akka.actor.dungeon.Children.attachChild(Children.scala:48)
+[info]   at akka.actor.dungeon.Children.attachChild$(Children.scala:47)
+[info]   at akka.actor.ActorCell.attachChild(ActorCell.scala:431)
+[info]   at akka.actor.ActorSystemImpl.actorOf(ActorSystem.scala:753)
+[info]   at chapter11.EchoServiceSpec.$anonfun$new$10(EchoServiceSpec.scala:242)
+</code></pre>
+<p><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/pull/45#issuecomment-450505641">原始链接</a></p>
 <hr/>
 <h3><a href="#第十三章" name="第十三章" class="anchor"><span class="anchor-link"></span></a>第十三章</h3>
 <h4><a href="#第一次印刷" name="第一次印刷" class="anchor"><span class="anchor-link"></span></a>第一次印刷</h4>
