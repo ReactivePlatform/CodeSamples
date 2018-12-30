@@ -228,7 +228,7 @@ final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre>
 <blockquote>
   <p>AskActorWithJava8.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">CompletionStage&lt;Response&gt; future =
+<pre class="prettyprint"><code class="language-java">final CompletionStage&lt;Response&gt; future =
     ask(actorRef, request, timeout).thenApply(Response.class::cast);
 future.thenAccept(AskActorWithJava8::processIt);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/AskActorWithJava8.java#L55-L57">Full source at GitHub</a>
 <h2><a href="#2-4-对失败作出反应" name="2-4-对失败作出反应" class="anchor"><span class="anchor-link"></span></a>2.4 对失败作出反应</h2>
