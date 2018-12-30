@@ -189,7 +189,7 @@ Type to start searching
   // there will be exactly one INSTANCE in this list, otherwise
   // runInstances() would have thrown an exception
   return instances.get(0);
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L44-L65">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L42-L63">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
@@ -211,7 +211,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L69-L87">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L67-L85">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
 </blockquote>
@@ -235,7 +235,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       });
   return promise.future();
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L91-L111">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L89-L109">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-4 关闭 EC2 实例</p>
 </blockquote>
@@ -260,7 +260,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L115-L136">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L113-L134">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
 </blockquote>
@@ -319,7 +319,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L168-L223">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L166-L221">Full source at GitHub</a>
 <h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
 <blockquote>
   <p>代码清单 14-6 分离资源和任务的管理</p>
@@ -466,13 +466,13 @@ public class BatchJobJS {
 public class WorkerJS {
   private static final ScriptEngine ENGINE = new ScriptEngineManager().getEngineByName(&quot;nashorn&quot;);
 
-  public PartialResult runJob(BatchJobJS job) {
-    Invocable invocable = (Invocable) ENGINE;
+  public PartialResult runJob(final BatchJobJS job) {
+    final Invocable invocable = (Invocable) ENGINE;
 
     try {
       ENGINE.eval(job.processingLogic);
       final Stream&lt;DataElement&gt; input = provideData(job.dataSelector);
-      PartialResult result = (PartialResult) invocable.invokeFunction(&quot;process&quot;, input);
+      final PartialResult result = (PartialResult) invocable.invokeFunction(&quot;process&quot;, input);
       return result;
     } catch (Exception e) {
       return new PartFailure(e);
@@ -511,7 +511,7 @@ RETURN AS RESULT</code></pre><a href="https://github.com/ReactivePlatform/Reacti
   <p>代码清单 14-10 内部 DSL</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public static void akkaStreamDSL() {
-  RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
+  final RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
       Source.&lt;DataElement&gt;empty()
           .filter(new InRange(&quot;year&quot;, 1950, 1960))
           .toMat(Sink.fold(0L, new Median&lt;&gt;(&quot;price&quot;)), Keep.right());
