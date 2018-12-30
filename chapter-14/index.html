@@ -168,29 +168,28 @@ Type to start searching
 <blockquote>
   <p>代码清单 14-1 亚马逊EC2实例作为工作者节点</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public Instance startInstance(AWSCredentials credentials) {
-  AmazonEC2 amazonEC2Client =
+<pre class="prettyprint"><code class="language-java">public Instance startInstance(final AWSCredentials credentials) {
+  final AmazonEC2 amazonEC2Client =
       AmazonEC2ClientBuilder.standard()
           .withCredentials(new AWSStaticCredentialsProvider(credentials))
           .build();
 
-  RunInstancesRequest runInstancesRequest =
+  final RunInstancesRequest runInstancesRequest =
       new RunInstancesRequest()
           .withImageId(&quot;&quot;)
           .withInstanceType(&quot;m1.small&quot;)
           .withMinCount(1)
           .withMaxCount(1);
 
-  RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
+  final RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
-  Reservation reservation = runInstancesResult.getReservation();
-  List&lt;Instance&gt; instances = reservation.getInstances();
+  final Reservation reservation = runInstancesResult.getReservation();
+  final List&lt;Instance&gt; instances = reservation.getInstances();
 
   // there will be exactly one INSTANCE in this list, otherwise
   // runInstances() would have thrown an exception
   return instances.get(0);
-}
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L43-L65">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L43-L64">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
@@ -198,11 +197,11 @@ Type to start searching
 private CircuitBreaker circuitBreaker; // value from somewhere
 
 public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
-  Future&lt;Instance&gt; f =
+  final Future&lt;Instance&gt; f =
       circuitBreaker.callWithCircuitBreaker(
           () -&gt; Futures.future(() -&gt; startInstance(credentials), executionContext));
 
-  PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
+  final PartialFunction&lt;Throwable, Future&lt;Instance&gt;&gt; recovery =
       new PFBuilder&lt;Throwable, Future&lt;Instance&gt;&gt;()
           .match(
               AmazonClientException.class,
@@ -212,14 +211,14 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L69-L87">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L68-L86">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public Future&lt;RunInstancesResult&gt; runInstancesAsync(
-    RunInstancesRequest request, AmazonEC2Async client) {
+    final RunInstancesRequest request, final AmazonEC2Async client) {
 
-  Promise&lt;RunInstancesResult&gt; promise = Futures.promise();
+  final Promise&lt;RunInstancesResult&gt; promise = Futures.promise();
   client.runInstancesAsync(
       request,
       new AsyncHandler&lt;RunInstancesRequest, RunInstancesResult&gt;() {
@@ -236,22 +235,22 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       });
   return promise.future();
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L91-L111">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L90-L110">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-4 关闭 EC2 实例</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
-    AmazonEC2Client client, Instance... instances) {
+    final AmazonEC2Client client, final Instance... instances) {
 
-  List&lt;String&gt; ids =
+  final List&lt;String&gt; ids =
       Arrays.stream(instances).map(Instance::getInstanceId).collect(Collectors.toList());
-  TerminateInstancesRequest request = new TerminateInstancesRequest(ids);
+  final TerminateInstancesRequest request = new TerminateInstancesRequest(ids);
 
-  Future&lt;TerminateInstancesResult&gt; f =
+  final Future&lt;TerminateInstancesResult&gt; f =
       circuitBreaker.callWithCircuitBreaker(
           () -&gt; Futures.future(() -&gt; client.terminateInstances(request), executionContext));
 
-  PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
+  final PartialFunction&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt; recovery =
       new PFBuilder&lt;Throwable, Future&lt;TerminateInstancesResult&gt;&gt;()
           .match(
               AmazonClientException.class,
@@ -261,14 +260,14 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L115-L136">Full source at GitHub</a>
+</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L114-L135">Full source at GitHub</a>
 <blockquote>
   <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
 </blockquote>
 <pre class="prettyprint"><code class="language-java">class WorkerNode extends AbstractActor {
   private final Cancellable checkTimer;
 
-  public WorkerNode(InetAddress address, FiniteDuration checkInterval) {
+  public WorkerNode(final InetAddress address, final FiniteDuration checkInterval) {
     checkTimer =
         getContext()
             .system()
@@ -284,7 +283,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   @Override
   public Receive createReceive() {
-    List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
+    final List&lt;WorkerNodeMessage&gt; msgs = new ArrayList&lt;&gt;();
     return receiveBuilder()
         .match(WorkerNodeMessage.class, msgs::add)
         .match(
@@ -320,7 +319,7 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L168-L223">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L167-L222">Full source at GitHub</a>
 <h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
 <blockquote>
   <p>代码清单 14-6 分离资源和任务的管理</p>
