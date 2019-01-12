@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -163,56 +163,56 @@ Type to start searching
 <blockquote>
   <p>代码清单 11-1 测试一个完全同步的翻译函数</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SynchronousSpec.scala#L26-L28" target="_blank" title="Go to snippet source"></a><code class="language-scala">val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
-translate(input) should be(output)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SynchronousSpec.scala#L26-L28">Full source at GitHub</a>
+translate(input) should be(output)</code></pre>
 <blockquote>
   <p>AsyncSpec.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpec.scala#L24-L27" target="_blank" title="Go to snippet source"></a><code class="language-scala">val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val future = translate(input)
-// what now?</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpec.scala#L24-L27">Full source at GitHub</a>
+// what now?</code></pre>
 <blockquote>
   <p>ActorSpec.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpec.scala#L25-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val probe = TestProbe()
 translationService ! Translate(input, probe.ref)
-// when can we continue?</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpec.scala#L25-L29">Full source at GitHub</a>
+// when can we continue?</code></pre>
 <blockquote>
   <p>AsyncSpecWithWhile.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">while (!future.isCompleted) Thread.sleep(50)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithWhile.scala#L21">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithWhile.scala#L21" target="_blank" title="Go to snippet source"></a><code class="language-scala">while (!future.isCompleted) Thread.sleep(50)</code></pre>
 <blockquote>
   <p>AsyncSpecWithWhileLoopIterationsBounded.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">var i = 20
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithWhileLoopIterationsBounded.scala#L21-L26" target="_blank" title="Go to snippet source"></a><code class="language-scala">var i = 20
 while (!future.isCompleted &amp;&amp; i &gt; 0) {
   i -= 1
   Thread.sleep(50)
 }
-if (i == 0) fail(&quot;translation was not received in time&quot;)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithWhileLoopIterationsBounded.scala#L21-L26">Full source at GitHub</a>
+if (i == 0) fail(&quot;translation was not received in time&quot;)</code></pre>
 <blockquote>
   <p>代码清单 11-2 等待结果的动作在翻译过程中同步阻塞</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithAwait.scala#L26-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val result = Await.result(translate(input), 1.second)
-result should be(output)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncSpecWithAwait.scala#L26-L29">Full source at GitHub</a>
+result should be(output)</code></pre>
 <blockquote>
   <p>代码清单 11-3 使用 TestProbe 预期答复</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val input = &quot;Hur mår du?&quot;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpecWithExpectMsg.scala#L27-L31" target="_blank" title="Go to snippet source"></a><code class="language-scala">val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val probe = TestProbe()
 translationService ! Translate(input, probe.ref)
-probe.expectMsg(1.second, output)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpecWithExpectMsg.scala#L27-L31">Full source at GitHub</a>
+probe.expectMsg(1.second, output)</code></pre>
 <blockquote>
   <p>代码清单 11-4 使用 TestProbe 接收调度程序的响应</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SchedulerSpec.scala#L31-L42" target="_blank" title="Go to snippet source"></a><code class="language-scala">val probe = TestProbe()
 
 val start = Timestamp.now
 scheduler ! Schedule(probe.ref, &quot;tick&quot;, 1.second)
@@ -223,11 +223,11 @@ val stop = Timestamp.now
 val duration = stop - start
 assert(duration &gt; 950.millis, &quot;tick came in early&quot;)
 assert(duration &lt; 1050.millis, &quot;tick came in late&quot;)
-// when can we continue?</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SchedulerSpec.scala#L31-L42">Full source at GitHub</a>
+// when can we continue?</code></pre>
 <blockquote>
   <p>代码清单 11-5 确定第 95 百分位的延迟</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val probe = TestProbe()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L151-L168" target="_blank" title="Go to snippet source"></a><code class="language-scala">val probe = TestProbe()
 
 val echo = echoService(&quot;keepSLA&quot;)
 val N = 200
@@ -244,11 +244,11 @@ val sorted = timings.sorted
 val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 1.millisecond
-ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L151-L168">Full source at GitHub</a>
+ninetyfifthPercentile.toFiniteDuration should be &lt;= SLA</code></pre>
 <blockquote>
   <p>代码清单 11-6 用 Ask 模式并行地生成测试样本</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAWithFuture&quot;)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L178-L198" target="_blank" title="Go to snippet source"></a><code class="language-scala">val echo = echoService(&quot;keepSLAWithFuture&quot;)
 
 val N = 10000
 val timingFutures = for (i ← 1 to N) yield {
@@ -268,11 +268,11 @@ info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentil
 
 val SLA = if (Helpers.isCiTest) 500.milliseconds else 100.milliseconds
 
-ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L178-L198">Full source at GitHub</a>
+ninetyfifthPercentile.toFiniteDuration should be &lt; SLA</code></pre>
 <blockquote>
   <p>代码清单 11-7 使用自定义 Actor 来限制并行测试样本的数量</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val echo = echoService(&quot;keepSLAInParallel&quot;)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L206-L230" target="_blank" title="Go to snippet source"></a><code class="language-scala">val echo = echoService(&quot;keepSLAInParallel&quot;)
 val probe = TestProbe()
 
 val N = 10000
@@ -296,11 +296,11 @@ val ninetyfifthPercentile = sorted.dropRight(N * 5 / 100).last
 info(s&quot;SLA min=${sorted.head} max=${sorted.last} 95th=$ninetyfifthPercentile&quot;)
 val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
 
-ninetyfifthPercentile should be &lt; SLA</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L206-L230">Full source at GitHub</a>
+ninetyfifthPercentile should be &lt; SLA</code></pre>
 <blockquote>
   <p>代码清单 11-8 验证没有收到额外的消息</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">import scala.concurrent.duration._
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SchedulerSpec.scala#L49-L58" target="_blank" title="Go to snippet source"></a><code class="language-scala">import scala.concurrent.duration._
 val scheduler = system.actorOf(Scheduler.props)
 
 val probe = TestProbe()
@@ -309,50 +309,50 @@ val token = probe.expectMsgType[SchedulerToken]
 probe.expectMsg(1500.millis, &quot;tick&quot;)
 scheduler ! CancelSchedule(token, probe.ref)
 probe.expectMsg(100.millis, ScheduleCanceled)
-probe.expectNoMessage(2.seconds)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/SchedulerSpec.scala#L49-L58">Full source at GitHub</a>
+probe.expectNoMessage(2.seconds)</code></pre>
 <blockquote>
   <p>代码清单 11-9 对具有关联 ID 的请求匹配响应</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val ingestService = system.actorOf(DataIngester.props)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/DataIngesterSpec.scala#L25-L31" target="_blank" title="Go to snippet source"></a><code class="language-scala">val ingestService = system.actorOf(DataIngester.props)
 val probe = TestProbe()
 ingestService ! Retrieve(url, &quot;myID&quot;, probe.ref)
 val replies = probe.receiveWhile(1.second) {
   case r @ Record(&quot;myID&quot;, _) ⇒ r
 }
-probe.expectMsg(0.seconds, EOF)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/DataIngesterSpec.scala#L25-L31">Full source at GitHub</a>
+probe.expectMsg(0.seconds, EOF)</code></pre>
 <blockquote>
   <p>代码清单 11-10 强制同步执行：仅对非阻塞处理安全</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val tr = new TranslationService
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L72-L77" target="_blank" title="Go to snippet source"></a><code class="language-scala">val tr = new TranslationService
 val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val ec = SynchronousEventLoop
 val future = tr.translate(input, ec)
-future.value.get should be(Success(output))</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L72-L77">Full source at GitHub</a>
+future.value.get should be(Success(output))</code></pre>
 <blockquote>
   <p>代码清单 11-11 使用 CallingThreadDispatcher 来处理调用线程上的消息</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val translationService = system.actorOf(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpecWithCallingThreadDispatcher.scala#L25-L31" target="_blank" title="Go to snippet source"></a><code class="language-scala">val translationService = system.actorOf(
   TranslationService.props.withDispatcher(&quot;akka.test.calling-thread-dispatcher&quot;))
 val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val probe = TestProbe()
 translationService ! Translate(input, probe.ref)
-probe.expectMsg(0.seconds, output)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/ActorSpecWithCallingThreadDispatcher.scala#L25-L31">Full source at GitHub</a>
+probe.expectMsg(0.seconds, output)</code></pre>
 <blockquote>
   <p>代码清单 11-12 将超时参数移到外部配置</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val tr = new TranslationService
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L91-L97" target="_blank" title="Go to snippet source"></a><code class="language-scala">val tr = new TranslationService
 val input = &quot;Hur mår du?&quot;
 val output = &quot;How are you?&quot;
 val future = tr.translate(input)
 eventually {
   future.value.get should be(Success(output))
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L91-L97">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-13 异步地处理响应，从而创建完全反应式的测试</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val echo = echoService()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L238-L253" target="_blank" title="Go to snippet source"></a><code class="language-scala">val echo = echoService()
 val N = 10000
 val maxParallelism = 500
 val controller = system.actorOf(
@@ -367,30 +367,30 @@ for (SLAResponse(timings, outstanding) ← future) yield {
   val SLA = if (Helpers.isCiTest) 25.milliseconds else 2.milliseconds
 
   ninetyfifthPercentile should be &gt; SLA
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L238-L253">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-14 使用 async 和 await 提高异步测试的可读性</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">async {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncAwaitSpec.scala#L42-L46" target="_blank" title="Go to snippet source"></a><code class="language-scala">async {
   val input = &quot;Hur mår du?&quot;
   val output = &quot;How are you?&quot;
   await(translate(input).withTimeout(5.seconds)) should be(output)
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/AsyncAwaitSpec.scala#L42-L46">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-15 在 JavaScript 中测试翻译服务</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">describe(&#39;Translator&#39;, function () {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/js/translation.js#L3-L10" target="_blank" title="Go to snippet source"></a><code class="language-js">describe(&#39;Translator&#39;, function () {
     describe(&#39;#translate()&#39;, function () {
         it(&#39;should yield the correct result&#39;, function () {
             return tr.translate(&#39;Hur mår du?&#39;)
                 .should.eventually.equal(&#39;How are you?&#39;);
         })
     })
-});</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/js/translation.js#L3-L10">Full source at GitHub</a>
+});</code></pre>
 <blockquote>
   <p>代码清单 11-16 使用请求-响应工厂来生成测试流量</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">async {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L266-L284" target="_blank" title="Go to snippet source"></a><code class="language-scala">async {
   val echo = echoService(&quot;keepSLAwithSupport&quot;)
   val latencySupport = new LatencyTestSupport(system)
   val latenciesFuture = latencySupport.measure(
@@ -408,16 +408,16 @@ for (SLAResponse(timings, outstanding) ← future) yield {
   val SLA = if (Helpers.isCiTest) 50.milliseconds else 10.milliseconds
   latencies.quantile(0.99) should be &lt; SLA
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/EchoServiceSpec.scala#L266-L284">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 11-17 简单的翻译 API</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class TranslateV1(query: String, replyTo: ActorRef)
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/main/scala/chapter11/TranslationService.scala#L61-L62">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/main/scala/chapter11/TranslationService.scala#L61-L62" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class TranslateV1(query: String, replyTo: ActorRef)
+</code></pre>
 <blockquote>
   <p>代码清单 11-18 将更严格的类型添加到翻译 API</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class TranslateV2(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/main/scala/chapter11/TranslationService.scala#L88-L107" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class TranslateV2(
   phrase:         String,
   inputLanguage:  String,
   outputLanguage: String,
@@ -436,11 +436,11 @@ final case class TranslationErrorV2(
   inputLanguage:  String,
   outputLanguage: String,
   errorMessage:   String)
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/main/scala/chapter11/TranslationService.scala#L88-L107">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 11-19 测试翻译版本适配器</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val v1 = TestProbe()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L127-L153" target="_blank" title="Go to snippet source"></a><code class="language-scala">val v1 = TestProbe()
 val v2 = system.actorOf(propsV2(v1.ref))
 val client = TestProbe()
 
@@ -466,11 +466,11 @@ req2.replyTo ! &quot;error:cannot parse input &#39;sv:en:Hur är läget?&#39;&qu
 client.expectMsg(TranslationErrorV2(&quot;Hur är läget?&quot;, &quot;sv&quot;, &quot;en&quot;,
   &quot;cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;))
 
-v1.expectNoMessage(3.second)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L127-L153">Full source at GitHub</a>
+v1.expectNoMessage(3.second)</code></pre>
 <blockquote>
   <p>代码清单 11-20 模拟错误过程</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case object ExpectNominal
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L25-L55" target="_blank" title="Go to snippet source"></a><code class="language-scala">case object ExpectNominal
 
 case object ExpectError
 
@@ -500,11 +500,11 @@ class MockV1(reporter: ActorRef) extends Actor {
       context.become(initial)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L25-L55">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 11-21 测试正确的错误处理</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val asyncErrors = TestProbe()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L159-L181" target="_blank" title="Go to snippet source"></a><code class="language-scala">val asyncErrors = TestProbe()
 val v1 = system.actorOf(mockV1props(asyncErrors.ref))
 val v2 = system.actorOf(propsV2(v1))
 val client = TestProbe()
@@ -526,20 +526,20 @@ client.expectMsg(TranslationErrorV2(&quot;Hur är läget?&quot;, &quot;sv&quot;,
   &quot;cannot parse input &#39;sv:en:Hur är läget?&#39;&quot;))
 
 // final check for async errors
-asyncErrors.expectNoMessage(1.second)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/TranslationServiceSpec.scala#L159-L181">Full source at GitHub</a>
+asyncErrors.expectNoMessage(1.second)</code></pre>
 <h2><a href="#11-6-测试回弹性" name="11-6-测试回弹性" class="anchor"><span class="anchor-link"></span></a>11.6 测试回弹性</h2>
 <blockquote>
   <p>代码清单 11-22 要测试的基本 Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class MyActor extends Actor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L55-L59" target="_blank" title="Go to snippet source"></a><code class="language-scala">class MyActor extends Actor {
   def receive: Receive = {
     case _ ⇒ throw new NullPointerException
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L55-L59">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-23 为被测 Actor 提供测试上下文</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class StepParent extends Actor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L42-L51" target="_blank" title="Go to snippet source"></a><code class="language-scala">class StepParent extends Actor {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
     case ex ⇒ Restart
   }
@@ -548,11 +548,11 @@ asyncErrors.expectNoMessage(1.second)</code></pre><a href="https://github.com/Re
     case p: Props ⇒
       sender ! context.actorOf(p, &quot;child&quot;)
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L42-L51">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 11-24 在 StepParent 的上下文中测试 Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class StepParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L19-L38" target="_blank" title="Go to snippet source"></a><code class="language-scala">class StepParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   implicit val system: ActorSystem = ActorSystem()
 
   &quot;An actor that throws an exception&quot; must {
@@ -571,11 +571,11 @@ asyncErrors.expectNoMessage(1.second)</code></pre><a href="https://github.com/Re
     Await.ready(terminated, Duration.Inf)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/StepParentSpec.scala#L19-L38">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 11-25 将失败报告给指定的 Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class FailureParent(failures: ActorRef) extends Actor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/FailureParentSpec.scala#L43-L54" target="_blank" title="Go to snippet source"></a><code class="language-scala">class FailureParent(failures: ActorRef) extends Actor {
   private val props: Props = Props[MyFailureParentActor]
   private val child: ActorRef = context.actorOf(props, &quot;child&quot;)
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
@@ -586,11 +586,11 @@ asyncErrors.expectNoMessage(1.second)</code></pre><a href="https://github.com/Re
     case msg ⇒ child forward msg
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/FailureParentSpec.scala#L43-L54">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 11-26 在测试中移除监督</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">case object TestFailureParentMessage
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/FailureParentSpec.scala#L19-L39" target="_blank" title="Go to snippet source"></a><code class="language-scala">case object TestFailureParentMessage
 
 class FailureParentSpec extends WordSpec
   with Matchers with BeforeAndAfterAll {
@@ -610,10 +610,10 @@ class FailureParentSpec extends WordSpec
     Await.ready(terminated, Duration.Inf)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter11/src/test/scala/chapter11/FailureParentSpec.scala#L19-L39">Full source at GitHub</a>
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-11/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

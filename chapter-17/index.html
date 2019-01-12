@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -168,16 +168,16 @@ Type to start searching
 <blockquote>
   <p>DomainObject.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class ItemRef(id: URI)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L13-L18" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ItemRef(id: URI)
 
 final case class CustomerRef(id: URI)
 
 final case class ShoppingCartRef(id: URI)
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L13-L18">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-1 一个最小化的购物车定义</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class ShoppingCart(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ShoppingCart(
   items: Map[ItemRef, Int],
   owner: Option[CustomerRef]) {
   def setOwner(customer: CustomerRef): ShoppingCart = {
@@ -218,11 +218,11 @@ final case class ShoppingCartRef(id: URI)
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-2 用于和购物车对象通信的消息</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">trait ShoppingCartMessage {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/ShoppingCartMessage.scala#L11-L56" target="_blank" title="Go to snippet source"></a><code class="language-scala">trait ShoppingCartMessage {
   def shoppingCart: ShoppingCartRef
 }
 
@@ -267,11 +267,11 @@ sealed trait Result extends ShoppingCartMessage
 final case class GetItemsResult(
   shoppingCart: ShoppingCartRef,
   items:        Map[ItemRef, Int]) extends Result
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/ShoppingCartMessage.scala#L11-L56">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-3 一个购物车管理者 Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class ManagerCommand(cmd: Command, id: Long, replyTo: ActorRef)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/ObjectManager.scala#L16-L65" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ManagerCommand(cmd: Command, id: Long, replyTo: ActorRef)
 
 final case class ManagerEvent(id: Long, event: Event)
 
@@ -320,12 +320,12 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
       }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/ObjectManager.scala#L16-L65">Full source at GitHub</a>
+</code></pre>
 <h2><a href="#17-2-分片模式" name="17-2-分片模式" class="anchor"><span class="anchor-link"></span></a>17.2 分片模式</h2>
 <blockquote>
   <p>清单 17-4 为购物车定义分片算法</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">object ShardSupport {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L19-L54" target="_blank" title="Go to snippet source"></a><code class="language-scala">object ShardSupport {
   /*
    * use the shoppingCart reference as the sharding key; the partial function
    * must return both the key and the message to be forwarded, and if it does
@@ -360,11 +360,11 @@ class Manager(var shoppingCart: ShoppingCart) extends Actor {
 
   val RegionName = &quot;ShoppingCart&quot;
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L19-L54">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-5 启动一个群集来托管分片</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val sys1 = ActorSystem(&quot;ShardingExample&quot;, node1Config.withFallback(clusterConfig))
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L73-L89" target="_blank" title="Go to snippet source"></a><code class="language-scala">val sys1 = ActorSystem(&quot;ShardingExample&quot;, node1Config.withFallback(clusterConfig))
 val seed = Cluster(sys1).selfAddress
 
 def startNode(sys: ActorSystem): Unit = {
@@ -380,16 +380,16 @@ def startNode(sys: ActorSystem): Unit = {
 startNode(sys1)
 
 val sys2 = ActorSystem(&quot;ShardingExample&quot;, clusterConfig)
-startNode(sys2)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L73-L89">Full source at GitHub</a>
+startNode(sys2)</code></pre>
 <blockquote>
   <p>Sharding.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val manager = ClusterSharding(sys1).shardRegion(ShardSupport.RegionName)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L98">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/Sharding.scala#L98" target="_blank" title="Go to snippet source"></a><code class="language-scala">val manager = ClusterSharding(sys1).shardRegion(ShardSupport.RegionName)</code></pre>
 <h2><a href="#17-3-事件溯源模式" name="17-3-事件溯源模式" class="anchor"><span class="anchor-link"></span></a>17.3 事件溯源模式</h2>
 <blockquote>
   <p>清单 17-6 将领域事件添加到业务逻辑</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class ShoppingCart(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ShoppingCart(
   items: Map[ItemRef, Int],
   owner: Option[CustomerRef]) {
   def setOwner(customer: CustomerRef): ShoppingCart = {
@@ -430,11 +430,11 @@ startNode(sys2)</code></pre><a href="https://github.com/ReactivePlatform/Reactiv
 object ShoppingCart {
   val empty = ShoppingCart(Map.empty, None)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/DomainObject.scala#L22-L63">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-7 持久化一个事件溯源领域对象</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class PersistentObjectManager extends PersistentActor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventSourcing.scala#L18-L57" target="_blank" title="Go to snippet source"></a><code class="language-scala">class PersistentObjectManager extends PersistentActor {
   // we expect the name to be the shopping card ID
   override def persistenceId: String = context.self.path.name
 
@@ -473,12 +473,12 @@ object ShoppingCart {
     case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventSourcing.scala#L18-L57">Full source at GitHub</a>
+</code></pre>
 <h2><a href="#17-4-事件流模式" name="17-4-事件流模式" class="anchor"><span class="anchor-link"></span></a>17.4 事件流模式</h2>
 <blockquote>
   <p>清单 17-8 在写日志期间对事件打标签</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class ShoppingCartTagging(system: ExtendedActorSystem)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L23-L33" target="_blank" title="Go to snippet source"></a><code class="language-scala">class ShoppingCartTagging(system: ExtendedActorSystem)
   extends WriteEventAdapter {
   def manifest(event: Any): String = &quot;&quot; // no additional manifest needed
 
@@ -488,11 +488,11 @@ object ShoppingCart {
       case other                  ⇒ other
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L23-L33">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>清单 17-9 一个正在监听事件流的 Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">object TopProductListener {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L91-L135" target="_blank" title="Go to snippet source"></a><code class="language-scala">object TopProductListener {
 
   private class IntHolder(var value: Int)
 
@@ -536,10 +536,10 @@ class TopProductListener extends Actor with ActorLogging {
       log.info(&quot;new {}&quot;, products)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter17/src/main/scala/chapter17/EventStream.scala#L91-L135">Full source at GitHub</a>
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-17/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-17/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

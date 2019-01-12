@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -163,7 +163,7 @@ Type to start searching
 <blockquote>
   <p>代码清单3-1 不安全的、可变的消息类，可能会隐含非预期的行为</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java"><br/>import java.util.Date;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Unsafe.java#L12-L35" target="_blank" title="Go to snippet source"></a><code class="language-java"><br/>import java.util.Date;
 
 public class Unsafe {
   private Date timestamp;
@@ -185,11 +185,11 @@ public class Unsafe {
   public StringBuffer getMessage() {
     return message;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Unsafe.java#L12-L35">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 3-2 不可变的消息类，其行为是可预知的，并易于推断</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java"><br/>import java.util.Date;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Immutable.java#L13-L32" target="_blank" title="Go to snippet source"></a><code class="language-java"><br/>import java.util.Date;
 
 public class Immutable {
   private final Date timestamp;
@@ -207,24 +207,24 @@ public class Immutable {
   public String getMessage() {
     return message;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Immutable.java#L13-L32">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>Message.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">import java.util.Date
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/scala/chapter03/Message.scala#L13-L16" target="_blank" title="Go to snippet source"></a><code class="language-scala">import java.util.Date
 
 final case class Message(timestamp: Date, message: String)
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/scala/chapter03/Message.scala#L13-L16">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>UsingStringBuffer.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final StringBuffer original = new StringBuffer(&quot;foo&quot;);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingStringBuffer.java#L14-L16" target="_blank" title="Go to snippet source"></a><code class="language-java">final StringBuffer original = new StringBuffer(&quot;foo&quot;);
 final StringBuffer reversed = original.reverse();
-System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;, original, reversed));</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingStringBuffer.java#L14-L16">Full source at GitHub</a>
+System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&#39;&quot;, original, reversed));</code></pre>
 <blockquote>
   <p>代码清单 3-3 引用透明性：允许代换预先计算好的值</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class Rooter {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Rooter.java#L14-L32" target="_blank" title="Go to snippet source"></a><code class="language-java">public class Rooter {
   private final double value;
   private Double root = null;
 
@@ -242,11 +242,11 @@ System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&
     }
     return root;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/Rooter.java#L14-L32">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单3-4 因副作用而受限的可用性</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class SideEffecting implements Serializable, Cloneable {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/SideEffecting.java#L16-L27" target="_blank" title="Go to snippet source"></a><code class="language-java">public class SideEffecting implements Serializable, Cloneable {
   private int count;
 
   public SideEffecting(int start) {
@@ -257,34 +257,34 @@ System.out.println(String.format(&quot;original &#39;%s&#39;, new value &#39;%s&
     this.count += Math.incrementExact(this.count);
     return this.count;
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/SideEffecting.java#L16-L27">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>IntSeeding.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final int next = se.next();
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/IntSeeding.java#L28-L32" target="_blank" title="Go to snippet source"></a><code class="language-java">final int next = se.next();
 if (logger.isDebugEnabled()) {
   logger.debug(&quot;Next is &quot; + se.next());
 }
-return next;</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/IntSeeding.java#L28-L32">Full source at GitHub</a>
+return next;</code></pre>
 <blockquote>
   <p>UsingMapFunction.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final List&lt;Integer&gt; numbers = Arrays.asList(1, 2, 3);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingMapFunction.java#L18-L20" target="_blank" title="Go to snippet source"></a><code class="language-java">final List&lt;Integer&gt; numbers = Arrays.asList(1, 2, 3);
 final List&lt;Integer&gt; numbersPlusOne =
-    numbers.stream().map(number -&gt; number + 1).collect(Collectors.toList());</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/java/chapter03/UsingMapFunction.java#L18-L20">Full source at GitHub</a>
+    numbers.stream().map(number -&gt; number + 1).collect(Collectors.toList());</code></pre>
 <p><em>Python REPL</em></p>
-<pre class="prettyprint"><code class="language-output"><br/>&gt;&gt;&gt; def addOne(x):
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/python/output/myFunction.py.output#L4-L11" target="_blank" title="Go to snippet source"></a><code class="language-output"><br/>&gt;&gt;&gt; def addOne(x):
 ... returnx+1
 ...
 &gt;&gt;&gt; myFunction = addOne
 &gt;&gt;&gt; myFunction(3)
 4
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/src/main/python/output/myFunction.py.output#L4-L11">Full source at GitHub</a>
+</code></pre>
 <h2><a href="#3-4-对反应式设计的现有支持" name="3-4-对反应式设计的现有支持" class="anchor"><span class="anchor-link"></span></a>3.4 对反应式设计的现有支持</h2>
 <blockquote>
   <p>sample.js</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">var http = require(&#39;http&#39;);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/eventloop/src/main/js/sample.js#L3-L13" target="_blank" title="Go to snippet source"></a><code class="language-js">var http = require(&#39;http&#39;);
 
 var counter = 0;
 
@@ -294,11 +294,11 @@ http.createServer(function (req, res) {
     res.end(&#39;Sending response: &#39; + counter + &#39; via callback!\n&#39;);
 }).listen(8888, &#39;127.0.0.1&#39;);
 
-console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/eventloop/src/main/js/sample.js#L3-L13">Full source at GitHub</a>
+console.log(&#39;Server up on 127.0.0.1:8888, send requests!&#39;);</code></pre>
 <blockquote>
   <p>sample.go</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-go">package main
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/csp/src/main/go/sample.go#L3-L33" target="_blank" title="Go to snippet source"></a><code class="language-go">package main
 
 import (
 	&quot;fmt&quot;
@@ -328,11 +328,11 @@ func consumer(myChannel chan int, iterations int) {
 		fmt.Println(&quot;Received: &quot;, recVal)
 	}
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/csp/src/main/go/sample.go#L3-L33">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单3-5 从更快的数据源获取结果</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class ParallelRetrievalExample {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/java/chapter03/future/ParallelRetrievalExample.java#L16-L33" target="_blank" title="Go to snippet source"></a><code class="language-java">public class ParallelRetrievalExample {
   private final CacheRetriever cacheRetriever;
   private final DBRetriever dbRetriever;
 
@@ -349,11 +349,11 @@ func consumer(myChannel chan int, iterations int) {
 
     return CompletableFuture.anyOf(cacheFuture, dbFuture);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/java/chapter03/future/ParallelRetrievalExample.java#L16-L33">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">// Provide the thread pool to be applied
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L28-L52" target="_blank" title="Go to snippet source"></a><code class="language-scala">// Provide the thread pool to be applied
 implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(
   ForkJoinPool.commonPool())
 
@@ -377,11 +377,11 @@ def getProductInventoryByPostalCode(
     overall ← overallInventoryFutureByWarehouse
   } yield (local, overall)
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L28-L52">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">import scala.async.Async.{ async, await }
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L37-L46" target="_blank" title="Go to snippet source"></a><code class="language-scala">import scala.async.Async.{ async, await }
 val resultFuture = async {
   val localInventoryFuture = async {
     inventoryService.currentInventoryInWarehouse(productSku, postalCode)
@@ -390,11 +390,11 @@ val resultFuture = async {
     inventoryService.currentInventoryOverallByWarehouse(productSku)
   }
   (await(localInventoryFuture), await(overallInventoryFutureByWarehouse))
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L37-L46">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>RxJavaExample.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExample.java#L10-L18" target="_blank" title="Go to snippet source"></a><code class="language-java">package chapter03.rxjava;
 
 import io.reactivex.Observable;
 
@@ -402,11 +402,11 @@ public class RxJavaExample {
   public void observe(String[] strings) {
     Observable.fromArray(strings).subscribe((s) -&gt; System.out.println(&quot;Received &quot; + s));
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExample.java#L10-L18">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>RxJavaExampleDriver.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">package chapter03.rxjava;
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExampleDriver.java#L10-L19" target="_blank" title="Go to snippet source"></a><code class="language-java">package chapter03.rxjava;
 
 public class RxJavaExampleDriver {
   private static final RxJavaExample RX_JAVA_EXAMPLE = new RxJavaExample();
@@ -415,11 +415,11 @@ public class RxJavaExampleDriver {
     String[] strings = {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;};
     RX_JAVA_EXAMPLE.observe(strings);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/reactiveExtensions/src/main/java/chapter03/rxjava/RxJavaExampleDriver.java#L10-L19">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单3-7 一个使用 Akka 的Actor的例子</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">package chapter03.actor
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77" target="_blank" title="Go to snippet source"></a><code class="language-scala">package chapter03.actor
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
@@ -484,10 +484,10 @@ object Example extends App {
   val supervisor = system.actorOf(Props[SupervisorActor])
   supervisor ! Start
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77">Full source at GitHub</a>
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-03/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -168,7 +168,7 @@ Type to start searching
 <blockquote>
   <p>代码清单 14-1 亚马逊EC2实例作为工作者节点</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public Instance startInstance(final AWSCredentials credentials) {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L42-L63" target="_blank" title="Go to snippet source"></a><code class="language-java">public Instance startInstance(final AWSCredentials credentials) {
   final AmazonEC2 amazonEC2Client =
       AmazonEC2ClientBuilder.standard()
           .withCredentials(new AWSStaticCredentialsProvider(credentials))
@@ -189,11 +189,11 @@ Type to start searching
   // there will be exactly one INSTANCE in this list, otherwise
   // runInstances() would have thrown an exception
   return instances.get(0);
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L42-L63">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 14-2 将EC2节点提升到一个Future中，从而简化失败处理过程</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">private ExecutionContext executionContext; // value from somewhere
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L67-L85" target="_blank" title="Go to snippet source"></a><code class="language-java">private ExecutionContext executionContext; // value from somewhere
 private CircuitBreaker circuitBreaker; // value from somewhere
 
 public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
@@ -211,11 +211,11 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L67-L85">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 14-3 通过桥接客户端代码执行亚马逊的异步客户端</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public Future&lt;RunInstancesResult&gt; runInstancesAsync(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L89-L109" target="_blank" title="Go to snippet source"></a><code class="language-java">public Future&lt;RunInstancesResult&gt; runInstancesAsync(
     final RunInstancesRequest request, final AmazonEC2Async client) {
 
   final Promise&lt;RunInstancesResult&gt; promise = Futures.promise();
@@ -235,11 +235,11 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
       });
   return promise.future();
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L89-L109">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 14-4 关闭 EC2 实例</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L113-L134" target="_blank" title="Go to snippet source"></a><code class="language-java">public Future&lt;TerminateInstancesResult&gt; terminateInstancesAsync(
     final AmazonEC2Client client, final Instance... instances) {
 
   final List&lt;String&gt; ids =
@@ -260,11 +260,11 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
 
   return f.recoverWith(recovery, executionContext);
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L113-L134">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单 14-5 执行组件和看作工作者节点的 Actor 通信</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">class WorkerNode extends AbstractActor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L166-L221" target="_blank" title="Go to snippet source"></a><code class="language-java">class WorkerNode extends AbstractActor {
   private final Cancellable checkTimer;
 
   public WorkerNode(final InetAddress address, final Duration checkInterval) {
@@ -319,12 +319,12 @@ public Future&lt;Instance&gt; startInstanceAsync(AWSCredentials credentials) {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceEncapsulation.java#L166-L221">Full source at GitHub</a>
+}</code></pre>
 <h2><a href="#14-2-资源借贷模式" name="14-2-资源借贷模式" class="anchor"><span class="anchor-link"></span></a>14.2 资源借贷模式</h2>
 <blockquote>
   <p>代码清单 14-6 分离资源和任务的管理</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">class WorkerNodeForExecution extends AbstractActor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L22-L87" target="_blank" title="Go to snippet source"></a><code class="language-java">class WorkerNodeForExecution extends AbstractActor {
 
   @Override
   public Receive createReceive() {
@@ -389,12 +389,12 @@ class WorkNodeForResourcePool extends AbstractActor {
   public void postStop() {
     checkTimer.cancel();
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ResourceLoan.java#L22-L87">Full source at GitHub</a>
+}</code></pre>
 <h2><a href="#14-3-复杂命令模式" name="14-3-复杂命令模式" class="anchor"><span class="anchor-link"></span></a>14.3 复杂命令模式</h2>
 <blockquote>
   <p>代码清单 14-7 批处理作业的基本构成</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public interface ProcessingLogic {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L109-L132" target="_blank" title="Go to snippet source"></a><code class="language-java">public interface ProcessingLogic {
   PartialResult process(Stream&lt;DataElement&gt; input);
 }
 
@@ -417,11 +417,11 @@ public class BatchJob {
   public BatchJob withDataSelector(String selector) {
     return new BatchJob(selector, processingLogic, mergeLogic);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L109-L132">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 14-8 通过调用Nashorn JavaScript脚本引擎执行处理逻辑</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class PartSuccess implements PartialResult {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L43-L105" target="_blank" title="Go to snippet source"></a><code class="language-java">public class PartSuccess implements PartialResult {
   public final int value;
 
   public PartSuccess(int value) {
@@ -483,22 +483,22 @@ public class WorkerJS {
     /* fetch data from persistent storage in streaming fashion */
     return Stream.of(1, 2, 3).map(DataElement::new);
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L43-L105">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>job.js</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">var PartSuccess = Java.type(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/job.js#L8-L15" target="_blank" title="Go to snippet source"></a><code class="language-js">var PartSuccess = Java.type(
     &#39;chapter14.ComplexCommand.PartSuccess&#39;);
 
 var process = function (input) {
     // &#39;input&#39; is a Java 8 Stream
     var value = input.count();
     return new PartSuccess(value);
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/job.js#L8-L15">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单 14-9 外部 DSL 使用了不同于宿主编程语言的语法</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-txt">FOREACH Car (_, _, year, price)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/dsl.txt#L8-L16" target="_blank" title="Go to snippet source"></a><code class="language-txt">FOREACH Car (_, _, year, price)
 SELECT year ? 1950 &amp;&amp; year &lt; 1960
 MEDIAN OF price
 REMEMBER AS p
@@ -506,11 +506,11 @@ REMEMBER AS p
 FOREACH Car (make, model, _, price)
 SELECT price &gt; p
 DISTINCT VALUES OF (make, model)
-RETURN AS RESULT</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/resources/chapter14/dsl.txt#L8-L16">Full source at GitHub</a>
+RETURN AS RESULT</code></pre>
 <blockquote>
   <p>代码清单 14-10 内部 DSL</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public static void akkaStreamDSL() {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L217-L229" target="_blank" title="Go to snippet source"></a><code class="language-java">public static void akkaStreamDSL() {
   final RunnableGraph&lt;CompletionStage&lt;Long&gt;&gt; p =
       Source.&lt;DataElement&gt;empty()
           .filter(new InRange(&quot;year&quot;, 1950, 1960))
@@ -522,12 +522,12 @@ RETURN AS RESULT</code></pre><a href="https://github.com/ReactivePlatform/Reacti
       .to(
           Sink.fold(
               Collections.emptySet(), new DistinctValues&lt;Pair&lt;String, String&gt;&gt;(&quot;make&quot;, &quot;model&quot;)));
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ComplexCommand.java#L217-L229">Full source at GitHub</a>
+}</code></pre>
 <h2><a href="#14-5-托管阻塞模式" name="14-5-托管阻塞模式" class="anchor"><span class="anchor-link"></span></a>14.5 托管阻塞模式</h2>
 <blockquote>
   <p>代码清单 14-11 维护一个私有的ExecutorService</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public enum AccessRights {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L29-L112" target="_blank" title="Go to snippet source"></a><code class="language-java">public enum AccessRights {
   READ_JOB_STATUS,
   SUBMIT_JOB;
 
@@ -610,10 +610,10 @@ public class AccessService extends AbstractActor {
       ca.replyTo.tell(new CheckAccessResult(ca, AccessRights.EMPTY), self);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter14/src/main/java/chapter14/ManagedBlocking.java#L29-L112">Full source at GitHub</a>
+}</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-14/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

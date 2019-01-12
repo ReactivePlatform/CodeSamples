@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -162,7 +162,7 @@ Type to start searching
 <blockquote>
   <p>代码清单 12-1 利用断路器使得失败组件有时间恢复</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">private object StorageFailed extends RuntimeException
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageComponent.scala#L20-L50" target="_blank" title="Go to snippet source"></a><code class="language-scala">private object StorageFailed extends RuntimeException
 
 import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
 
@@ -192,11 +192,11 @@ def persist(job: Job): Future[StorageStatus] = {
       case _: CircuitBreakerOpenException =&gt; StorageStatus.Failed
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageComponent.scala#L20-L50">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单12-2 使用速率限制器保护组件</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">import scala.concurrent.Future
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/RateLimiter.scala#L14-L44" target="_blank" title="Go to snippet source"></a><code class="language-scala">import scala.concurrent.Future
 import scala.concurrent.duration.{ Deadline, FiniteDuration }
 
 case object RateLimitExceeded extends RuntimeException
@@ -226,11 +226,11 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
     }
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/RateLimiter.scala#L14-L44">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单12-3 断路器：限制来自同一个客户端的请求</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageClient.scala#L19-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
 
 def persistForThisClient(job: Job): Future[StorageStatus] = {
   import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
@@ -240,11 +240,11 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case RateLimitExceeded ⇒ StorageStatus.Failed
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/StorageClient.scala#L19-L29">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单12-4 门控一个客户端</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/GatedStorageClient.scala#L22-L36" target="_blank" title="Go to snippet source"></a><code class="language-scala">private val limiter = new RateLimiter(100, 2.seconds)
 private val breaker = CircuitBreaker(
   system.scheduler,
   10, Duration.Zero, 10.seconds)
@@ -258,10 +258,10 @@ def persistForThisClient(job: Job): Future[StorageStatus] = {
       case _: CircuitBreakerOpenException ⇒ StorageStatus.Gated
     }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter12/src/main/scala/chapter12/GatedStorageClient.scala#L22-L36">Full source at GitHub</a>
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-12/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-12/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

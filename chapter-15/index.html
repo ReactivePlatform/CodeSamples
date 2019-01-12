@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -170,7 +170,7 @@ Type to start searching
 <blockquote>
   <p>代码清单15-1 服务器向发起请求的地址发送响应</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class Server {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/java/chapter15/Server.java#L19-L41" target="_blank" title="Go to snippet source"></a><code class="language-java">public class Server {
   static final int SERVER_PORT = 8888;
 
   public static void main(String[] args) throws IOException {
@@ -192,11 +192,11 @@ Type to start searching
       socket.send(packet2);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/java/chapter15/Server.java#L19-L41">Full source at GitHub</a>
+}</code></pre>
 <blockquote>
   <p>代码清单15-2 客户端发送一个请求，然后阻塞直到接收到服务器的响应</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public class Client {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/java/chapter15/Client.java#L21-L42" target="_blank" title="Go to snippet source"></a><code class="language-java">public class Client {
   public static void main(String[] args) throws IOException {
     // get local socket with random port
     try (final DatagramSocket socket = new DatagramSocket()) {
@@ -217,27 +217,27 @@ Type to start searching
       System.out.println(&quot;client: sender was &quot; + sender);
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/java/chapter15/Client.java#L21-L42">Full source at GitHub</a>
+}</code></pre>
 <p><em>Server 的输出结果</em></p>
-<pre class="prettyprint"><code class="language-output">server: received hello
-server: sender was /127.0.0.1:55589</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/server.output#L2-L3">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/server.output#L2-L3" target="_blank" title="Go to snippet source"></a><code class="language-output">server: received hello
+server: sender was /127.0.0.1:55589</code></pre>
 <p><em>Client 的可能输出结果</em></p>
-<pre class="prettyprint"><code class="language-output">client: received got it!
-client: sender was /127.0.0.1:8888</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/client.output#L2-L3">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/client.output#L2-L3" target="_blank" title="Go to snippet source"></a><code class="language-output">client: received got it!
+client: sender was /127.0.0.1:8888</code></pre>
 <p><em>HTTP Request Header</em></p>
-<pre class="prettyprint"><code class="language-header">GET /request?msg=hello HTTP/1.1
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/http-request.header#L2-L4" target="_blank" title="Go to snippet source"></a><code class="language-header">GET /request?msg=hello HTTP/1.1
 Host: client-interface.our.application.domain
-Accept: application/json</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/http-request.header#L2-L4">Full source at GitHub</a>
+Accept: application/json</code></pre>
 <p><em>HTTP Response Header</em></p>
-<pre class="prettyprint"><code class="language-header">HTTP/1.1 200 OK
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/http-response.header#L2-L6" target="_blank" title="Go to snippet source"></a><code class="language-header">HTTP/1.1 200 OK
 ...
 Content-Type: application/json
 Content-Length: 22
-{&quot;response&quot;:&quot;got it!&quot;}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/http-response.header#L2-L6">Full source at GitHub</a>
+{&quot;response&quot;:&quot;got it!&quot;}</code></pre>
 <blockquote>
   <p>代码清单15-3 使用Akka UntypedActor 来建模请求——响应模式</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">object RequestResponseActors {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseActors.scala#L16-L47" target="_blank" title="Go to snippet source"></a><code class="language-scala">object RequestResponseActors {
 
   final case class Request(msg: String)
 
@@ -268,14 +268,14 @@ Content-Length: 22
   }
 
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseActors.scala#L16-L47">Full source at GitHub</a>
+</code></pre>
 <p><em>运行结果</em></p>
-<pre class="prettyprint"><code class="language-output">got request: hello
-got response: got it!</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/request-response-actors.output#L2-L3">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/request-response-actors.output#L2-L3" target="_blank" title="Go to snippet source"></a><code class="language-output">got request: hello
+got response: got it!</code></pre>
 <blockquote>
   <p>代码清单15-4 在请求消息中显式地包含响应地址</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">object RequestResponseTypedActors {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseTypedActors.scala#L17-L50" target="_blank" title="Go to snippet source"></a><code class="language-scala">object RequestResponseTypedActors {
 
   final case class Request(msg: String, replyTo: ActorRef[Response])
 
@@ -308,11 +308,11 @@ got response: got it!</code></pre><a href="https://github.com/ReactivePlatform/R
     })
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/RequestResponseTypedActors.scala#L17-L50">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-5 基于单向消息传递的请求——响应模式</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/js/request-response.js#L5-L20" target="_blank" title="Go to snippet source"></a><code class="language-js">var amqp = require(&#39;amqplib/callback_api&#39;);
 
 amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
     conn.createChannel(function (err, ch) {
@@ -327,11 +327,11 @@ amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
             ch.ack(msg);
         });
     });
-});</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/js/request-response.js#L5-L20">Full source at GitHub</a>
+});</code></pre>
 <blockquote>
   <p>代码清单15-6 监听与原始请求具有相同的关联ID的响应</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/js/request-response-2way.js#L5-L25" target="_blank" title="Go to snippet source"></a><code class="language-js">var uuid = require(&#39;node-uuid&#39;);
 
 amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
     conn.createChannel(function (err, ch) {
@@ -351,10 +351,10 @@ amqp.connect(&#39;amqp://localhost&#39;, function (err, conn) {
                 {correlationId: corr, replyTo: q.queue});
         });
     });
-});</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/js/request-response-2way.js#L5-L25">Full source at GitHub</a>
+});</code></pre>
 <h2><a href="#15-2-消息自包含模式" name="15-2-消息自包含模式" class="anchor"><span class="anchor-link"></span></a>15.2 消息自包含模式</h2>
 <p><em>SMTP</em></p>
-<pre class="prettyprint"><code class="language-protocal"><br/>S: 220 mailhost.example.com ESMTP Postfix
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/smtp.protocal#L3-L27" target="_blank" title="Go to snippet source"></a><code class="language-protocal"><br/>S: 220 mailhost.example.com ESMTP Postfix
 C: HELO alice-workstation.example.com
 S: 250 Hello alice-workstation.example.com
 C: MAIL FROM:&lt;alice@example.com&gt;
@@ -377,48 +377,48 @@ C: .
 S: 250 Ok, queued as 4567876345
 C: QUIT
 S: 221 Bye
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/output/smtp.protocal#L3-L27">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-7 封装了多次 SMTP 交换所需要的信息</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class SendEmail(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/SendEmail.scala#L18-L24" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
   sender:        String,
   recipients:    List[String],
   body:          String,
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/SendEmail.scala#L18-L24">Full source at GitHub</a>
-<pre class="prettyprint"><code class="language-scala">final case class SendEmailResult(
+</code></pre>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Result.scala#L20-L24" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmailResult(
   correlationID: UUID,
   status:        StatusCode,
   explanation:   Option[String]) extends Result
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Result.scala#L20-L24">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-8 分离电子邮件主体，使得其可以按需投递</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class SendEmail(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L26" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
   sender:        String,
   recipients:    List[String],
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
   override def payload: Source[String] = body
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L26">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class SendEmail(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pullable/SendEmail.scala#L20-L26" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
   sender:        String,
   recipients:    List[String],
   bodyLocation:  URL,
   correlationID: UUID,
   replyTo:       ActorRef[SendEmailResult])
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pullable/SendEmail.scala#L20-L26">Full source at GitHub</a>
+</code></pre>
 <h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
 <blockquote>
   <p>代码清单15-10 请求启动验证过程的简单协议</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class StartVerificationProcess(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L20-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class StartVerificationProcess(
   userEmail: String,
   replyTo:   ActorRef[VerificationProcessResponse]) extends MyCommands
 
@@ -427,11 +427,11 @@ sealed trait VerificationProcessResponse
 final case class VerificationProcessStarted(userEmail: String) extends VerificationProcessResponse
 
 final case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L20-L29">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-11 一个转发结果的匿名子Actor</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">def withChildActor(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L68" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withChildActor(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
   ContextAware { ctx: ActorContext[StartVerificationProcess] ⇒
     val log = new BusLogging(
       ctx.system.eventStream,
@@ -473,11 +473,11 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
         emailGateway ! request
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L68">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-12 由询问模式所产生的Future，并进行了转换</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">def withAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L72-L114" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
   ContextAware { ctx ⇒
     val log = new BusLogging(
       ctx.system.eventStream,
@@ -519,11 +519,11 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
         }.foreach(result ⇒ replyTo ! result)
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L72-L114">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-13 不使用内置支持实现询问模式</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">def withoutAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L118-L159" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withoutAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
   ContextAware[MyCommands] { ctx ⇒
     val log = new BusLogging(
       ctx.system.eventStream,
@@ -564,12 +564,12 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
         }
     }
   }.narrow[StartVerificationProcess]
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L118-L159">Full source at GitHub</a>
+</code></pre>
 <h2><a href="#15-5-聚合器模式" name="15-5-聚合器模式" class="anchor"><span class="anchor-link"></span></a>15.5 聚合器模式</h2>
 <blockquote>
   <p>代码清单15-14 使用for推导式来聚合三个Future表达式的结果。</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">def futureFrontPage(
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L155" target="_blank" title="Go to snippet source"></a><code class="language-scala">def futureFrontPage(
   themes:       ActorRef[GetTheme],
   personalNews: ActorRef[GetPersonalNews],
   topNews:      ActorRef[GetTopNews]): Behavior[GetFrontPage] =
@@ -611,11 +611,11 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
         }
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L155">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-15 使用子Actor替代Future组合子的使用</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">private def pf(p: PartialFunction[AnyRef, Unit]): p.type = p
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L79-L109" target="_blank" title="Go to snippet source"></a><code class="language-scala">private def pf(p: PartialFunction[AnyRef, Unit]): p.type = p
 
 def frontPage(
   themes:       ActorRef[GetTheme],
@@ -645,11 +645,11 @@ def frontPage(
         ctx.schedule(1.second, childRef, ReceiveTimeout)
     }
   }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L79-L109">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-16 使用一个构建器来更加直接地表达领域模型</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">class FrontPageResultBuilder(user: String) {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L75" target="_blank" title="Go to snippet source"></a><code class="language-scala">class FrontPageResultBuilder(user: String) {
   private var css: Option[String] = None
   private var personalNews: Option[List[String]] = None
   private var topNews: Option[List[String]] = None
@@ -678,11 +678,11 @@ def frontPage(
     FrontPageResult(user, css.get, allNews)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L75">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-17 添加第4个服务，降低了代码的可读性</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val overrideFuture =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L190-L213" target="_blank" title="Go to snippet source"></a><code class="language-scala">val overrideFuture =
   (overrides ? (GetOverride(_: ActorRef[OverrideResult])))
     .recover {
       case _: AskTimeoutException ⇒ NoOverride
@@ -705,12 +705,12 @@ for {
   case NoOverride ⇒ // nothing to do here
   case Override(css, news) ⇒
     replyTo ! FrontPageResult(user, css, news)
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L190-L213">Full source at GitHub</a>
+}</code></pre>
 <h2><a href="#15-7-业务握手协议-又名可靠投递模式-" name="15-7-业务握手协议-又名可靠投递模式-" class="anchor"><span class="anchor-link"></span></a>15.7 业务握手协议（又名可靠投递模式）</h2>
 <blockquote>
   <p>代码清单15-18 使用Actor实现上面的（信息）交换</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L39-L86" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
 
 case object ChangeBudgetDone
 
@@ -757,11 +757,11 @@ class Alice extends Actor {
       alreadyDone -= saga
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L39-L86">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-19 向预算消息添加持久性</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class AliceConfirmedChange(deliveryId: Long)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L138-L191" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class AliceConfirmedChange(deliveryId: Long)
 
 final case class AliceDeniedChange(deliveryId: Long)
 
@@ -814,11 +814,11 @@ class PersistentSam(
       context.stop(self)
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L138-L191">Full source at GitHub</a>
+</code></pre>
 <blockquote>
   <p>代码清单15-20 Alice Actor的持久化版本</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">final case class BudgetChanged(amount: BigDecimal, persistenceId: String)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L195-L255" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class BudgetChanged(amount: BigDecimal, persistenceId: String)
 
 case object CleanupDoneList
 
@@ -878,10 +878,10 @@ class PersistentAlice extends PersistentActor with ActorLogging {
     cleanupTimer.cancel()
   }
 }
-</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L195-L255">Full source at GitHub</a>
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-15/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>

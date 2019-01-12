@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="docs">
-<meta name="generator" content="Paradox, paradox-material-theme=0.5.1, mkdocs-material=3.0.3">
+<meta name="generator" content="Paradox, paradox-material-theme=0.6.0, mkdocs-material=3.0.3">
 
 <meta name="lang:clipboard.copy" content="Copy to clipboard">
 <meta name="lang:clipboard.copied" content="Copied to clipboard">
@@ -166,7 +166,7 @@ Type to start searching
 <blockquote>
   <p>代码清单 2-1 图片服务中简单 Controller 的一段代码</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">public interface Images {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ImageServiceController.java#L16-L38" target="_blank" title="Go to snippet source"></a><code class="language-java">public interface Images {
   Image get(String key);
 
   void add(String key, Image image);
@@ -188,63 +188,63 @@ public Image retrieveImages(String key) {
       return FALLBACK;
     }
   }
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ImageServiceController.java#L16-L38">Full source at GitHub</a>
+}</code></pre>
 <h2><a href="#2-2-利用并行性" name="2-2-利用并行性" class="anchor"><span class="anchor-link"></span></a>2.2 利用并行性</h2>
 <blockquote>
   <p>SimpleFunction.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val result = f(42)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/SimpleFunction.scala#L13">Full source at GitHub</a>
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/SimpleFunction.scala#L13" target="_blank" title="Go to snippet source"></a><code class="language-scala">val result = f(42)</code></pre>
 <blockquote>
   <p>SequentialExecution.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final ReplyA a = computeA();
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L45-L49" target="_blank" title="Go to snippet source"></a><code class="language-java">final ReplyA a = computeA();
 final ReplyB b = computeB();
 final ReplyC c = computeC();
 
-final Result r = aggregate(a, b, c);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/SequentialExecution.java#L45-L49">Full source at GitHub</a>
+final Result r = aggregate(a, b, c);</code></pre>
 <blockquote>
   <p>ParallelExecutionWithJavaFuture.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final Future&lt;ReplyA&gt; a = taskA();
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L59-L63" target="_blank" title="Go to snippet source"></a><code class="language-java">final Future&lt;ReplyA&gt; a = taskA();
 final Future&lt;ReplyB&gt; b = taskB();
 final Future&lt;ReplyC&gt; c = taskC();
 
-final Result r = aggregate(a.get(), b.get(), c.get());</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/ParallelExecutionWithJavaFuture.java#L59-L63">Full source at GitHub</a>
+final Result r = aggregate(a.get(), b.get(), c.get());</code></pre>
 <blockquote>
   <p>ParallelExecutionWithScalaFuture.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">val fa: Future[ReplyA] = taskA()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ParallelExecutionWithScalaFuture.scala#L32-L37" target="_blank" title="Go to snippet source"></a><code class="language-scala">val fa: Future[ReplyA] = taskA()
 val fb: Future[ReplyB] = taskB()
 val fc: Future[ReplyC] = taskC()
 
 val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
-  yield aggregate(a, b, c)</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ParallelExecutionWithScalaFuture.scala#L32-L37">Full source at GitHub</a>
+  yield aggregate(a, b, c)</code></pre>
 <blockquote>
   <p>BlockingSocketRead.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;, 8080);
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/BlockingSocketRead.java#L17-L19" target="_blank" title="Go to snippet source"></a><code class="language-java">final Socket socket = new Socket(&quot;127.0.0.1&quot;, 8080);
 socket.getOutputStream().write(requestMessageBytes);
-final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/BlockingSocketRead.java#L17-L19">Full source at GitHub</a>
+final int bytesRead = socket.getInputStream().read(responseBuffer);</code></pre>
 <blockquote>
   <p>AskActorWithJava8.java</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-java">final CompletionStage&lt;Response&gt; future =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/AskActorWithJava8.java#L55-L57" target="_blank" title="Go to snippet source"></a><code class="language-java">final CompletionStage&lt;Response&gt; future =
     ask(actorRef, request, timeout).thenApply(Response.class::cast);
-future.thenAccept(AskActorWithJava8::processIt);</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/java/AskActorWithJava8.java#L55-L57">Full source at GitHub</a>
+future.thenAccept(AskActorWithJava8::processIt);</code></pre>
 <h2><a href="#2-4-对失败作出反应" name="2-4-对失败作出反应" class="anchor"><span class="anchor-link"></span></a>2.4 对失败作出反应</h2>
 <blockquote>
   <p>ExceptionHandler.scala</p>
 </blockquote>
-<pre class="prettyprint"><code class="language-scala">try {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ExceptionHandler.scala#L14-L20" target="_blank" title="Go to snippet source"></a><code class="language-scala">try {
   f(i)
 } catch {
   case _: java.lang.ArithmeticException ⇒ Int.MaxValue
   case ex: java.lang.StackOverflowError ⇒ ???
   case ex: java.net.ConnectException    ⇒ ???
-}</code></pre><a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ExceptionHandler.scala#L14-L20">Full source at GitHub</a>
+}</code></pre>
 </div>
 <div>
-<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/master/docs/src/paradox/chapter-02/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/docs/src/paradox/chapter-02/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
