@@ -36,7 +36,7 @@ object Dependencies {
 
   val rxJava = "io.reactivex.rxjava2" % "rxjava" % "2.2.8"
 
-  val playJson = "com.typesafe.play" %% "play-json" % "2.7.2"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.7.3"
 
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.7" % "test"
 
