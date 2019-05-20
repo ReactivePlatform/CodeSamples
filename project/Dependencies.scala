@@ -45,7 +45,7 @@ object Dependencies {
   val guava = "com.google.guava" % "guava" % "23.0"
 
   val finagle = "com.twitter" %% "finagle-http" % "19.4.0"
-  val fasterxml = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8"
+  val fasterxml = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9"
 
   val ckites: Seq[ModuleID] = Seq(
     "io.ckite" % "ckite-core" % ckiteVersion exclude("org.apache.thrift", "libthrift"),
