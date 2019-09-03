@@ -29,7 +29,7 @@ object Dependencies {
 
   val amazonAWS = "com.amazonaws" % "aws-java-sdk" % "1.11.487"
 
-  val sbtIO = "org.scala-sbt" %% "io" % "1.2.2"
+  val sbtIO = "org.scala-sbt" %% "io" % "1.3.0"
 
   val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.10.0"
   val scalaJava8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
