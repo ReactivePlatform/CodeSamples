@@ -34,7 +34,7 @@ object Dependencies {
   val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.10.0"
   val scalaJava8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
 
-  val rxJava = "io.reactivex.rxjava2" % "rxjava" % "2.2.8"
+  val rxJava = "io.reactivex.rxjava2" % "rxjava" % "2.2.18"
 
   val playJson = "com.typesafe.play" %% "play-json" % "2.7.3"
 
