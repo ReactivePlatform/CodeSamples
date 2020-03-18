@@ -16,7 +16,7 @@ addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.2.0")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.12")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.4.3")
 
