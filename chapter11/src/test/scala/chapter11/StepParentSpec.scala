@@ -41,11 +41,11 @@ class StepParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 // #snip_11-23
 class StepParent extends Actor {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case ex ⇒ Restart
+    case ex => Restart
   }
 
   def receive: Receive = {
-    case p: Props ⇒
+    case p: Props =>
       sender ! context.actorOf(p, "child")
   }
 }
@@ -54,7 +54,7 @@ class StepParent extends Actor {
 // #snip_11-22
 class MyActor extends Actor {
   def receive: Receive = {
-    case _ ⇒ throw new NullPointerException
+    case _ => throw new NullPointerException
   }
 }
 // #snip_11-22

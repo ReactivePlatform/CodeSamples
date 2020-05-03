@@ -10,8 +10,7 @@ package chapter13
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{ Matchers, WordSpec }
 
-class MultiMasterCRDTSpec extends WordSpec with Matchers
-  with TypeCheckedTripleEquals {
+class MultiMasterCRDTSpec extends WordSpec with Matchers with TypeCheckedTripleEquals {
 
   import MultiMasterCRDT._
 
@@ -59,8 +58,8 @@ class MultiMasterCRDTSpec extends WordSpec with Matchers
 
     "have a symmetrical mergeStatus function" in {
       for {
-        left ← allStatus
-        right ← allStatus
+        left <- allStatus
+        right <- allStatus
       } withClue(s"mergeStatus($left, $right): ") {
         mergeStatus(left, right) should ===(mergeStatus(right, left))
       }
@@ -68,7 +67,7 @@ class MultiMasterCRDTSpec extends WordSpec with Matchers
 
     "merge Finished always to Finished" in {
       for {
-        other ← allStatus
+        other <- allStatus
       } withClue(s"mergeStatus(Finished, $other): ") {
         mergeStatus(Finished, other) should ===(Finished)
       }

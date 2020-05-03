@@ -22,8 +22,8 @@ class ActorSpecWithCallingThreadDispatcher extends WordSpec with Matchers with B
   // 代码清单11-11
   "Processing messages on the calling thread with CallingThreadDispatcher" in {
     // #snip
-    val translationService = system.actorOf(
-      TranslationService.props.withDispatcher("akka.test.calling-thread-dispatcher"))
+    val translationService =
+      system.actorOf(TranslationService.props.withDispatcher("akka.test.calling-thread-dispatcher"))
     val input = "Hur mår du?"
     val output = "How are you?"
     val probe = TestProbe()

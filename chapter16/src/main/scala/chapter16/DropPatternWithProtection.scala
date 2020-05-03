@@ -44,7 +44,7 @@ object DropPatternWithProtection {
     private var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
 
     def receive: Receive = {
-      case job: Job ⇒
+      case job: Job =>
         workQueue = workQueue.dropWhile(_.consumed)
         if (workQueue.size < 1000) {
           val envelope = WorkEnvelope(job)
@@ -60,12 +60,11 @@ object DropPatternWithProtection {
 
     private val manager: ActorRef = context.actorOf(Props(new Manager), "manager")
 
-    private val incomingQueue: ActorRef = context.actorOf(
-      Props(new IncomingQueue(manager))
-        .withMailbox("bounded-mailbox"), "incomingQueue")
+    private val incomingQueue: ActorRef =
+      context.actorOf(Props(new IncomingQueue(manager)).withMailbox("bounded-mailbox"), "incomingQueue")
 
     def receive: Receive = {
-      case GetIncomingRef(replyTo) ⇒ replyTo ! incomingQueue
+      case GetIncomingRef(replyTo) => replyTo ! incomingQueue
     }
   }
 
@@ -85,10 +84,10 @@ object DropPatternWithProtection {
         random.nextInt(dropFactor + 2) == 0
       }
 
-    (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
+    (1 to 8).foreach(_ => context.actorOf(Props(new Worker(self))))
 
     def receive: Receive = {
-      case envelope @ WorkEnvelope(job @ Job(id, _, replyTo)) ⇒
+      case envelope @ WorkEnvelope(job @ Job(id, _, replyTo)) =>
         envelope.consumed = true
         if (requestQueue.isEmpty) {
           val atSize = workQueue.size
@@ -100,11 +99,11 @@ object DropPatternWithProtection {
           if (items > 1) worker ! DummyWork(items - 1)
           requestQueue = requestQueue.drop(1)
         }
-      case wr @ WorkRequest(worker, items) ⇒
+      case wr @ WorkRequest(worker, items) =>
         if (workQueue.isEmpty) {
           requestQueue :+= wr
         } else {
-          workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
+          workQueue.iterator.take(items).foreach(job => worker ! job)
           if (workQueue.size < items) worker ! DummyWork(items - workQueue.size)
           workQueue = workQueue.drop(items)
         }
@@ -128,13 +127,13 @@ object DropPatternWithProtection {
     request()
 
     def receive: Receive = {
-      case Job(id, data, replyTo) ⇒
+      case Job(id, data, replyTo) =>
         requested -= 1
         request()
         val sign = if ((data & 1) == 1) plus else minus
         val result = sign / data
         replyTo ! JobResult(id, result)
-      case DummyWork(count) ⇒
+      case DummyWork(count) =>
         requested -= count
         request()
     }
@@ -155,8 +154,7 @@ object DropPatternWithProtection {
 
   def main(args: Array[String]): Unit = {
     //TODO with config file
-    val config = ConfigFactory.parseString(
-      """
+    val config = ConfigFactory.parseString("""
         |bounded-mailbox {
         | mailbox-type = "akka.dispatch.BoundedMailbox"
         | mailbox-capacity = 1000
@@ -172,24 +170,24 @@ object DropPatternWithProtection {
     val calculator = Await.result((protector ? GetIncomingRef).mapTo[ActorRef], 1.second)
 
     Source(1 to 10000000)
-      // experiment with the parallelism number to see dropping in effect
-      .mapAsyncUnordered(100000) { i ⇒
+    // experiment with the parallelism number to see dropping in effect
+      .mapAsyncUnordered(100000) { i =>
         (calculator ? (Job(i, i, _)))
           .collect {
-            case JobResult(_, report) ⇒ Report.success(report)
-            case _                    ⇒ Report.failure
+            case JobResult(_, report) => Report.success(report)
+            case _                    => Report.failure
           }
           .recover {
-            case _: TimeoutException ⇒ Report.dropped
+            case _: TimeoutException => Report.dropped
           }
       }
       .runFold(Report.empty)(_ + _)
-      .map(x ⇒ println(s"final result: $x"))
+      .map(x => println(s"final result: $x"))
       .recover {
-        case ex ⇒
+        case ex =>
           ex.printStackTrace()
       }
-      .foreach(_ ⇒ sys.terminate())
+      .foreach(_ => sys.terminate())
   }
 
 }

@@ -21,7 +21,7 @@ object RequestResponseActors {
 
   class Responder extends Actor {
     def receive: Receive = {
-      case Request(msg) ⇒
+      case Request(msg) =>
         println(s"got request: $msg")
         sender() ! Response("got it!")
     }
@@ -31,7 +31,7 @@ object RequestResponseActors {
     responder ! Request("hello")
 
     def receive: Receive = {
-      case Response(msg) ⇒
+      case Response(msg) =>
         println(s"got response: $msg")
         context.system.terminate()
     }

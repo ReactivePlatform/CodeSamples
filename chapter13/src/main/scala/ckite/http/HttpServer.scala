@@ -21,12 +21,10 @@ class HttpServer(ckite: CKite) {
 
   def start(): Unit = {
     val restServerPort =
-      ConfigFactory.load()
-        .getString("ckite.listen-address").split(":")(1).toInt + 1000
+      ConfigFactory.load().getString("ckite.listen-address").split(":")(1).toInt + 1000
 
     val adminServerPort = restServerPort + 1000
-    server =
-      Http.serve(new InetSocketAddress(restServerPort), new HttpService(ckite))
+    server = Http.serve(new InetSocketAddress(restServerPort), new HttpService(ckite))
   }
 
   def stop(): Unit = synchronized {

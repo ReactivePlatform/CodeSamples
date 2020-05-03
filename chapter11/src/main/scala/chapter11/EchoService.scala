@@ -22,6 +22,6 @@ class EchoService extends Actor {
   import EchoService._
 
   def receive: Receive = {
-    case Request(tag, ref) ⇒ ref ! Response(tag)
+    case Request(tag, ref) => ref ! Response(tag)
   }
 }

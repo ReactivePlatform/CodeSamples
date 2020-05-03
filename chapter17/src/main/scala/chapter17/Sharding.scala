@@ -23,9 +23,9 @@ object ShardSupport {
    * not match then the message is dropped
    */
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case mc @ ManagerCommand(cmd, _, _) ⇒
+    case mc @ ManagerCommand(cmd, _, _) =>
       cmd.shoppingCart.id.toString -> mc
-    case mc @ ManagerQuery(query, _, _) ⇒
+    case mc @ ManagerQuery(query, _, _) =>
       query.shoppingCart.id.toString -> mc
   }
 
@@ -35,17 +35,14 @@ object ShardSupport {
    * that are forwarded
    */
   val extractShardId: ShardRegion.ExtractShardId = {
-    case ManagerCommand(cmd, _, _) ⇒
+    case ManagerCommand(cmd, _, _) =>
       toHex(cmd.shoppingCart.id.hashCode & 255)
-    case ManagerQuery(query, _, _) ⇒
+    case ManagerQuery(query, _, _) =>
       toHex(query.shoppingCart.id.hashCode & 255)
   }
 
   private def toHex(b: Int) =
-    new java.lang.StringBuilder(2)
-      .append(hexDigits(b >> 4))
-      .append(hexDigits(b & 15))
-      .toString
+    new java.lang.StringBuilder(2).append(hexDigits(b >> 4)).append(hexDigits(b & 15)).toString
 
   private val hexDigits = "0123456789ABCDEF"
 
@@ -55,8 +52,7 @@ object ShardSupport {
 //#snip_17-4
 
 object ShardingExample extends App {
-  val clusterConfig = ConfigFactory.parseString(
-    """
+  val clusterConfig = ConfigFactory.parseString("""
 akka.loglevel = INFO
 akka.actor.provider = "akka.cluster.ClusterActorRefProvider"
 akka.actor.warn-about-java-serializer-usage = off
@@ -104,38 +100,37 @@ akka.cluster.sharding.state-store-mode = ddata
   val item1, item2 = ItemRef(mkURI())
   val shoppingCart1, shoppingCart2 = ShoppingCartRef(mkURI())
 
-  Cluster(sys1).registerOnMemberUp(
-    sys1.actorOf(Props(new Actor with ActorLogging {
-      manager ! ManagerCommand(SetOwner(shoppingCart1, customer), 0, self)
-      manager ! ManagerCommand(AddItem(shoppingCart1, item1, 5), 1, self)
-      manager ! ManagerCommand(AddItem(shoppingCart1, item1, -3), 2, self)
-      manager ! ManagerCommand(AddItem(shoppingCart1, item2, 6), 3, self)
-      manager ! ManagerCommand(RemoveItem(shoppingCart1, item1, 3), 4, self)
-      manager ! ManagerQuery(GetItems(shoppingCart1), 5, self)
+  Cluster(sys1).registerOnMemberUp(sys1.actorOf(Props(new Actor with ActorLogging {
+    manager ! ManagerCommand(SetOwner(shoppingCart1, customer), 0, self)
+    manager ! ManagerCommand(AddItem(shoppingCart1, item1, 5), 1, self)
+    manager ! ManagerCommand(AddItem(shoppingCart1, item1, -3), 2, self)
+    manager ! ManagerCommand(AddItem(shoppingCart1, item2, 6), 3, self)
+    manager ! ManagerCommand(RemoveItem(shoppingCart1, item1, 3), 4, self)
+    manager ! ManagerQuery(GetItems(shoppingCart1), 5, self)
 
-      def receive: Receive = {
-        case ManagerEvent(id, event)   ⇒ log.info("success ({}): {}", id, event)
-        case ManagerRejection(id, msg) ⇒ log.warning("rejected ({}): {}", id, msg)
-        case ManagerResult(id, result) ⇒
-          log.info("result ({}): {}", id, result)
+    def receive: Receive = {
+      case ManagerEvent(id, event)   => log.info("success ({}): {}", id, event)
+      case ManagerRejection(id, msg) => log.warning("rejected ({}): {}", id, msg)
+      case ManagerResult(id, result) =>
+        log.info("result ({}): {}", id, result)
 
-          manager ! ManagerCommand(SetOwner(shoppingCart2, customer), 10, self)
-          manager ! ManagerCommand(AddItem(shoppingCart2, item2, 15), 11, self)
-          manager ! ManagerCommand(AddItem(shoppingCart2, item2, -3), 12, self)
-          manager ! ManagerCommand(AddItem(shoppingCart2, item1, 60), 13, self)
-          manager ! ManagerCommand(RemoveItem(shoppingCart2, item2, 3), 14, self)
-          manager ! ManagerQuery(GetItems(shoppingCart2), 15, self)
+        manager ! ManagerCommand(SetOwner(shoppingCart2, customer), 10, self)
+        manager ! ManagerCommand(AddItem(shoppingCart2, item2, 15), 11, self)
+        manager ! ManagerCommand(AddItem(shoppingCart2, item2, -3), 12, self)
+        manager ! ManagerCommand(AddItem(shoppingCart2, item1, 60), 13, self)
+        manager ! ManagerCommand(RemoveItem(shoppingCart2, item2, 3), 14, self)
+        manager ! ManagerQuery(GetItems(shoppingCart2), 15, self)
 
-          context.become(second)
-      }
+        context.become(second)
+    }
 
-      def second: Receive = {
-        case ManagerEvent(id, event)   ⇒ log.info("success ({}): {}", id, event)
-        case ManagerRejection(id, msg) ⇒ log.warning("rejected ({}): {}", id, msg)
-        case ManagerResult(id, result) ⇒
-          log.info("result ({}): {}", id, result)
-          sys1.terminate()
-          sys2.terminate()
-      }
-    }), "client"))
+    def second: Receive = {
+      case ManagerEvent(id, event)   => log.info("success ({}): {}", id, event)
+      case ManagerRejection(id, msg) => log.warning("rejected ({}): {}", id, msg)
+      case ManagerResult(id, result) =>
+        log.info("result ({}): {}", id, result)
+        sys1.terminate()
+        sys2.terminate()
+    }
+  }), "client"))
 }

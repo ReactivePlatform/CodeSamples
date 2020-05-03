@@ -21,11 +21,7 @@ object ActiveActive {
   // #snip_13-14
   private final case class SeqCommand(seq: Int, cmd: Command, replyTo: ActorRef)
 
-  private final case class SeqResult(
-    seq:     Int,
-    res:     Result,
-    replica: ActorRef,
-    replyTo: ActorRef)
+  private final case class SeqResult(seq: Int, res: Result, replica: ActorRef, replyTo: ActorRef)
 
   private final case class SendInitialData(toReplica: ActorRef)
 
@@ -35,24 +31,24 @@ object ActiveActive {
     private var map = Map.empty[String, JsValue]
 
     def receive: Receive = {
-      case InitialData(m) ⇒
+      case InitialData(m) =>
         map = m
         context.become(initialized)
         unstashAll()
-      case _ ⇒ stash()
+      case _ => stash()
     }
 
     def initialized: Receive = {
-      case SeqCommand(seq, cmd, replyTo) ⇒
+      case SeqCommand(seq, cmd, replyTo) =>
         // tracking of sequence numbers and resents is elided here
         cmd match {
-          case Put(key, value, r) ⇒
+          case Put(key, value, r) =>
             map += key -> value
             replyTo ! SeqResult(seq, PutConfirmed(key, value), self, r)
-          case Get(key, r) ⇒
-            replyTo ! SeqResult(seq, GetResult(key, map get key), self, r)
+          case Get(key, r) =>
+            replyTo ! SeqResult(seq, GetResult(key, map.get(key)), self, r)
         }
-      case SendInitialData(toReplica) ⇒ toReplica ! InitialData(map)
+      case SendInitialData(toReplica) => toReplica ! InitialData(map)
     }
   }
 
@@ -73,26 +69,22 @@ object ActiveActive {
     def isFinished: Boolean = missing.isEmpty
   }
 
-  private final case class Unknown(
-    deadline: Deadline,
-    replies:  Set[SeqResult],
-    missing:  Set[ActorRef],
-    quorum:   Int) extends ReplyState {
+  private final case class Unknown(deadline: Deadline, replies: Set[SeqResult], missing: Set[ActorRef], quorum: Int)
+      extends ReplyState {
 
     override def add(res: SeqResult): ReplyState = {
       val nextReplies = replies + res
       val nextMissing = missing - res.replica
       if (nextReplies.size >= quorum) {
         val answer =
-          replies.toSeq.groupBy(_.res)
-            .collectFirst {
-              case (k, s) if s.size >= quorum ⇒ s.head
-            }
+          replies.toSeq.groupBy(_.res).collectFirst {
+            case (k, s) if s.size >= quorum => s.head
+          }
 
         if (answer.isDefined) {
           val right = answer.get
           val wrong = replies.collect {
-            case SeqResult(_, result, replica, _) if res != right ⇒ replica
+            case SeqResult(_, result, replica, _) if res != right => replica
           }
           Known(deadline, right, wrong, nextMissing)
         } else if (nextMissing.isEmpty) {
@@ -102,15 +94,15 @@ object ActiveActive {
     }
   }
 
-  private final case class Known(
-    deadline: Deadline, reply: SeqResult,
-    wrong: Set[ActorRef], missing: Set[ActorRef]) extends ReplyState {
+  private final case class Known(deadline: Deadline, reply: SeqResult, wrong: Set[ActorRef], missing: Set[ActorRef])
+      extends ReplyState {
 
     override def add(res: SeqResult): ReplyState = {
-      val nextWrong = if (res.res == reply.res)
-        wrong
-      else
-        wrong + res.replica
+      val nextWrong =
+        if (res.res == reply.res)
+          wrong
+        else
+          wrong + res.replica
       Known(deadline, reply, nextWrong, missing - res.replica)
     }
   }
@@ -121,7 +113,7 @@ object ActiveActive {
       val counts = replies.groupBy(_.res)
       val biggest = counts.iterator.map(_._2.size).max
       val winners = counts.collectFirst {
-        case (res, win) if win.size == biggest ⇒ win
+        case (res, win) if win.size == biggest => win
       }.get
       val losers = (replies -- winners).map(_.replica)
       Known(deadline, winners.head, losers, Set.empty)
@@ -132,8 +124,8 @@ object ActiveActive {
 
   // #snip_13-16
   class Coordinator(N: Int) extends Actor {
-    private var replicas = (1 to N).map(_ ⇒ newReplica()).toSet
-    private val seqNr = Iterator from 0
+    private var replicas = (1 to N).map(_ => newReplica()).toSet
+    private val seqNr = Iterator.from(0)
     private var replies = TreeMap.empty[Int, ReplyState]
     private var nextReply = 0
 
@@ -146,37 +138,38 @@ object ActiveActive {
     // schedule timeout messages for quiescent periods
     context.setReceiveTimeout(1.second)
 
-    def receive: Receive = ({
-      case cmd: Command ⇒
-        val c = SeqCommand(seqNr.next, cmd, self)
-        replicas foreach (_ ! c)
-        replies += c.seq -> Unknown(5 seconds fromNow, Set.empty,
-          replicas, (replicas.size + 1) / 2)
-      case res: SeqResult if replies.contains(res.seq) &&
-        replicas.contains(res.replica) ⇒
-        val prevState = replies(res.seq)
-        val nextState = prevState.add(res)
-        replies += res.seq -> nextState
-      case Terminated(ref) ⇒
-        replaceReplica(ref, terminate = false)
-      case ReceiveTimeout ⇒
-    }: Receive) andThen { _ ⇒
-      doTimeouts()
-      sendReplies()
-      evictFinished()
-    }
+    def receive: Receive =
+      ({
+        case cmd: Command =>
+          val c = SeqCommand(seqNr.next, cmd, self)
+          replicas.foreach(_ ! c)
+          replies += c.seq -> Unknown(5.seconds(fromNow), Set.empty, replicas, (replicas.size + 1) / 2)
+        case res: SeqResult
+            if replies.contains(res.seq) &&
+            replicas.contains(res.replica) =>
+          val prevState = replies(res.seq)
+          val nextState = prevState.add(res)
+          replies += res.seq -> nextState
+        case Terminated(ref) =>
+          replaceReplica(ref, terminate = false)
+        case ReceiveTimeout =>
+      }: Receive).andThen { _ =>
+        doTimeouts()
+        sendReplies()
+        evictFinished()
+      }
 
     //...
     // #snip_13-18
     private def doTimeouts(): Unit = {
       val now = Deadline.now
       val expired = replies.iterator.takeWhile(_._2.deadline <= now)
-      for ((seq, state) ← expired) {
+      for ((seq, state) <- expired) {
         state match {
-          case Unknown(deadline, received, _, _) ⇒
+          case Unknown(deadline, received, _, _) =>
             val forced = Known.fromUnknown(deadline, received)
             replies += seq -> forced
-          case Known(deadline, reply, wrong, missing) ⇒
+          case Known(deadline, reply, wrong, missing) =>
             replies += seq -> Known(deadline, reply, wrong, Set.empty)
         }
       }
@@ -187,11 +180,11 @@ object ActiveActive {
     // #snip_13-17
     @tailrec private def sendReplies(): Unit =
       replies.get(nextReply) match {
-        case Some(k @ Known(_, reply, _, _)) ⇒
+        case Some(k @ Known(_, reply, _, _)) =>
           reply.replyTo ! reply.res
           nextReply += 1
           sendReplies()
-        case _ ⇒
+        case _ =>
       }
 
     // #snip_13-17
@@ -199,11 +192,11 @@ object ActiveActive {
     // #snip_13-19
     @tailrec private def evictFinished(): Unit =
       replies.headOption match {
-        case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished ⇒
-          wrong foreach (replaceReplica(_, terminate = true))
+        case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished =>
+          wrong.foreach(replaceReplica(_, terminate = true))
           replies -= seq
           evictFinished()
-        case _ ⇒
+        case _ =>
       }
 
     private def replaceReplica(r: ActorRef, terminate: Boolean): Unit =

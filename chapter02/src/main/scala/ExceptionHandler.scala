@@ -14,9 +14,9 @@ object ExceptionHandler {
     try {
       f(i)
     } catch {
-      case _: java.lang.ArithmeticException ⇒ Int.MaxValue
-      case ex: java.lang.StackOverflowError ⇒ ???
-      case ex: java.net.ConnectException    ⇒ ???
+      case _: java.lang.ArithmeticException => Int.MaxValue
+      case ex: java.lang.StackOverflowError => ???
+      case ex: java.net.ConnectException    => ???
     }
     // #snip
 

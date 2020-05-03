@@ -26,7 +26,7 @@ class DataIngesterSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     val probe = TestProbe()
     ingestService ! Retrieve(url, "myID", probe.ref)
     val replies = probe.receiveWhile(1.second) {
-      case r @ Record("myID", _) ⇒ r
+      case r @ Record("myID", _) => r
     }
     probe.expectMsg(0.seconds, EOF)
     // #snip
@@ -52,7 +52,7 @@ object DataIngesterSpec {
 
   class DataIngester extends Actor {
     override def receive: Receive = {
-      case Retrieve(_, dataId, replyTo) ⇒
+      case Retrieve(_, dataId, replyTo) =>
         replyTo ! Record(dataId, 1)
         replyTo ! Record(dataId, 2)
         replyTo ! Record(dataId, 3)

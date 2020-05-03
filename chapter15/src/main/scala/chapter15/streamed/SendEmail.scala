@@ -17,10 +17,11 @@ import chapter15.SendEmailResult
 
 // #snip
 final case class SendEmail(
-  sender:        String,
-  recipients:    List[String],
-  correlationID: UUID,
-  replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
+    sender: String,
+    recipients: List[String],
+    correlationID: UUID,
+    replyTo: ActorRef[SendEmailResult])(body: Source[String])
+    extends StreamedRequest {
   override def payload: Source[String] = body
 }
 

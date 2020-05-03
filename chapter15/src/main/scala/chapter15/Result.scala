@@ -17,10 +17,6 @@ case object ReceiveTimeout extends Result
 // Listing 15.7 Encapsulated information needed for multiple SMTP exchanges
 
 // #snip
-final case class SendEmailResult(
-  correlationID: UUID,
-  status:        StatusCode,
-  explanation:   Option[String]) extends Result
+final case class SendEmailResult(correlationID: UUID, status: StatusCode, explanation: Option[String]) extends Result
 
 // #snip
-

@@ -1,25 +1,8 @@
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.{HeaderLicense, headerLicense}
 import sbt.{Def, _}
 import scalafix.sbt.ScalafixPlugin.autoImport._
-import scalariform.formatter.preferences._
 
 object Build {
-
-  private def setPreferences(preferences: IFormattingPreferences): IFormattingPreferences = preferences
-    .setPreference(RewriteArrowSymbols, true)
-    .setPreference(AlignParameters, true)
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(DoubleIndentConstructorArguments, false)
-    .setPreference(DoubleIndentMethodDeclaration, false)
-    .setPreference(DanglingCloseParenthesis, Preserve)
-    .setPreference(NewlineAtEndOfFile, true)
-
-  private val formats: Seq[Def.Setting[IFormattingPreferences]] = Seq(
-    ScalariformKeys.preferences := setPreferences(ScalariformKeys.preferences.value),
-    ScalariformKeys.preferences in Compile := setPreferences(ScalariformKeys.preferences.value),
-    ScalariformKeys.preferences in Test := setPreferences(ScalariformKeys.preferences.value)
-  )
 
   import sbt.Keys._
 
@@ -31,7 +14,7 @@ object Build {
 
   final val DefaultJavacOptions = Seq("-encoding", "UTF-8", "-Xlint:unchecked", "-XDignore.symbol.file")
 
-  val sharedSettings: Seq[Def.Setting[_]] = formats ++ Seq(
+  val sharedSettings: Seq[Def.Setting[_]] = Seq(
     addCompilerPlugin(scalafixSemanticdb),
     headerLicense := Some(HeaderLicense.Custom(
       s"""|Copyright (c) 2018 https://www.reactivedesignpatterns.com/ ${"\n"}

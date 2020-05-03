@@ -26,27 +26,22 @@ class StagedFuturesForExample(inventoryService: InventoryService) {
    */
   // #snip
   // Provide the thread pool to be applied
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(
-    ForkJoinPool.commonPool())
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool.commonPool())
 
-  def getProductInventoryByPostalCode(
-    productSku: Long,
-    postalCode: String): Future[(Long, Map[String, Long])] = {
+  def getProductInventoryByPostalCode(productSku: Long, postalCode: String): Future[(Long, Map[String, Long])] = {
 
     // Define the futures so they can start doing their work
     val localInventoryFuture = Future {
-      inventoryService.currentInventoryInWarehouse(
-        productSku, postalCode)
+      inventoryService.currentInventoryInWarehouse(productSku, postalCode)
     }
     val overallInventoryFutureByWarehouse = Future {
-      inventoryService.currentInventoryOverallByWarehouse(
-        productSku)
+      inventoryService.currentInventoryOverallByWarehouse(productSku)
     }
 
     // Retrieve the values and return a future of the combined result
     for {
-      local ← localInventoryFuture
-      overall ← overallInventoryFutureByWarehouse
+      local <- localInventoryFuture
+      overall <- overallInventoryFutureByWarehouse
     } yield (local, overall)
   }
 

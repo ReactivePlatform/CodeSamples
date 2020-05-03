@@ -7,7 +7,7 @@
 
 package chapter11
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props, actorRef2Scala }
+import akka.actor.{ actorRef2Scala, Actor, ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import akka.util.Timeout
 import com.reactivedesignpatterns.Defaults.AskableActorRef
@@ -43,15 +43,21 @@ object LatencyTestSupport {
           |        maximum         = ${sorted.last}""".stripMargin
   }
 
-  private final case class RunMeasurement(count: Int, maxParallelism: Int, ec: ExecutionContext, f: Int ⇒ SingleResult[_], replyTo: ActorRef)
+  private final case class RunMeasurement(
+      count: Int,
+      maxParallelism: Int,
+      ec: ExecutionContext,
+      f: Int => SingleResult[_],
+      replyTo: ActorRef)
 
   private class Supervisor extends Actor {
     def receive: Receive = {
-      case r: RunMeasurement ⇒ context.actorOf(runnerProps(r))
+      case r: RunMeasurement => context.actorOf(runnerProps(r))
     }
   }
 
-  private def runnerProps(r: RunMeasurement): Props = Props(new TestRunner(r.count, r.maxParallelism, r.f, r.replyTo)(r.ec))
+  private def runnerProps(r: RunMeasurement): Props =
+    Props(new TestRunner(r.count, r.maxParallelism, r.f, r.replyTo)(r.ec))
 
   private sealed trait TestResult
 
@@ -63,11 +69,9 @@ object LatencyTestSupport {
     override def isDefinedAt(ex: Throwable) = true
   }
 
-  private class TestRunner(
-    count:          Int,
-    maxParallelism: Int,
-    f:              Int ⇒ SingleResult[_],
-    replyTo:        ActorRef)(implicit ec: ExecutionContext) extends Actor {
+  private class TestRunner(count: Int, maxParallelism: Int, f: Int => SingleResult[_], replyTo: ActorRef)(
+      implicit ec: ExecutionContext)
+      extends Actor {
 
     private var sent = 0
     private var received = 0
@@ -76,25 +80,29 @@ object LatencyTestSupport {
 
     override def preStart(): Unit = {
       val tryNow = Math.min(count, maxParallelism)
-      (0 until tryNow) foreach send
+      (0 until tryNow).foreach(send)
     }
 
     def send(i: Int): Unit = {
       val start = Timestamp.now
       val r = f(i)
-      r.future map { v ⇒
-        val stop = Timestamp.now
-        assert(v == r.expected, s"$v did not equal ${r.expected}")
-        (stop - start).toFiniteDuration
-      } map TestSuccess recover TestFailure pipeTo self
+      r.future
+        .map { v =>
+          val stop = Timestamp.now
+          assert(v == r.expected, s"$v did not equal ${r.expected}")
+          (stop - start).toFiniteDuration
+        }
+        .map(TestSuccess)
+        .recover(TestFailure)
+        .pipeTo(self)
       sent += 1
     }
 
     def receive: Receive = {
-      case TestSuccess(timing) ⇒
+      case TestSuccess(timing) =>
         results :+= timing
         nextOrFinish()
-      case TestFailure(ex) ⇒
+      case TestFailure(ex) =>
         failures :+= ex
         nextOrFinish()
     }
@@ -118,9 +126,9 @@ class LatencyTestSupport(system: ActorSystem) {
 
   private val supervisor = system.actorOf(Props[Supervisor], "LatencyTestSupportSupervisor")
 
-  def measure(count: Int, maxParallelism: Int)(f: Int ⇒ SingleResult[_])(implicit timeout: Timeout, ec: ExecutionContext): Future[SummaryResult] = {
-    supervisor ? (RunMeasurement(count, maxParallelism, ec, f, _)) mapTo classTag[SummaryResult]
+  def measure(count: Int, maxParallelism: Int)(
+      f: Int => SingleResult[_])(implicit timeout: Timeout, ec: ExecutionContext): Future[SummaryResult] = {
+    (supervisor ? (RunMeasurement(count, maxParallelism, ec, f, _))).mapTo(classTag[SummaryResult])
   }
 
 }
-
