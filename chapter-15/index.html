@@ -245,7 +245,7 @@ Content-Length: 22
 
   class Responder extends Actor {
     def receive: Receive = {
-      case Request(msg) ⇒
+      case Request(msg) =&gt;
         println(s&quot;got request: $msg&quot;)
         sender() ! Response(&quot;got it!&quot;)
     }
@@ -255,7 +255,7 @@ Content-Length: 22
     responder ! Request(&quot;hello&quot;)
 
     def receive: Receive = {
-      case Response(msg) ⇒
+      case Response(msg) =&gt;
         println(s&quot;got response: $msg&quot;)
         context.system.terminate()
     }
@@ -283,27 +283,27 @@ got response: got it!</code></pre>
 
   val responder: Behavior[Request] =
     Static {
-      case Request(msg, replyTo) ⇒
+      case Request(msg, replyTo) =&gt;
         println(s&quot;got request: $msg&quot;)
         replyTo ! Response(&quot;got it!&quot;)
     }
 
   def requester(responder: ActorRef[Request]): Behavior[Response] =
-    SelfAware { self ⇒
+    SelfAware { self =&gt;
       responder ! Request(&quot;hello&quot;, self)
       Total {
-        case Response(msg) ⇒
+        case Response(msg) =&gt;
           println(s&quot;got response: $msg&quot;)
           Stopped
       }
     }
 
   def main(args: Array[String]): Unit = {
-    ActorSystem(&quot;ReqResTyped&quot;, ContextAware[Unit] { ctx ⇒
+    ActorSystem(&quot;ReqResTyped&quot;, ContextAware[Unit] { ctx =&gt;
       val res = ctx.spawn(responder, &quot;responder&quot;)
       val req = ctx.watch(ctx.spawn(requester(res), &quot;requester&quot;))
       Full {
-        case Sig(_, Terminated(`req`)) ⇒ Stopped
+        case Sig(_, Terminated(`req`)) =&gt; Stopped
       }
     })
   }
@@ -382,25 +382,23 @@ S: 221 Bye
   <p>代码清单15-7 封装了多次 SMTP 交换所需要的信息</p>
 </blockquote>
 <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/SendEmail.scala#L18-L24" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
-  sender:        String,
-  recipients:    List[String],
-  body:          String,
-  correlationID: UUID,
-  replyTo:       ActorRef[SendEmailResult])
+    sender: String,
+    recipients: List[String],
+    body: String,
+    correlationID: UUID,
+    replyTo: ActorRef[SendEmailResult])
 </code></pre>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Result.scala#L20-L24" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmailResult(
-  correlationID: UUID,
-  status:        StatusCode,
-  explanation:   Option[String]) extends Result
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Result.scala#L20-L21" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmailResult(correlationID: UUID, status: StatusCode, explanation: Option[String]) extends Result
 </code></pre>
 <blockquote>
   <p>代码清单15-8 分离电子邮件主体，使得其可以按需投递</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L26" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
-  sender:        String,
-  recipients:    List[String],
-  correlationID: UUID,
-  replyTo:       ActorRef[SendEmailResult])(body: Source[String]) extends StreamedRequest {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/streamed/SendEmail.scala#L19-L27" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
+    sender: String,
+    recipients: List[String],
+    correlationID: UUID,
+    replyTo: ActorRef[SendEmailResult])(body: Source[String])
+    extends StreamedRequest {
   override def payload: Source[String] = body
 }
 </code></pre>
@@ -408,19 +406,18 @@ S: 221 Bye
   <p>代码清单15-9 允许邮件主体可以被接收者拉取</p>
 </blockquote>
 <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pullable/SendEmail.scala#L20-L26" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class SendEmail(
-  sender:        String,
-  recipients:    List[String],
-  bodyLocation:  URL,
-  correlationID: UUID,
-  replyTo:       ActorRef[SendEmailResult])
+    sender: String,
+    recipients: List[String],
+    bodyLocation: URL,
+    correlationID: UUID,
+    replyTo: ActorRef[SendEmailResult])
 </code></pre>
 <h2><a href="#15-3-询问模式" name="15-3-询问模式" class="anchor"><span class="anchor-link"></span></a>15.3 询问模式</h2>
 <blockquote>
   <p>代码清单15-10 请求启动验证过程的简单协议</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L20-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class StartVerificationProcess(
-  userEmail: String,
-  replyTo:   ActorRef[VerificationProcessResponse]) extends MyCommands
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/Protocal.scala#L21-L29" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class StartVerificationProcess(userEmail: String, replyTo: ActorRef[VerificationProcessResponse])
+    extends MyCommands
 
 sealed trait VerificationProcessResponse
 
@@ -431,45 +428,35 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
 <blockquote>
   <p>代码清单15-11 一个转发结果的匿名子Actor</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L68" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withChildActor(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
-  ContextAware { ctx: ActorContext[StartVerificationProcess] ⇒
-    val log = new BusLogging(
-      ctx.system.eventStream,
-      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L26-L58" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withChildActor(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware { ctx: ActorContext[StartVerificationProcess] =&gt;
+    val log = new BusLogging(ctx.system.eventStream, &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
 
     Static {
-      case StartVerificationProcess(userEmail, replyTo) ⇒
+      case StartVerificationProcess(userEmail, replyTo) =&gt;
         val corrID = UUID.randomUUID()
         val childActor = ctx.spawnAnonymous(FullTotal[Result] {
-          case Sig(ctx, PreStart) ⇒
+          case Sig(ctx, PreStart) =&gt;
             ctx.setReceiveTimeout(5.seconds, ReceiveTimeout)
             Same
-          case Msg(_, ReceiveTimeout) ⇒
-            log.warning(
-              &quot;verification process initiation timed out for {}&quot;,
-              userEmail)
+          case Msg(_, ReceiveTimeout) =&gt;
+            log.warning(&quot;verification process initiation timed out for {}&quot;, userEmail)
             replyTo ! VerificationProcessFailed(userEmail)
             Stopped
-          case Msg(_, SendEmailResult(`corrID`, StatusCode.OK, _)) ⇒
-            log.debug(
-              &quot;successfully started the verification process for {}&quot;,
-              userEmail)
+          case Msg(_, SendEmailResult(`corrID`, StatusCode.OK, _)) =&gt;
+            log.debug(&quot;successfully started the verification process for {}&quot;, userEmail)
             replyTo ! VerificationProcessStarted(userEmail)
             Stopped
-          case Msg(_, SendEmailResult(`corrID`, StatusCode.Failed, explanation)) ⇒
-            log.info(
-              &quot;failed to start the verification process for {}: {}&quot;,
-              userEmail, explanation)
+          case Msg(_, SendEmailResult(`corrID`, StatusCode.Failed, explanation)) =&gt;
+            log.info(&quot;failed to start the verification process for {}: {}&quot;, userEmail, explanation)
             replyTo ! VerificationProcessFailed(userEmail)
             Stopped
-          case Msg(_, SendEmailResult(wrongID, _, _)) ⇒
-            log.error(
-              &quot;received wrong SendEmailResult for corrID {}&quot;,
-              corrID)
+          case Msg(_, SendEmailResult(wrongID, _, _)) =&gt;
+            log.error(&quot;received wrong SendEmailResult for corrID {}&quot;, corrID)
             Same
         })
-        val request = SendEmail(&quot;verification@example.com&quot;, List(userEmail),
-          constructBody(userEmail, corrID), corrID, childActor)
+        val request =
+          SendEmail(&quot;verification@example.com&quot;, List(userEmail), constructBody(userEmail, corrID), corrID, childActor)
         emailGateway ! request
     }
   }
@@ -477,87 +464,72 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
 <blockquote>
   <p>代码清单15-12 由询问模式所产生的Future，并进行了转换</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L72-L114" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
-  ContextAware { ctx ⇒
-    val log = new BusLogging(
-      ctx.system.eventStream,
-      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L62-L99" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware { ctx =&gt;
+    val log = new BusLogging(ctx.system.eventStream, &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
     implicit val timeout: Timeout = Timeout(5.seconds)
     import ctx.executionContext
     implicit val scheduler: Scheduler = ctx.system.scheduler
 
     Static {
-      case StartVerificationProcess(userEmail, replyTo) ⇒
+      case StartVerificationProcess(userEmail, replyTo) =&gt;
         val corrID = UUID.randomUUID()
         val response: Future[SendEmailResult] =
           emailGateway ? (SendEmail(
             &quot;verification@example.com&quot;,
             List(userEmail),
-            constructBody(userEmail, corrID), corrID, _))
-        response.map {
-          case SendEmailResult(`corrID`, StatusCode.OK, _) ⇒
-            log.debug(
-              &quot;successfully started the verification process for {}&quot;,
-              userEmail)
-            VerificationProcessStarted(userEmail)
-          case SendEmailResult(`corrID`, StatusCode.Failed, explanation) ⇒
-            log.info(
-              &quot;failed to start the verification process for {}: {}&quot;,
-              userEmail, explanation)
-            VerificationProcessFailed(userEmail)
-          case SendEmailResult(wrongID, _, _) ⇒
-            log.error(
-              &quot;received wrong SendEmailResult for corrID {}&quot;,
-              corrID)
-            VerificationProcessFailed(userEmail)
-        }.recover {
-          case _: AskTimeoutException ⇒
-            log.warning(
-              &quot;verification process initiation timed out for {}&quot;,
-              userEmail)
-            VerificationProcessFailed(userEmail)
-        }.foreach(result ⇒ replyTo ! result)
+            constructBody(userEmail, corrID),
+            corrID,
+            _))
+        response
+          .map {
+            case SendEmailResult(`corrID`, StatusCode.OK, _) =&gt;
+              log.debug(&quot;successfully started the verification process for {}&quot;, userEmail)
+              VerificationProcessStarted(userEmail)
+            case SendEmailResult(`corrID`, StatusCode.Failed, explanation) =&gt;
+              log.info(&quot;failed to start the verification process for {}: {}&quot;, userEmail, explanation)
+              VerificationProcessFailed(userEmail)
+            case SendEmailResult(wrongID, _, _) =&gt;
+              log.error(&quot;received wrong SendEmailResult for corrID {}&quot;, corrID)
+              VerificationProcessFailed(userEmail)
+          }
+          .recover {
+            case _: AskTimeoutException =&gt;
+              log.warning(&quot;verification process initiation timed out for {}&quot;, userEmail)
+              VerificationProcessFailed(userEmail)
+          }
+          .foreach(result =&gt; replyTo ! result)
     }
   }
 </code></pre>
 <blockquote>
   <p>代码清单15-13 不使用内置支持实现询问模式</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L118-L159" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withoutAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
-  ContextAware[MyCommands] { ctx ⇒
-    val log = new BusLogging(
-      ctx.system.eventStream,
-      &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/pattern/ask/AskPattern.scala#L103-L134" target="_blank" title="Go to snippet source"></a><code class="language-scala">def withoutAskPattern(emailGateway: ActorRef[SendEmail]): Behavior[StartVerificationProcess] =
+  ContextAware[MyCommands] { ctx =&gt;
+    val log = new BusLogging(ctx.system.eventStream, &quot;VerificationProcessManager&quot;, getClass, ctx.system.logFilter)
     var statusMap = Map.empty[UUID, (String, ActorRef[VerificationProcessResponse])]
-    val adapter = ctx.spawnAdapter((s: SendEmailResult) ⇒
-      MyEmailResult(s.correlationID, s.status, s.explanation))
+    val adapter = ctx.spawnAdapter((s: SendEmailResult) =&gt; MyEmailResult(s.correlationID, s.status, s.explanation))
 
     Static {
-      case StartVerificationProcess(userEmail, replyTo) ⇒
+      case StartVerificationProcess(userEmail, replyTo) =&gt;
         val corrID = UUID.randomUUID()
-        val request = SendEmail(&quot;verification@example.com&quot;, List(userEmail),
-          constructBody(userEmail, corrID), corrID, adapter)
+        val request =
+          SendEmail(&quot;verification@example.com&quot;, List(userEmail), constructBody(userEmail, corrID), corrID, adapter)
         emailGateway ! request
         statusMap += corrID -&gt; (userEmail, replyTo)
-        ctx.schedule(5.seconds, ctx.self, MyEmailResult(
-          corrID, StatusCode.Failed, Some(&quot;timeout&quot;)))
-      case MyEmailResult(correlationID, status, explanation) ⇒
+        ctx.schedule(5.seconds, ctx.self, MyEmailResult(corrID, StatusCode.Failed, Some(&quot;timeout&quot;)))
+      case MyEmailResult(correlationID, status, explanation) =&gt;
         statusMap.get(correlationID) match {
-          case None ⇒
-            log.error(
-              &quot;received SendEmailResult for unknown correlation ID {}&quot;,
-              correlationID)
-          case Some((userEmail, replyTo)) ⇒
+          case None =&gt;
+            log.error(&quot;received SendEmailResult for unknown correlation ID {}&quot;, correlationID)
+          case Some((userEmail, replyTo)) =&gt;
             status match {
-              case StatusCode.OK ⇒
-                log.debug(
-                  &quot;successfully started the verification process for {}&quot;,
-                  userEmail)
+              case StatusCode.OK =&gt;
+                log.debug(&quot;successfully started the verification process for {}&quot;, userEmail)
                 replyTo ! VerificationProcessStarted(userEmail)
-              case StatusCode.Failed ⇒
-                log.info(
-                  &quot;failed to start the verification process for {}: {}&quot;,
-                  userEmail, explanation)
+              case StatusCode.Failed =&gt;
+                log.info(&quot;failed to start the verification process for {}: {}&quot;, userEmail, explanation)
                 replyTo ! VerificationProcessFailed(userEmail)
             }
             statusMap -= correlationID
@@ -569,41 +541,33 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
 <blockquote>
   <p>代码清单15-14 使用for推导式来聚合三个Future表达式的结果。</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L155" target="_blank" title="Go to snippet source"></a><code class="language-scala">def futureFrontPage(
-  themes:       ActorRef[GetTheme],
-  personalNews: ActorRef[GetPersonalNews],
-  topNews:      ActorRef[GetTopNews]): Behavior[GetFrontPage] =
-  ContextAware { ctx ⇒
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L113-L147" target="_blank" title="Go to snippet source"></a><code class="language-scala">def futureFrontPage(
+    themes: ActorRef[GetTheme],
+    personalNews: ActorRef[GetPersonalNews],
+    topNews: ActorRef[GetTopNews]): Behavior[GetFrontPage] =
+  ContextAware { ctx =&gt;
     import ctx.executionContext
     implicit val timeout: Timeout = Timeout(1.second)
     implicit val scheduler: Scheduler = ctx.system.scheduler
 
     Static {
-      case GetFrontPage(user, replyTo) ⇒
+      case GetFrontPage(user, replyTo) =&gt;
         val cssFuture =
-          (themes ? (GetTheme(user, _: ActorRef[ThemeResult])))
-            .map(_.css)
-            .recover {
-              case _: AskTimeoutException ⇒ &quot;default.css&quot;
-            }
+          (themes ? (GetTheme(user, _: ActorRef[ThemeResult]))).map(_.css).recover {
+            case _: AskTimeoutException =&gt; &quot;default.css&quot;
+          }
         val personalNewsFuture =
-          (personalNews ? (GetPersonalNews(
-            user,
-            _: ActorRef[PersonalNewsResult])))
-            .map(_.news)
-            .recover {
-              case _: AskTimeoutException ⇒ Nil
-            }
+          (personalNews ? (GetPersonalNews(user, _: ActorRef[PersonalNewsResult]))).map(_.news).recover {
+            case _: AskTimeoutException =&gt; Nil
+          }
         val topNewsFuture =
-          (topNews ? (GetTopNews(_: ActorRef[TopNewsResult])))
-            .map(_.news)
-            .recover {
-              case _: AskTimeoutException ⇒ Nil
-            }
+          (topNews ? (GetTopNews(_: ActorRef[TopNewsResult]))).map(_.news).recover {
+            case _: AskTimeoutException =&gt; Nil
+          }
         for {
-          css ← cssFuture
-          personalNews ← personalNewsFuture
-          topNews ← topNewsFuture
+          css &lt;- cssFuture
+          personalNews &lt;- personalNewsFuture
+          topNews &lt;- topNewsFuture
         } {
           val topSet = topNews.toSet
           val allNews = topNews ::: personalNews.filterNot(topSet.contains)
@@ -615,29 +579,28 @@ final case class VerificationProcessFailed(userEmail: String) extends Verificati
 <blockquote>
   <p>代码清单15-15 使用子Actor替代Future组合子的使用</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L79-L109" target="_blank" title="Go to snippet source"></a><code class="language-scala">private def pf(p: PartialFunction[AnyRef, Unit]): p.type = p
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L80-L109" target="_blank" title="Go to snippet source"></a><code class="language-scala">private def pf(p: PartialFunction[AnyRef, Unit]): p.type = p
 
 def frontPage(
-  themes:       ActorRef[GetTheme],
-  personalNews: ActorRef[GetPersonalNews],
-  topNews:      ActorRef[GetTopNews]): Behavior[GetFrontPage] =
-  ContextAware { ctx ⇒
+    themes: ActorRef[GetTheme],
+    personalNews: ActorRef[GetPersonalNews],
+    topNews: ActorRef[GetTopNews]): Behavior[GetFrontPage] =
+  ContextAware { ctx =&gt;
     Static {
-      case GetFrontPage(user, replyTo) ⇒
-        val childRef = ctx.spawnAnonymous(Deferred { () ⇒
+      case GetFrontPage(user, replyTo) =&gt;
+        val childRef = ctx.spawnAnonymous(Deferred { () =&gt;
           val builder = new FrontPageResultBuilder(user)
-          Partial[AnyRef](
-            pf {
-              case ThemeResult(css)         ⇒ builder.addCSS(css)
-              case PersonalNewsResult(news) ⇒ builder.addPersonalNews(news)
-              case TopNewsResult(news)      ⇒ builder.addTopNews(news)
-              case ReceiveTimeout           ⇒ builder.timeout()
-            } andThen { _ ⇒
-              if (builder.isComplete) {
-                replyTo ! builder.result
-                Stopped
-              } else Same
-            })
+          Partial[AnyRef](pf {
+            case ThemeResult(css)         =&gt; builder.addCSS(css)
+            case PersonalNewsResult(news) =&gt; builder.addPersonalNews(news)
+            case TopNewsResult(news)      =&gt; builder.addTopNews(news)
+            case ReceiveTimeout           =&gt; builder.timeout()
+          }.andThen { _ =&gt;
+            if (builder.isComplete) {
+              replyTo ! builder.result
+              Stopped
+            } else Same
+          })
         })
         themes ! GetTheme(user, childRef)
         personalNews ! GetPersonalNews(user, childRef)
@@ -649,7 +612,7 @@ def frontPage(
 <blockquote>
   <p>代码清单15-16 使用一个构建器来更加直接地表达领域模型</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L75" target="_blank" title="Go to snippet source"></a><code class="language-scala">class FrontPageResultBuilder(user: String) {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L46-L76" target="_blank" title="Go to snippet source"></a><code class="language-scala">class FrontPageResultBuilder(user: String) {
   private var css: Option[String] = None
   private var personalNews: Option[List[String]] = None
   private var topNews: Option[List[String]] = None
@@ -668,7 +631,8 @@ def frontPage(
     if (topNews.isEmpty) topNews = Some(Nil)
   }
 
-  def isComplete: Boolean = css.isDefined &amp;&amp;
+  def isComplete: Boolean =
+    css.isDefined &amp;&amp;
     personalNews.isDefined &amp;&amp; topNews.isDefined
 
   def result: FrontPageResult = {
@@ -682,44 +646,40 @@ def frontPage(
 <blockquote>
   <p>代码清单15-17 添加第4个服务，降低了代码的可读性</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L190-L213" target="_blank" title="Go to snippet source"></a><code class="language-scala">val overrideFuture =
-  (overrides ? (GetOverride(_: ActorRef[OverrideResult])))
-    .recover {
-      case _: AskTimeoutException ⇒ NoOverride
-    }
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/Aggregator.scala#L176-L198" target="_blank" title="Go to snippet source"></a><code class="language-scala">val overrideFuture =
+  (overrides ? (GetOverride(_: ActorRef[OverrideResult]))).recover {
+    case _: AskTimeoutException =&gt; NoOverride
+  }
 for {
-  css ← cssFuture
-  personalNews ← personalNewsFuture
-  topNews ← topNewsFuture
-  ovr ← overrideFuture
+  css &lt;- cssFuture
+  personalNews &lt;- personalNewsFuture
+  topNews &lt;- topNewsFuture
+  ovr &lt;- overrideFuture
 } ovr match {
-  case NoOverride ⇒
+  case NoOverride =&gt;
     val topSet = topNews.toSet
     val allNews = topNews ::: personalNews.filterNot(topSet.contains)
     replyTo ! FrontPageResult(user, css, allNews)
-  case _ ⇒ // nothing to do here
+  case _ =&gt; // nothing to do here
 }
 for {
-  ovr ← overrideFuture
+  ovr &lt;- overrideFuture
 } ovr match {
-  case NoOverride ⇒ // nothing to do here
-  case Override(css, news) ⇒
+  case NoOverride =&gt; // nothing to do here
+  case Override(css, news) =&gt;
     replyTo ! FrontPageResult(user, css, news)
 }</code></pre>
 <h2><a href="#15-7-业务握手协议-又名可靠投递模式-" name="15-7-业务握手协议-又名可靠投递模式-" class="anchor"><span class="anchor-link"></span></a>15.7 业务握手协议（又名可靠投递模式）</h2>
 <blockquote>
   <p>代码清单15-18 使用Actor实现上面的（信息）交换</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L39-L86" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L38-L82" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class ChangeBudget(amount: BigDecimal, replyTo: ActorRef)
 
 case object ChangeBudgetDone
 
 final case class CannotChangeBudget(reason: String)
 
-class Sam(
-  alice:  ActorRef,
-  bob:    ActorRef,
-  amount: BigDecimal) extends Actor {
+class Sam(alice: ActorRef, bob: ActorRef, amount: BigDecimal) extends Actor {
   def receive: Receive = talkToAlice()
 
   def talkToAlice(): Receive = {
@@ -727,9 +687,9 @@ class Sam(
     context.setReceiveTimeout(1.second)
 
     LoggingReceive {
-      case ChangeBudgetDone           ⇒ context.become(talkToBob())
-      case CannotChangeBudget(reason) ⇒ context.stop(self)
-      case ReceiveTimeout             ⇒ alice ! ChangeBudget(-amount, self)
+      case ChangeBudgetDone           =&gt; context.become(talkToBob())
+      case CannotChangeBudget(reason) =&gt; context.stop(self)
+      case ReceiveTimeout             =&gt; alice ! ChangeBudget(-amount, self)
     }
   }
 
@@ -744,16 +704,16 @@ class Alice extends Actor {
   private var alreadyDone: Set[ActorRef] = Set.empty
 
   def receive = LoggingReceive {
-    case ChangeBudget(amount, replyTo) if alreadyDone(replyTo) ⇒
+    case ChangeBudget(amount, replyTo) if alreadyDone(replyTo) =&gt;
       replyTo ! ChangeBudgetDone
-    case ChangeBudget(amount, replyTo) if amount + budget &gt; 0 ⇒
+    case ChangeBudget(amount, replyTo) if amount + budget &gt; 0 =&gt;
       budget += amount
       alreadyDone += replyTo
       context.watch(replyTo)
       replyTo ! ChangeBudgetDone
-    case ChangeBudget(_, replyTo) ⇒
+    case ChangeBudget(_, replyTo) =&gt;
       replyTo ! CannotChangeBudget(&quot;insufficient budget&quot;)
-    case Terminated(saga) ⇒
+    case Terminated(saga) =&gt;
       alreadyDone -= saga
   }
 }
@@ -761,16 +721,14 @@ class Alice extends Actor {
 <blockquote>
   <p>代码清单15-19 向预算消息添加持久性</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L138-L191" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class AliceConfirmedChange(deliveryId: Long)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L133-L184" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class AliceConfirmedChange(deliveryId: Long)
 
 final case class AliceDeniedChange(deliveryId: Long)
 
-class PersistentSam(
-  alice:                      ActorPath,
-  bob:                        ActorPath,
-  amount:                     BigDecimal,
-  override val persistenceId: String)
-  extends PersistentActor with AtLeastOnceDelivery with ActorLogging {
+class PersistentSam(alice: ActorPath, bob: ActorPath, amount: BigDecimal, override val persistenceId: String)
+    extends PersistentActor
+    with AtLeastOnceDelivery
+    with ActorLogging {
 
   def receiveCommand: Receive = Actor.emptyBehavior
 
@@ -781,19 +739,19 @@ class PersistentSam(
   def talkToAlice(): Receive = {
     log.debug(&quot;talking to Alice&quot;)
     var deliveryId: Long = 0
-    deliver(alice)(id ⇒ {
+    deliver(alice)(id =&gt; {
       deliveryId = id
       ChangeBudget(-amount, self, persistenceId)
     })
 
     LoggingReceive({
-      case ChangeBudgetDone ⇒
-        persist(AliceConfirmedChange(deliveryId)) { ev ⇒
+      case ChangeBudgetDone =&gt;
+        persist(AliceConfirmedChange(deliveryId)) { ev =&gt;
           confirmDelivery(ev.deliveryId)
           context.become(talkToBob())
         }
-      case CannotChangeBudget(reason) ⇒
-        persist(AliceDeniedChange(deliveryId)) { ev ⇒
+      case CannotChangeBudget(reason) =&gt;
+        persist(AliceDeniedChange(deliveryId)) { ev =&gt;
           confirmDelivery(ev.deliveryId)
           context.stop(self)
         }
@@ -806,10 +764,10 @@ class PersistentSam(
   }
 
   def receiveRecover = LoggingReceive {
-    case AliceConfirmedChange(deliveryId) ⇒
+    case AliceConfirmedChange(deliveryId) =&gt;
       confirmDelivery(deliveryId)
       context.become(talkToBob())
-    case AliceDeniedChange(deliveryId) ⇒
+    case AliceDeniedChange(deliveryId) =&gt;
       confirmDelivery(deliveryId)
       context.stop(self)
   }
@@ -818,7 +776,7 @@ class PersistentSam(
 <blockquote>
   <p>代码清单15-20 Alice Actor的持久化版本</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L195-L255" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class BudgetChanged(amount: BigDecimal, persistenceId: String)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter15/src/main/scala/chapter15/BusinessHandshake.scala#L188-L243" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class BudgetChanged(amount: BigDecimal, persistenceId: String)
 
 case object CleanupDoneList
 
@@ -834,43 +792,38 @@ class PersistentAlice extends PersistentActor with ActorLogging {
   private var alreadyDone: Set[String] = Set.empty
   private var budget: BigDecimal = 10
 
-  private val cleanupTimer: Cancellable = context.system.scheduler.
-    schedule(1.hour, 1.hour, self, CleanupDoneList)
+  private val cleanupTimer: Cancellable = context.system.scheduler.schedule(1.hour, 1.hour, self, CleanupDoneList)
 
   def receiveCommand = LoggingReceive {
-    case ChangeBudget(amount, replyTo, id) if alreadyDone(id) ⇒
+    case ChangeBudget(amount, replyTo, id) if alreadyDone(id) =&gt;
       replyTo ! ChangeBudgetDone
-    case ChangeBudget(amount, replyTo, id) if amount + budget &gt; 0 ⇒
-      persist(BudgetChanged(amount, id)) { ev ⇒
+    case ChangeBudget(amount, replyTo, id) if amount + budget &gt; 0 =&gt;
+      persist(BudgetChanged(amount, id)) { ev =&gt;
         budget += ev.amount
         alreadyDone += ev.persistenceId
         replyTo ! ChangeBudgetDone
       }
-    case ChangeBudget(_, replyTo, _) ⇒
+    case ChangeBudget(_, replyTo, _) =&gt;
       replyTo ! CannotChangeBudget(&quot;insufficient budget&quot;)
-    case CleanupDoneList ⇒
-      val journal = PersistenceQuery(context.system)
-        .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
-      for (persistenceId ← alreadyDone) {
-        val stream = journal
-          .currentEventsByPersistenceId(persistenceId)
-          .map(_.event)
-          .collect {
-            case AliceConfirmedChange(_) ⇒ ChangeDone(persistenceId)
-          }
+    case CleanupDoneList =&gt;
+      val journal = PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+      for (persistenceId &lt;- alreadyDone) {
+        val stream = journal.currentEventsByPersistenceId(persistenceId).map(_.event).collect {
+          case AliceConfirmedChange(_) =&gt; ChangeDone(persistenceId)
+        }
         stream.runWith(Sink.head).pipeTo(self)
       }
-    case ChangeDone(id) ⇒
-      persist(ChangeDone(id)) { ev ⇒
+    case ChangeDone(id) =&gt;
+      persist(ChangeDone(id)) { ev =&gt;
         alreadyDone -= ev.persistenceId
       }
   }
 
   def receiveRecover = LoggingReceive {
-    case BudgetChanged(amount, id) ⇒
+    case BudgetChanged(amount, id) =&gt;
       budget += amount
       alreadyDone += id
-    case ChangeDone(id) ⇒
+    case ChangeDone(id) =&gt;
       alreadyDone -= id
   }
 

@@ -353,35 +353,30 @@ func consumer(myChannel chan int, iterations int) {
 <blockquote>
   <p>代码清单3-6 使用Scala编程语言将两个Future的结果组合为单一结果</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L28-L52" target="_blank" title="Go to snippet source"></a><code class="language-scala">// Provide the thread pool to be applied
-implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(
-  ForkJoinPool.commonPool())
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesForExample.scala#L28-L47" target="_blank" title="Go to snippet source"></a><code class="language-scala">// Provide the thread pool to be applied
+implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool.commonPool())
 
-def getProductInventoryByPostalCode(
-  productSku: Long,
-  postalCode: String): Future[(Long, Map[String, Long])] = {
+def getProductInventoryByPostalCode(productSku: Long, postalCode: String): Future[(Long, Map[String, Long])] = {
 
   // Define the futures so they can start doing their work
   val localInventoryFuture = Future {
-    inventoryService.currentInventoryInWarehouse(
-      productSku, postalCode)
+    inventoryService.currentInventoryInWarehouse(productSku, postalCode)
   }
   val overallInventoryFutureByWarehouse = Future {
-    inventoryService.currentInventoryOverallByWarehouse(
-      productSku)
+    inventoryService.currentInventoryOverallByWarehouse(productSku)
   }
 
   // Retrieve the values and return a future of the combined result
   for {
-    local ← localInventoryFuture
-    overall ← overallInventoryFutureByWarehouse
+    local &lt;- localInventoryFuture
+    overall &lt;- overallInventoryFutureByWarehouse
   } yield (local, overall)
 }
 </code></pre>
 <blockquote>
   <p>StagedFuturesAsyncExample.scala</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L37-L46" target="_blank" title="Go to snippet source"></a><code class="language-scala">import scala.async.Async.{ async, await }
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/futures-and-promises/src/main/scala/chapter03/future/StagedFuturesAsyncExample.scala#L34-L43" target="_blank" title="Go to snippet source"></a><code class="language-scala">import scala.async.Async.{ async, await }
 val resultFuture = async {
   val localInventoryFuture = async {
     inventoryService.currentInventoryInWarehouse(productSku, postalCode)
@@ -419,7 +414,7 @@ public class RxJavaExampleDriver {
 <blockquote>
   <p>代码清单3-7 一个使用 Akka 的Actor的例子</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L77" target="_blank" title="Go to snippet source"></a><code class="language-scala">package chapter03.actor
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter03/actor/src/main/scala/chapter03/actor/Example.scala#L12-L76" target="_blank" title="Go to snippet source"></a><code class="language-scala">package chapter03.actor
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
@@ -433,14 +428,14 @@ final case class CounterTooLargeException(message: String) extends Exception(mes
 
 class SupervisorActor extends Actor with ActorLogging {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _: CounterTooLargeException ⇒ Restart
+    case _: CounterTooLargeException =&gt; Restart
   }
 
   private val actor2 = context.actorOf(Props[SecondActor], &quot;second-actor&quot;)
   private val actor1 = context.actorOf(Props(new FirstActor(actor2)), &quot;first-actor&quot;)
 
   def receive: Receive = {
-    case Start ⇒ actor1 ! Start
+    case Start =&gt; actor1 ! Start
   }
 }
 
@@ -448,17 +443,16 @@ class AbstractCounterActor extends Actor with ActorLogging {
   protected var counterValue = 0
 
   def receive: Receive = {
-    case _ ⇒
+    case _ =&gt;
   }
 
   def counterReceive: Receive = LoggingReceive {
-    case CounterMessage(i) if i &lt;= 1000 ⇒
+    case CounterMessage(i) if i &lt;= 1000 =&gt;
       counterValue = i
       log.info(s&quot;Counter value: $counterValue&quot;)
       sender ! CounterMessage(counterValue + 1)
-    case CounterMessage(_) ⇒
-      throw CounterTooLargeException(
-        &quot;Exceeded max value of counter!&quot;)
+    case CounterMessage(_) =&gt;
+      throw CounterTooLargeException(&quot;Exceeded max value of counter!&quot;)
   }
 
   override def postRestart(reason: Throwable): Unit = {
@@ -468,7 +462,7 @@ class AbstractCounterActor extends Actor with ActorLogging {
 
 class FirstActor(secondActor: ActorRef) extends AbstractCounterActor {
   override def receive = LoggingReceive {
-    case Start ⇒
+    case Start =&gt;
       context.become(counterReceive)
       log.info(&quot;Starting counter passing.&quot;)
       secondActor ! CounterMessage(counterValue + 1)

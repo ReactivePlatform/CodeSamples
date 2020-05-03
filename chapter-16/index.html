@@ -184,7 +184,7 @@ Type to start searching
   request()
 
   def receive: Receive = {
-    case Job(id, data, replyTo) ⇒
+    case Job(id, data, replyTo) =&gt;
       requested -= 1
       request()
       val sign = if ((data &amp; 1) == 1) plus else minus
@@ -199,23 +199,23 @@ Type to start searching
 <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter16/src/main/scala/chapter16/PullPattern.scala#L51-L79" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Manager extends Actor {
 
   private val works: Iterator[Job] =
-    Iterator from 1 map (x ⇒ Job(x, x, self)) take 1000000
+    Iterator.from(1).map(x =&gt; Job(x, x, self)).take(1000000)
 
-  private val aggregator: (BigDecimal, BigDecimal) ⇒ BigDecimal = (x: BigDecimal, y: BigDecimal) ⇒ x + y
+  private val aggregator: (BigDecimal, BigDecimal) =&gt; BigDecimal = (x: BigDecimal, y: BigDecimal) =&gt; x + y
   private val mc = new MathContext(10000, RoundingMode.HALF_EVEN)
   private var approximation = BigDecimal(0, mc)
 
   private var outstandingWork = 0
 
-  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
+  (1 to 8).foreach(_ =&gt; context.actorOf(Props(new Worker(self))))
 
   def receive: Receive = {
-    case WorkRequest(worker, items) ⇒
-      works.toStream.take(items).foreach { job ⇒
+    case WorkRequest(worker, items) =&gt;
+      works.toStream.take(items).foreach { job =&gt;
         worker ! job
         outstandingWork += 1
       }
-    case JobResult(id, report) ⇒
+    case JobResult(id, report) =&gt;
       approximation = aggregator(approximation, report)
       outstandingWork -= 1
       if (outstandingWork == 0 &amp;&amp; works.isEmpty) {
@@ -234,10 +234,10 @@ Type to start searching
   private var workQueue: Queue[Job] = Queue.empty[Job]
   private var requestQueue: Queue[WorkRequest] = Queue.empty[WorkRequest]
 
-  (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
+  (1 to 8).foreach(_ =&gt; context.actorOf(Props(new Worker(self))))
 
   def receive: Receive = {
-    case job @ Job(id, _, replyTo) ⇒
+    case job @ Job(id, _, replyTo) =&gt;
       if (requestQueue.isEmpty) {
         if (workQueue.size &lt; 1000) workQueue :+= job
         else replyTo ! JobRejected(id)
@@ -249,11 +249,11 @@ Type to start searching
         }
         requestQueue = requestQueue.drop(1)
       }
-    case wr @ WorkRequest(worker, items) ⇒
+    case wr @ WorkRequest(worker, items) =&gt;
       if (workQueue.isEmpty) {
         requestQueue :+= wr
       } else {
-        workQueue.iterator.take(items).foreach(job ⇒ worker ! job)
+        workQueue.iterator.take(items).foreach(job =&gt; worker ! job)
         val sent = Math.min(workQueue.size, items)
         if (sent &lt; items) {
           worker ! DummyWork(items - sent)
@@ -281,13 +281,13 @@ Type to start searching
   request()
 
   def receive: Receive = {
-    case Job(id, data, replyTo) ⇒
+    case Job(id, data, replyTo) =&gt;
       requested -= 1
       request()
       val sign = if ((data &amp; 1) == 1) plus else minus
       val result = sign / data
       replyTo ! JobResult(id, result)
-    case DummyWork(count) ⇒
+    case DummyWork(count) =&gt;
       requested -= count
       request()
   }
@@ -311,7 +311,7 @@ def shallEnqueue(atSize: Int): Boolean =
 <blockquote>
   <p>DropPattern.scala</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter16/src/main/scala/chapter16/DropPattern.scala#L57-L65" target="_blank" title="Go to snippet source"></a><code class="language-scala">case job @ Job(id, _, replyTo) ⇒
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter16/src/main/scala/chapter16/DropPattern.scala#L57-L65" target="_blank" title="Go to snippet source"></a><code class="language-scala">case job @ Job(id, _, replyTo) =&gt;
   if (requestQueue.isEmpty) {
     val atSize = workQueue.size
     if (shallEnqueue(atSize)) {
@@ -331,7 +331,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
   private var workQueue: Queue[WorkEnvelope] = Queue.empty[WorkEnvelope]
 
   def receive: Receive = {
-    case job: Job ⇒
+    case job: Job =&gt;
       workQueue = workQueue.dropWhile(_.consumed)
       if (workQueue.size &lt; 1000) {
         val envelope = WorkEnvelope(job)
@@ -345,12 +345,13 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
 <blockquote>
   <p>代码清单16-4 根据特定速率使用令牌桶来拉取工作</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter16/src/main/scala/chapter16/ThrottlingPattern.scala#L153-L238" target="_blank" title="Go to snippet source"></a><code class="language-scala">class CalculatorClient(
-  workSource:    ActorRef,
-  calculator:    ActorRef,
-  ratePerSecond: Long,
-  bucketSize:    Int,
-  batchSize:     Int) extends Actor {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter16/src/main/scala/chapter16/ThrottlingPattern.scala#L153-L236" target="_blank" title="Go to snippet source"></a><code class="language-scala">class CalculatorClient(
+    workSource: ActorRef,
+    calculator: ActorRef,
+    ratePerSecond: Long,
+    bucketSize: Int,
+    batchSize: Int)
+    extends Actor {
   def now(): Long = System.nanoTime()
 
   private val nanoSecondsBetweenTokens: Long =
@@ -391,11 +392,8 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
       } else {
         val timeForNextToken =
           lastTokenTime + nanoSecondsBetweenTokens - time
-        context.system.scheduler
-          .scheduleOnce(
-            timeForNextToken.nanos,
-            workSource,
-            WorkRequest(self, 1))(context.dispatcher)
+        context.system.scheduler.scheduleOnce(timeForNextToken.nanos, workSource, WorkRequest(self, 1))(
+          context.dispatcher)
         requested = 1
         if (Debug) {
           println(s&quot;$time: request(1) scheduled for ${time + timeForNextToken}&quot;)
@@ -419,7 +417,7 @@ private class IncomingQueue(manager: ActorRef) extends Actor {
    * third part: using the above for rate-regulated message forwarding
    */
   def receive: Receive = {
-    case job: Job ⇒
+    case job: Job =&gt;
       val time = now()
       if (Debug &amp;&amp; requested == 1) {
         println(s&quot;$time: received job&quot;)

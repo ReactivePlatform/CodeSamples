@@ -213,12 +213,13 @@ final Result r = aggregate(a.get(), b.get(), c.get());</code></pre>
 <blockquote>
   <p>ParallelExecutionWithScalaFuture.scala</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ParallelExecutionWithScalaFuture.scala#L32-L37" target="_blank" title="Go to snippet source"></a><code class="language-scala">val fa: Future[ReplyA] = taskA()
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ParallelExecutionWithScalaFuture.scala#L32-L38" target="_blank" title="Go to snippet source"></a><code class="language-scala">val fa: Future[ReplyA] = taskA()
 val fb: Future[ReplyB] = taskB()
 val fc: Future[ReplyC] = taskC()
 
-val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
-  yield aggregate(a, b, c)</code></pre>
+val fr: Future[Result] =
+  for (a &lt;- fa; b &lt;- fb; c &lt;- fc)
+    yield aggregate(a, b, c)</code></pre>
 <blockquote>
   <p>BlockingSocketRead.java</p>
 </blockquote>
@@ -238,9 +239,9 @@ future.thenAccept(AskActorWithJava8::processIt);</code></pre>
 <pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter02/src/main/scala/ExceptionHandler.scala#L14-L20" target="_blank" title="Go to snippet source"></a><code class="language-scala">try {
   f(i)
 } catch {
-  case _: java.lang.ArithmeticException ⇒ Int.MaxValue
-  case ex: java.lang.StackOverflowError ⇒ ???
-  case ex: java.net.ConnectException    ⇒ ???
+  case _: java.lang.ArithmeticException =&gt; Int.MaxValue
+  case ex: java.lang.StackOverflowError =&gt; ???
+  case ex: java.net.ConnectException    =&gt; ???
 }</code></pre>
 </div>
 <div>

@@ -182,10 +182,10 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
 <blockquote>
   <p>代码清单 13-1 单例作为主动副本来接管</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L42-L65" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Active(
-  localReplica:      ActorRef,
-  replicationFactor: Int,
-  maxQueueSize:      Int) extends Actor with Stash with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L46-L69" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Active(localReplica: ActorRef, replicationFactor: Int, maxQueueSize: Int)
+    extends Actor
+    with Stash
+    with ActorLogging {
 
   private var theStore: Map[String, JsValue] = _
   private var seqNr: Iterator[Int] = _
@@ -194,13 +194,13 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
   localReplica ! TakeOver(self)
 
   def receive: Receive = {
-    case InitialState(m, s) ⇒
+    case InitialState(m, s) =&gt;
       log.info(&quot;took over at sequence {}&quot;, s)
       theStore = m
-      seqNr = Iterator from s
+      seqNr = Iterator.from(s)
       context.become(running)
       unstashAll()
-    case _ ⇒ stash()
+    case _ =&gt; stash()
   }
 
   val running: Receive = ??? //...
@@ -209,10 +209,10 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
 <blockquote>
   <p>代码清单 13-2 主动副本传播复制请求</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L72-L153" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Active(
-  localReplica:      ActorRef,
-  replicationFactor: Int,
-  maxQueueSize:      Int) extends Actor with Stash with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L76-L155" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Active(localReplica: ActorRef, replicationFactor: Int, maxQueueSize: Int)
+    extends Actor
+    with Stash
+    with ActorLogging {
   // ...
   private val MaxOutstanding = maxQueueSize / 2
 
@@ -224,8 +224,7 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
   private var rejected = 0
 
   val timer: Cancellable =
-    context.system.scheduler.schedule(
-      1.second, 1.second, self, Tick)(context.dispatcher)
+    context.system.scheduler.schedule(1.second, 1.second, self, Tick)(context.dispatcher)
 
   override def postStop(): Unit = timer.cancel()
 
@@ -233,17 +232,17 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
   localReplica ! TakeOver(self)
 
   def receive: Receive = {
-    case InitialState(m, s) ⇒
+    case InitialState(m, s) =&gt;
       log.info(&quot;took over at sequence {}&quot;, s)
       theStore = m
-      seqNr = Iterator from s
+      seqNr = Iterator.from(s)
       context.become(running)
       unstashAll()
-    case _ ⇒ stash()
+    case _ =&gt; stash()
   }
 
   val running: Receive = {
-    case p @ Put(key, value, replyTo) ⇒
+    case p @ Put(key, value, replyTo) =&gt;
       if (toReplicate.size &lt; MaxOutstanding) {
         toReplicate.enqueue(Replicate(seqNr.next, key, value, replyTo))
         replicate()
@@ -251,24 +250,24 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
         rejected += 1
         replyTo ! PutRejected(key, value)
       }
-    case Get(key, replyTo) ⇒
-      replyTo ! GetResult(key, theStore get key)
-    case Tick ⇒
-      replicating.valuesIterator foreach {
-        case (replicate, _) ⇒ disseminate(replicate)
+    case Get(key, replyTo) =&gt;
+      replyTo ! GetResult(key, theStore.get(key))
+    case Tick =&gt;
+      replicating.valuesIterator.foreach {
+        case (replicate, _) =&gt; disseminate(replicate)
       }
       if (rejected &gt; 0) {
         log.info(&quot;rejected {} PUT requests&quot;, rejected)
         rejected = 0
       }
-    case Replicated(confirm) ⇒
+    case Replicated(confirm) =&gt;
       replicating.get(confirm) match {
-        case None ⇒ // already removed
-        case Some((rep, 1)) ⇒
+        case None =&gt; // already removed
+        case Some((rep, 1)) =&gt;
           replicating -= confirm
           theStore += rep.key -&gt; rep.value
           rep.replyTo ! PutConfirmed(rep.key, rep.value)
-        case Some((rep, n)) ⇒
+        case Some((rep, n)) =&gt;
           replicating += confirm -&gt; (rep, n - 1)
       }
       replicate()
@@ -284,12 +283,11 @@ final case class GetResult(key: String, value: Option[JsValue]) extends Result
   private def disseminate(r: Replicate): Unit = {
     val req = r.copy(replyTo = self)
     val members = Cluster(context.system).state.members
-    members.foreach(m ⇒ replicaOn(m.address) ! req)
+    members.foreach(m =&gt; replicaOn(m.address) ! req)
   }
 
   private def replicaOn(addr: Address): ActorSelection =
-    context.actorSelection(
-      localReplica.path.toStringWithAddress(addr))
+    context.actorSelection(localReplica.path.toStringWithAddress(addr))
 }</code></pre>
 <blockquote>
   <p>代码清单 13-3 通过将JSON文件写入到本地磁盘来实现持久化</p>
@@ -326,10 +324,7 @@ object Persistence {
 <blockquote>
   <p>代码清单 13-4 被动副本追踪它们是否是最新的版本</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L166-L219" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(
-  askAroundCount:    Int,
-  askAroundInterval: FiniteDuration,
-  maxLag:            Int) extends Actor with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L168-L216" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(askAroundCount: Int, askAroundInterval: FiniteDuration, maxLag: Int) extends Actor with ActorLogging {
 
   private val applied = mutable.Queue.empty[Replicate]
 
@@ -337,56 +332,51 @@ object Persistence {
     Cluster(context.system).selfAddress.toString.replaceAll(&quot;[:/]&quot;, &quot;_&quot;)
 
   def receive: Receive = readPersisted(name) match {
-    case Database(s, kv) ⇒
+    case Database(s, kv) =&gt;
       log.info(&quot;started at sequence {}&quot;, s)
       upToDate(kv, s + 1)
   }
 
   def upToDate(theStore: Map[String, JsValue], expectedSeq: Int): Receive = {
-    case TakeOver(active) ⇒
+    case TakeOver(active) =&gt;
       log.info(&quot;active replica starting at sequence {}&quot;, expectedSeq)
       active ! InitialState(theStore, expectedSeq)
-    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 ⇒
+    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 =&gt;
       replyTo ! Replicated(s)
-    case r: Replicate if r.seq == expectedSeq ⇒
+    case r: Replicate if r.seq == expectedSeq =&gt;
       val nextStore = theStore + (r.key -&gt; r.value)
       persist(name, expectedSeq, nextStore)
       r.replyTo ! Replicated(r.seq)
       applied.enqueue(r)
       context.become(upToDate(nextStore, expectedSeq + 1))
-    case r: Replicate ⇒
+    case r: Replicate =&gt;
       if (r.seq - expectedSeq &gt; maxLag)
         fallBehind(expectedSeq, TreeMap(r.seq -&gt; r))
       else
         missingSomeUpdates(theStore, expectedSeq, Set.empty, TreeMap(r.seq -&gt; r))
-    case GetSingle(s, replyTo) ⇒
+    case GetSingle(s, replyTo) =&gt;
       log.info(&quot;GetSingle from {}&quot;, replyTo)
       if (applied.nonEmpty &amp;&amp; applied.head.seq &lt;= s &amp;&amp; applied.last.seq &gt;= s)
         replyTo ! applied.find(_.seq == s).get
       else if (s &lt; expectedSeq) replyTo ! InitialState(theStore, expectedSeq)
-    case GetFull(replyTo) ⇒
+    case GetFull(replyTo) =&gt;
       log.info(&quot;sending full info to {}&quot;, replyTo)
       replyTo ! InitialState(theStore, expectedSeq)
   }
 
-  def fallBehind(
-    expectedSeq: Int,
-    _waiting:    TreeMap[Int, Replicate]): Unit = ???
+  def fallBehind(expectedSeq: Int, _waiting: TreeMap[Int, Replicate]): Unit = ???
 
   def missingSomeUpdates(
-    theStore:        Map[String, JsValue],
-    expectedSeq:     Int,
-    prevOutstanding: Set[Int],
-    waiting:         TreeMap[Int, Replicate]): Unit = ???
+      theStore: Map[String, JsValue],
+      expectedSeq: Int,
+      prevOutstanding: Set[Int],
+      waiting: TreeMap[Int, Replicate]): Unit = ???
 }
 </code></pre>
 <blockquote>
   <p>代码清单 13-5 被动副本在滞后过多时请求一份全量更新</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L226-L317" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(
-  askAroundCount:    Int,
-  askAroundInterval: FiniteDuration,
-  maxLag:            Int) extends Actor with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L223-L308" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(askAroundCount: Int, askAroundInterval: FiniteDuration, maxLag: Int) extends Actor with ActorLogging {
 
   private val applied = mutable.Queue.empty[Replicate]
   private var awaitingInitialState = Option.empty[ActorRef]
@@ -399,31 +389,31 @@ object Persistence {
   private var tickTask = Option.empty[Cancellable]
 
   def scheduleTick(): Unit = {
-    tickTask foreach (_.cancel())
-    tickTask = Some(context.system.scheduler.scheduleOnce(
-      askAroundInterval, self, DoConsolidate)(context.dispatcher))
+    tickTask.foreach(_.cancel())
+    tickTask = Some(
+      context.system.scheduler.scheduleOnce(askAroundInterval, self, DoConsolidate)(context.dispatcher))
   }
 
   def receive: Receive = readPersisted(name) match {
-    case Database(s, kv) ⇒
+    case Database(s, kv) =&gt;
       log.info(&quot;started at sequence {}&quot;, s)
       upToDate(kv, s + 1)
   }
 
   def caughtUp(theStore: Map[String, JsValue], expectedSeq: Int): Unit = {
-    awaitingInitialState foreach (_ ! InitialState(theStore, expectedSeq))
+    awaitingInitialState.foreach(_ ! InitialState(theStore, expectedSeq))
     awaitingInitialState = None
     context.become(upToDate(theStore, expectedSeq))
   }
 
   def upToDate(theStore: Map[String, JsValue], expectedSeq: Int): Receive = {
     // Cases shown previously elided
-    case TakeOver(active)                                   ⇒ ??? //...
-    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 ⇒ ??? //...
-    case r: Replicate if r.seq == expectedSeq               ⇒ ??? //...
-    case r: Replicate                                       ⇒ ??? //...
-    case GetSingle(s, replyTo)                              ⇒ ??? //...
-    case GetFull(replyTo) ⇒
+    case TakeOver(active)                                   =&gt; ??? //...
+    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 =&gt; ??? //...
+    case r: Replicate if r.seq == expectedSeq               =&gt; ??? //...
+    case r: Replicate                                       =&gt; ??? //...
+    case GetSingle(s, replyTo)                              =&gt; ??? //...
+    case GetFull(replyTo) =&gt;
       log.info(&quot;sending full info to {}&quot;, replyTo)
       replyTo ! InitialState(theStore, expectedSeq)
   }
@@ -433,33 +423,30 @@ object Persistence {
     scheduleTick()
     var waiting = _waiting
     context.become {
-      case Replicate(s, _, _, replyTo) if s &lt; expectedSeq ⇒
+      case Replicate(s, _, _, replyTo) if s &lt; expectedSeq =&gt;
         replyTo ! Replicated(s)
-      case r: Replicate ⇒
+      case r: Replicate =&gt;
         waiting += (r.seq -&gt; r)
-      case TakeOver(active) ⇒
-        log.info(
-          &quot;delaying active replica takeOver, at seq {} while highest is {}&quot;,
-          expectedSeq, waiting.lastKey)
+      case TakeOver(active) =&gt;
+        log.info(&quot;delaying active replica takeOver, at seq {} while highest is {}&quot;, expectedSeq, waiting.lastKey)
         awaitingInitialState = Some(active)
-      case InitialState(m, s) if s &gt; expectedSeq ⇒
-        log.info(
-          &quot;received newer state at sequence {} (was at {})&quot;, s, expectedSeq)
+      case InitialState(m, s) if s &gt; expectedSeq =&gt;
+        log.info(&quot;received newer state at sequence {} (was at {})&quot;, s, expectedSeq)
         persist(name, s, m)
-        waiting.to(s).valuesIterator foreach (r ⇒ r.replyTo ! Replicated(r.seq))
+        waiting.to(s).valuesIterator.foreach(r =&gt; r.replyTo ! Replicated(r.seq))
         val nextWaiting = waiting.from(expectedSeq)
         consolidate(m, s + 1, Set.empty, nextWaiting)
-      case DoConsolidate ⇒
+      case DoConsolidate =&gt;
         askAroundFullState()
         scheduleTick()
     }
   }
 
   private def consolidate(
-    theStore:    Map[String, JsValue],
-    expectedSeq: Int,
-    askedFor:    Set[Int],
-    waiting:     TreeMap[Int, Replicate]): Unit = ??? //...
+      theStore: Map[String, JsValue],
+      expectedSeq: Int,
+      askedFor: Set[Int],
+      waiting: TreeMap[Int, Replicate]): Unit = ??? //...
 
   private def getMembers(n: Int): Seq[Address] = {
     // using .iterator to avoid one intermediate collection to be created
@@ -468,7 +455,7 @@ object Persistence {
 
   private def askAroundFullState(): Unit = {
     log.info(&quot;asking for full data&quot;)
-    getMembers(1).foreach(addr ⇒ replicaOn(addr) ! GetFull(self))
+    getMembers(1).foreach(addr =&gt; replicaOn(addr) ! GetFull(self))
   }
 
   private def replicaOn(addr: Address): ActorSelection =
@@ -478,28 +465,23 @@ object Persistence {
 <blockquote>
   <p>代码清单 13-6 计算直接可应用的队列前段的长度</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L346-L382" target="_blank" title="Go to snippet source"></a><code class="language-scala">private val matches = (p: (Int, Int)) ⇒ p._1 == p._2
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L334-L364" target="_blank" title="Go to snippet source"></a><code class="language-scala">private val matches = (p: (Int, Int)) =&gt; p._1 == p._2
 
 private def consolidate(
-  theStore:    Map[String, JsValue],
-  expectedSeq: Int,
-  askedFor:    Set[Int],
-  waiting:     TreeMap[Int, Replicate]): Unit = {
+    theStore: Map[String, JsValue],
+    expectedSeq: Int,
+    askedFor: Set[Int],
+    waiting: TreeMap[Int, Replicate]): Unit = {
 
   // calculate applicable prefix length
-  val prefix = waiting.keysIterator
-    .zip(Iterator from expectedSeq)
-    .takeWhile(matches)
-    .size
+  val prefix = waiting.keysIterator.zip(Iterator.from(expectedSeq)).takeWhile(matches).size
 
-  val nextStore = waiting.valuesIterator
-    .take(prefix)
-    .foldLeft(theStore) { (store, replicate) ⇒
-      persist(name, replicate.seq, theStore)
-      replicate.replyTo ! Replicated(replicate.seq)
-      applied.enqueue(replicate)
-      store + (replicate.key -&gt; replicate.value)
-    }
+  val nextStore = waiting.valuesIterator.take(prefix).foldLeft(theStore) { (store, replicate) =&gt;
+    persist(name, replicate.seq, theStore)
+    replicate.replyTo ! Replicated(replicate.seq)
+    applied.enqueue(replicate)
+    store + (replicate.key -&gt; replicate.value)
+  }
   val nextWaiting = waiting.drop(prefix)
   val nextExpectedSeq = expectedSeq + prefix
 
@@ -510,18 +492,14 @@ private def consolidate(
     // check if we fell behind by too much
     if (nextWaiting.lastKey - nextExpectedSeq &gt; maxLag)
       fallBehind(nextExpectedSeq, nextWaiting)
-    else missingSomeUpdates(nextStore, nextExpectedSeq,
-      askedFor, nextWaiting)
+    else missingSomeUpdates(nextStore, nextExpectedSeq, askedFor, nextWaiting)
   } else caughtUp(nextStore, nextExpectedSeq)
 }
 </code></pre>
 <blockquote>
   <p>代码清单 13-7 确定更新队列里的数据缺口是否可以被一一填补</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L404-L499" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(
-  askAroundCount:    Int,
-  askAroundInterval: FiniteDuration,
-  maxLag:            Int) extends Actor with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActivePassive.scala#L384-L472" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Passive(askAroundCount: Int, askAroundInterval: FiniteDuration, maxLag: Int) extends Actor with ActorLogging {
 
   private val applied = mutable.Queue.empty[Replicate]
   private var awaitingInitialState = Option.empty[ActorRef]
@@ -530,15 +508,15 @@ private def consolidate(
   def receive: Receive = ??? //...
 
   def upToDate(theStore: Map[String, JsValue], expectedSeq: Int): Receive = {
-    case TakeOver(active)                                   ⇒ ??? //...
-    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 ⇒ ??? //...
-    case r: Replicate if r.seq == expectedSeq               ⇒ ??? //...
-    case r: Replicate                                       ⇒ ??? //...
-    case GetFull(replyTo)                                   ⇒ ??? //...
-    case GetSingle(s, replyTo) ⇒
+    case TakeOver(active)                                   =&gt; ??? //...
+    case Replicate(s, _, _, replyTo) if s - expectedSeq &lt; 0 =&gt; ??? //...
+    case r: Replicate if r.seq == expectedSeq               =&gt; ??? //...
+    case r: Replicate                                       =&gt; ??? //...
+    case GetFull(replyTo)                                   =&gt; ??? //...
+    case GetSingle(s, replyTo) =&gt;
       log.info(&quot;GetSingle from {}&quot;, replyTo)
       if (applied.nonEmpty &amp;&amp;
-        applied.head.seq &lt;= s &amp;&amp; applied.last.seq &gt;= s) {
+          applied.head.seq &lt;= s &amp;&amp; applied.last.seq &gt;= s) {
         replyTo ! applied.find(_.seq == s).get
       } else if (s &lt; expectedSeq) {
         replyTo ! InitialState(theStore, expectedSeq)
@@ -546,17 +524,18 @@ private def consolidate(
   }
 
   def missingSomeUpdates(
-    theStore:        Map[String, JsValue],
-    expectedSeq:     Int,
-    prevOutstanding: Set[Int],
-    waiting:         TreeMap[Int, Replicate]): Unit = {
+      theStore: Map[String, JsValue],
+      expectedSeq: Int,
+      prevOutstanding: Set[Int],
+      waiting: TreeMap[Int, Replicate]): Unit = {
 
     val askFor = (expectedSeq to waiting.lastKey).iterator
-      .filterNot(seq ⇒
+      .filterNot(seq =&gt;
         waiting.contains(seq) ||
-          prevOutstanding.contains(seq)).toList
+        prevOutstanding.contains(seq))
+      .toList
 
-    askFor foreach askAround
+    askFor.foreach(askAround)
 
     if (prevOutstanding.isEmpty) {
       scheduleTick()
@@ -564,47 +543,42 @@ private def consolidate(
     val outstanding = prevOutstanding ++ askFor
 
     context.become {
-      case Replicate(s, _, _, replyTo) if s &lt; expectedSeq ⇒
+      case Replicate(s, _, _, replyTo) if s &lt; expectedSeq =&gt;
         replyTo ! Replicated(s)
-      case r: Replicate ⇒
-        consolidate(theStore, expectedSeq,
-          outstanding - r.seq,
-          waiting + (r.seq -&gt; r))
-      case TakeOver(active) ⇒
-        log.info(
-          &quot;delaying active replica takeOver, at seq {} while highest is {}&quot;,
-          expectedSeq, waiting.lastKey)
+      case r: Replicate =&gt;
+        consolidate(theStore, expectedSeq, outstanding - r.seq, waiting + (r.seq -&gt; r))
+      case TakeOver(active) =&gt;
+        log.info(&quot;delaying active replica takeOver, at seq {} while highest is {}&quot;, expectedSeq, waiting.lastKey)
         awaitingInitialState = Some(active)
-      case GetSingle(s, replyTo) ⇒
+      case GetSingle(s, replyTo) =&gt;
         log.info(&quot;GetSingle from {}&quot;, replyTo)
         if (applied.nonEmpty &amp;&amp;
-          applied.head.seq &lt;= s &amp;&amp;
-          applied.last.seq &gt;= s) {
+            applied.head.seq &lt;= s &amp;&amp;
+            applied.last.seq &gt;= s) {
           replyTo ! applied.find(_.seq == s).get
         } else if (s &lt; expectedSeq) {
           replyTo ! InitialState(theStore, expectedSeq)
         }
-      case GetFull(replyTo) ⇒
+      case GetFull(replyTo) =&gt;
         log.info(&quot;sending full info to {}&quot;, replyTo)
         replyTo ! InitialState(theStore, expectedSeq)
-      case DoConsolidate ⇒
-        outstanding foreach askAround
+      case DoConsolidate =&gt;
+        outstanding.foreach(askAround)
         scheduleTick()
     }
   }
 
   private def askAround(seq: Int): Unit = {
     log.info(&quot;asking around for sequence number {}&quot;, seq)
-    getMembers(askAroundCount)
-      .foreach(addr ⇒ replicaOn(addr) ! GetSingle(seq, self))
+    getMembers(askAroundCount).foreach(addr =&gt; replicaOn(addr) ! GetSingle(seq, self))
   }
 
   // ... Other helpers elided
   private def consolidate(
-    theStore:    Map[String, JsValue],
-    expectedSeq: Int,
-    askedFor:    Set[Int],
-    waiting:     TreeMap[Int, Replicate]): Unit = ???
+      theStore: Map[String, JsValue],
+      expectedSeq: Int,
+      askedFor: Set[Int],
+      waiting: TreeMap[Int, Replicate]): Unit = ???
 
   private def getMembers(n: Int): Seq[Address] = ???
 
@@ -623,14 +597,14 @@ private def consolidate(
   private var lastIndex: Long = 0
 
   def applyWrite: PartialFunction[(Long, WriteCommand[_]), String] = {
-    case (index, Put(key: String, value: String)) ⇒
+    case (index, Put(key: String, value: String)) =&gt;
       map.put(key, value)
       lastIndex = index
       value
   }
 
   def applyRead: PartialFunction[ReadCommand[_], Option[String]] = {
-    case Get(key) ⇒ map.get(key)
+    case Get(key) =&gt; map.get(key)
   }
 
   def getLastAppliedIndex: Long = lastIndex
@@ -647,13 +621,9 @@ private def consolidate(
 <blockquote>
   <p>代码清单 13-9 按照复制状态机来实例化KVStore</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L55-L66" target="_blank" title="Go to snippet source"></a><code class="language-scala">object KVStoreBootstrap extends App {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L55-L62" target="_blank" title="Go to snippet source"></a><code class="language-scala">object KVStoreBootstrap extends App {
   val ckite =
-    CKiteBuilder()
-      .stateMachine(new KVStore())
-      .rpc(FinagleThriftRpc)
-      .storage(MapDBStorage())
-      .build
+    CKiteBuilder().stateMachine(new KVStore()).rpc(FinagleThriftRpc).storage(MapDBStorage()).build
   ckite.start()
 
   HttpServer(ckite).start()
@@ -662,14 +632,14 @@ private def consolidate(
 <blockquote>
   <p>ckite api</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L76-L78" target="_blank" title="Go to snippet source"></a><code class="language-scala">val consistentRead: Future[Option[String]] = ckite.read(Get(key))
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/ckite/KVStore.scala#L72-L74" target="_blank" title="Go to snippet source"></a><code class="language-scala">val consistentRead: Future[Option[String]] = ckite.read(Get(key))
 val possibleStaleRead: Future[Option[String]] = ckite.readLocal(Get(key))
 val write: Future[String] = ckite.write(Put(key, value))</code></pre>
 <blockquote>
   <p>代码清单 13-10 图13-1中图形的代码表示</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L20-L43" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class Status(name: String)(
-  _predecessor: ⇒ Set[Status], _successor: ⇒ Set[Status]) extends ReplicatedData {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L20-L43" target="_blank" title="Go to snippet source"></a><code class="language-scala">final case class Status(name: String)(_predecessor: =&gt; Set[Status], _successor: =&gt; Set[Status])
+    extends ReplicatedData {
 
   type T = Status
 
@@ -695,7 +665,7 @@ val Aborted: Status =
 <blockquote>
   <p>代码清单 13-11 合并两个状态来产生第三个合并后的状态</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L47-L76" target="_blank" title="Go to snippet source"></a><code class="language-scala">def mergeStatus(left: Status, right: Status): Status = {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L47-L73" target="_blank" title="Go to snippet source"></a><code class="language-scala">def mergeStatus(left: Status, right: Status): Status = {
   /*
    * Keep the left Status in hand and determine whether it is a predecessor of
    * the candidate, moving on to the candidate’s successor if not successful.
@@ -708,18 +678,15 @@ val Aborted: Status =
     } else {
       val nextExclude = exclude + candidate
       val branches =
-        candidate.successors.map(successor ⇒ innerLoop(successor, nextExclude))
-      branches.reduce((l, r) ⇒
-        if (isSuccessor(l, r, nextExclude)) r else l)
+        candidate.successors.map(successor =&gt; innerLoop(successor, nextExclude))
+      branches.reduce((l, r) =&gt; if (isSuccessor(l, r, nextExclude)) r else l)
     }
 
-  def isSuccessor(
-    candidate: Status,
-    fixed:     Status, exclude: Set[Status]): Boolean =
+  def isSuccessor(candidate: Status, fixed: Status, exclude: Set[Status]): Boolean =
     if (candidate == fixed) true
     else {
       val toSearch = candidate.predecessors -- exclude
-      toSearch.exists(pred ⇒ isSuccessor(pred, fixed, exclude))
+      toSearch.exists(pred =&gt; isSuccessor(pred, fixed, exclude))
     }
 
   innerLoop(right, Set.empty)
@@ -728,32 +695,30 @@ val Aborted: Status =
 <blockquote>
   <p>代码清单 13-12 使用 Akka Distributed Data 来传播状态变更</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L92-L121" target="_blank" title="Go to snippet source"></a><code class="language-scala">class ClientInterface extends Actor with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L89-L116" target="_blank" title="Go to snippet source"></a><code class="language-scala">class ClientInterface extends Actor with ActorLogging {
   private val replicator: ActorRef = DistributedData(context.system).replicator
   private implicit val cluster: Cluster = Cluster(context.system)
 
   def receive: Receive = {
-    case Submit(job) ⇒
+    case Submit(job) =&gt;
       log.info(&quot;submitting job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
         ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds),
         Some(s&quot;submit $job&quot;))(_ + (job -&gt; New))
-    case Cancel(job) ⇒
+    case Cancel(job) =&gt;
       log.info(&quot;cancelling job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
         ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds),
         Some(s&quot;cancel $job&quot;))(_ + (job -&gt; Cancelled))
-    case r: Replicator.UpdateResponse[_] ⇒
+    case r: Replicator.UpdateResponse[_] =&gt;
       log.info(&quot;received update result: {}&quot;, r)
-    case PrintStatus ⇒
-      replicator ! Replicator.Get(
-        StorageComponent,
-        Replicator.ReadMajority(5.seconds))
-    case g: Replicator.GetSuccess[_] ⇒
+    case PrintStatus =&gt;
+      replicator ! Replicator.Get(StorageComponent, Replicator.ReadMajority(5.seconds))
+    case g: Replicator.GetSuccess[_] =&gt;
       log.info(&quot;overall status: {}&quot;, g.get(StorageComponent))
   }
 }
@@ -761,7 +726,7 @@ val Aborted: Status =
 <blockquote>
   <p>代码清单 13-13 引入对于任务的请求标志</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L125-L165" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Executor extends Actor with ActorLogging {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/MultiMasterCRDT.scala#L120-L161" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Executor extends Actor with ActorLogging {
   private val replicator: ActorRef = DistributedData(context.system).replicator
   private implicit val cluster: Cluster = Cluster(context.system)
 
@@ -770,29 +735,30 @@ val Aborted: Status =
   replicator ! Replicator.Subscribe(StorageComponent, self)
 
   def receive: Receive = {
-    case Execute(job) ⇒
+    case Execute(job) =&gt;
       log.info(&quot;executing job {}&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
         ORMap.empty[String, Status],
-        Replicator.WriteMajority(5.seconds), Some(job)) { map ⇒
-          require(map.get(job).contains(New))
-          map + (job -&gt; Executing)
-        }
-    case Finish(job) ⇒
+        Replicator.WriteMajority(5.seconds),
+        Some(job)) { map =&gt;
+        require(map.get(job).contains(New))
+        map + (job -&gt; Executing)
+      }
+    case Finish(job) =&gt;
       log.info(&quot;job {} finished&quot;, job)
       replicator ! Replicator.Update(
         StorageComponent,
         ORMap.empty[String, Status],
         Replicator.WriteMajority(5.seconds))(_ + (job -&gt; Finished))
-    case Replicator.UpdateSuccess(StorageComponent, Some(job)) ⇒
+    case Replicator.UpdateSuccess(StorageComponent, Some(job)) =&gt;
       log.info(&quot;starting job {}&quot;, job)
-    case r: Replicator.UpdateResponse[_] ⇒
+    case r: Replicator.UpdateResponse[_] =&gt;
       log.info(&quot;received update result: {}&quot;, r)
-    case ch: Replicator.Changed[_] ⇒
+    case ch: Replicator.Changed[_] =&gt;
       val current = ch.get(StorageComponent).entries
       for {
-        (job, status) ← current.iterator
+        (job, status) &lt;- current.iterator
         if status == Aborted
         if !lastState.get(job).contains(Aborted)
       } {
@@ -806,13 +772,9 @@ val Aborted: Status =
 <blockquote>
   <p>代码清单 13-14 用无协调工作的实现来开始主动-主动复制模式</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L22-L58" target="_blank" title="Go to snippet source"></a><code class="language-scala">private final case class SeqCommand(seq: Int, cmd: Command, replyTo: ActorRef)
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L22-L54" target="_blank" title="Go to snippet source"></a><code class="language-scala">private final case class SeqCommand(seq: Int, cmd: Command, replyTo: ActorRef)
 
-private final case class SeqResult(
-  seq:     Int,
-  res:     Result,
-  replica: ActorRef,
-  replyTo: ActorRef)
+private final case class SeqResult(seq: Int, res: Result, replica: ActorRef, replyTo: ActorRef)
 
 private final case class SendInitialData(toReplica: ActorRef)
 
@@ -822,31 +784,31 @@ class Replica extends Actor with Stash {
   private var map = Map.empty[String, JsValue]
 
   def receive: Receive = {
-    case InitialData(m) ⇒
+    case InitialData(m) =&gt;
       map = m
       context.become(initialized)
       unstashAll()
-    case _ ⇒ stash()
+    case _ =&gt; stash()
   }
 
   def initialized: Receive = {
-    case SeqCommand(seq, cmd, replyTo) ⇒
+    case SeqCommand(seq, cmd, replyTo) =&gt;
       // tracking of sequence numbers and resents is elided here
       cmd match {
-        case Put(key, value, r) ⇒
+        case Put(key, value, r) =&gt;
           map += key -&gt; value
           replyTo ! SeqResult(seq, PutConfirmed(key, value), self, r)
-        case Get(key, r) ⇒
-          replyTo ! SeqResult(seq, GetResult(key, map get key), self, r)
+        case Get(key, r) =&gt;
+          replyTo ! SeqResult(seq, GetResult(key, map.get(key)), self, r)
       }
-    case SendInitialData(toReplica) ⇒ toReplica ! InitialData(map)
+    case SendInitialData(toReplica) =&gt; toReplica ! InitialData(map)
   }
 }
 </code></pre>
 <blockquote>
   <p>代码清单 13-15 封装对于单个客户端请求的知悉情况</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L66-L130" target="_blank" title="Go to snippet source"></a><code class="language-scala">private sealed trait ReplyState {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L62-L122" target="_blank" title="Go to snippet source"></a><code class="language-scala">private sealed trait ReplyState {
   def deadline: Deadline
 
   def missing: Set[ActorRef]
@@ -856,26 +818,22 @@ class Replica extends Actor with Stash {
   def isFinished: Boolean = missing.isEmpty
 }
 
-private final case class Unknown(
-  deadline: Deadline,
-  replies:  Set[SeqResult],
-  missing:  Set[ActorRef],
-  quorum:   Int) extends ReplyState {
+private final case class Unknown(deadline: Deadline, replies: Set[SeqResult], missing: Set[ActorRef], quorum: Int)
+    extends ReplyState {
 
   override def add(res: SeqResult): ReplyState = {
     val nextReplies = replies + res
     val nextMissing = missing - res.replica
     if (nextReplies.size &gt;= quorum) {
       val answer =
-        replies.toSeq.groupBy(_.res)
-          .collectFirst {
-            case (k, s) if s.size &gt;= quorum ⇒ s.head
-          }
+        replies.toSeq.groupBy(_.res).collectFirst {
+          case (k, s) if s.size &gt;= quorum =&gt; s.head
+        }
 
       if (answer.isDefined) {
         val right = answer.get
         val wrong = replies.collect {
-          case SeqResult(_, result, replica, _) if res != right ⇒ replica
+          case SeqResult(_, result, replica, _) if res != right =&gt; replica
         }
         Known(deadline, right, wrong, nextMissing)
       } else if (nextMissing.isEmpty) {
@@ -885,15 +843,15 @@ private final case class Unknown(
   }
 }
 
-private final case class Known(
-  deadline: Deadline, reply: SeqResult,
-  wrong: Set[ActorRef], missing: Set[ActorRef]) extends ReplyState {
+private final case class Known(deadline: Deadline, reply: SeqResult, wrong: Set[ActorRef], missing: Set[ActorRef])
+    extends ReplyState {
 
   override def add(res: SeqResult): ReplyState = {
-    val nextWrong = if (res.res == reply.res)
-      wrong
-    else
-      wrong + res.replica
+    val nextWrong =
+      if (res.res == reply.res)
+        wrong
+      else
+        wrong + res.replica
     Known(deadline, reply, nextWrong, missing - res.replica)
   }
 }
@@ -904,7 +862,7 @@ private object Known {
     val counts = replies.groupBy(_.res)
     val biggest = counts.iterator.map(_._2.size).max
     val winners = counts.collectFirst {
-      case (res, win) if win.size == biggest ⇒ win
+      case (res, win) if win.size == biggest =&gt; win
     }.get
     val losers = (replies -- winners).map(_.replica)
     Known(deadline, winners.head, losers, Set.empty)
@@ -914,9 +872,9 @@ private object Known {
 <blockquote>
   <p>代码清单 13-16 将副本当作子Actor管理</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L134-L220" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Coordinator(N: Int) extends Actor {
-  private var replicas = (1 to N).map(_ ⇒ newReplica()).toSet
-  private val seqNr = Iterator from 0
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L126-L213" target="_blank" title="Go to snippet source"></a><code class="language-scala">class Coordinator(N: Int) extends Actor {
+  private var replicas = (1 to N).map(_ =&gt; newReplica()).toSet
+  private val seqNr = Iterator.from(0)
   private var replies = TreeMap.empty[Int, ReplyState]
   private var nextReply = 0
 
@@ -929,36 +887,37 @@ private object Known {
   // schedule timeout messages for quiescent periods
   context.setReceiveTimeout(1.second)
 
-  def receive: Receive = ({
-    case cmd: Command ⇒
-      val c = SeqCommand(seqNr.next, cmd, self)
-      replicas foreach (_ ! c)
-      replies += c.seq -&gt; Unknown(5 seconds fromNow, Set.empty,
-        replicas, (replicas.size + 1) / 2)
-    case res: SeqResult if replies.contains(res.seq) &amp;&amp;
-      replicas.contains(res.replica) ⇒
-      val prevState = replies(res.seq)
-      val nextState = prevState.add(res)
-      replies += res.seq -&gt; nextState
-    case Terminated(ref) ⇒
-      replaceReplica(ref, terminate = false)
-    case ReceiveTimeout ⇒
-  }: Receive) andThen { _ ⇒
-    doTimeouts()
-    sendReplies()
-    evictFinished()
-  }
+  def receive: Receive =
+    ({
+      case cmd: Command =&gt;
+        val c = SeqCommand(seqNr.next, cmd, self)
+        replicas.foreach(_ ! c)
+        replies += c.seq -&gt; Unknown(5.seconds(fromNow), Set.empty, replicas, (replicas.size + 1) / 2)
+      case res: SeqResult
+          if replies.contains(res.seq) &amp;&amp;
+          replicas.contains(res.replica) =&gt;
+        val prevState = replies(res.seq)
+        val nextState = prevState.add(res)
+        replies += res.seq -&gt; nextState
+      case Terminated(ref) =&gt;
+        replaceReplica(ref, terminate = false)
+      case ReceiveTimeout =&gt;
+    }: Receive).andThen { _ =&gt;
+      doTimeouts()
+      sendReplies()
+      evictFinished()
+    }
 
   //...
   private def doTimeouts(): Unit = {
     val now = Deadline.now
     val expired = replies.iterator.takeWhile(_._2.deadline &lt;= now)
-    for ((seq, state) ← expired) {
+    for ((seq, state) &lt;- expired) {
       state match {
-        case Unknown(deadline, received, _, _) ⇒
+        case Unknown(deadline, received, _, _) =&gt;
           val forced = Known.fromUnknown(deadline, received)
           replies += seq -&gt; forced
-        case Known(deadline, reply, wrong, missing) ⇒
+        case Known(deadline, reply, wrong, missing) =&gt;
           replies += seq -&gt; Known(deadline, reply, wrong, Set.empty)
       }
     }
@@ -967,21 +926,21 @@ private object Known {
 
   @tailrec private def sendReplies(): Unit =
     replies.get(nextReply) match {
-      case Some(k @ Known(_, reply, _, _)) ⇒
+      case Some(k @ Known(_, reply, _, _)) =&gt;
         reply.replyTo ! reply.res
         nextReply += 1
         sendReplies()
-      case _ ⇒
+      case _ =&gt;
     }
 
 
   @tailrec private def evictFinished(): Unit =
     replies.headOption match {
-      case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished ⇒
-        wrong foreach (replaceReplica(_, terminate = true))
+      case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished =&gt;
+        wrong.foreach(replaceReplica(_, terminate = true))
         replies -= seq
         evictFinished()
-      case _ ⇒
+      case _ =&gt;
     }
 
   private def replaceReplica(r: ActorRef, terminate: Boolean): Unit =
@@ -998,27 +957,27 @@ private object Known {
 <blockquote>
   <p>代码清单 13-17 按序发送回复</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L188-L196" target="_blank" title="Go to snippet source"></a><code class="language-scala">@tailrec private def sendReplies(): Unit =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L181-L189" target="_blank" title="Go to snippet source"></a><code class="language-scala">@tailrec private def sendReplies(): Unit =
   replies.get(nextReply) match {
-    case Some(k @ Known(_, reply, _, _)) ⇒
+    case Some(k @ Known(_, reply, _, _)) =&gt;
       reply.replyTo ! reply.res
       nextReply += 1
       sendReplies()
-    case _ ⇒
+    case _ =&gt;
   }
 </code></pre>
 <blockquote>
   <p>代码清单 13-18 一旦timeout，就强迫将“missing”回复转为“known”回复</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L171-L184" target="_blank" title="Go to snippet source"></a><code class="language-scala">private def doTimeouts(): Unit = {
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L164-L177" target="_blank" title="Go to snippet source"></a><code class="language-scala">private def doTimeouts(): Unit = {
   val now = Deadline.now
   val expired = replies.iterator.takeWhile(_._2.deadline &lt;= now)
-  for ((seq, state) ← expired) {
+  for ((seq, state) &lt;- expired) {
     state match {
-      case Unknown(deadline, received, _, _) ⇒
+      case Unknown(deadline, received, _, _) =&gt;
         val forced = Known.fromUnknown(deadline, received)
         replies += seq -&gt; forced
-      case Known(deadline, reply, wrong, missing) ⇒
+      case Known(deadline, reply, wrong, missing) =&gt;
         replies += seq -&gt; Known(deadline, reply, wrong, Set.empty)
     }
   }
@@ -1027,13 +986,13 @@ private object Known {
 <blockquote>
   <p>代码清单 13-19 终止并替换未完成的副本</p>
 </blockquote>
-<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L200-L217" target="_blank" title="Go to snippet source"></a><code class="language-scala">@tailrec private def evictFinished(): Unit =
+<pre class="prettyprint"><a class="icon go-to-source" href="https://github.com/ReactivePlatform/Reactive-Design-Patterns/tree/v1.0.0/chapter13/src/main/scala/chapter13/ActiveActive.scala#L193-L210" target="_blank" title="Go to snippet source"></a><code class="language-scala">@tailrec private def evictFinished(): Unit =
   replies.headOption match {
-    case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished ⇒
-      wrong foreach (replaceReplica(_, terminate = true))
+    case Some((seq, k @ Known(_, _, wrong, _))) if k.isFinished =&gt;
+      wrong.foreach(replaceReplica(_, terminate = true))
       replies -= seq
       evictFinished()
-    case _ ⇒
+    case _ =&gt;
   }
 
 private def replaceReplica(r: ActorRef, terminate: Boolean): Unit =
