@@ -25,12 +25,9 @@ class StagedFuturesAsyncExample(inventoryService: InventoryService) {
    * inventory is a Map of Warehouse ID to count.
    */
   // Provide the thread pool to be applied
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(
-    ForkJoinPool.commonPool())
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool.commonPool())
 
-  def getProductInventoryByPostalCode(
-    productSku: Long,
-    postalCode: String): Future[(Long, Map[String, Long])] = {
+  def getProductInventoryByPostalCode(productSku: Long, postalCode: String): Future[(Long, Map[String, Long])] = {
 
     // Retrieve the values and return a future of the combined result
     // #snip

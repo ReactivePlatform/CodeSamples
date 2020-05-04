@@ -36,7 +36,7 @@ object PullPattern {
     request()
 
     def receive: Receive = {
-      case Job(id, data, replyTo) ⇒
+      case Job(id, data, replyTo) =>
         requested -= 1
         request()
         val sign = if ((data & 1) == 1) plus else minus
@@ -51,23 +51,23 @@ object PullPattern {
   class Manager extends Actor {
 
     private val works: Iterator[Job] =
-      Iterator from 1 map (x ⇒ Job(x, x, self)) take 1000000
+      Iterator.from(1).map(x => Job(x, x, self)).take(1000000)
 
-    private val aggregator: (BigDecimal, BigDecimal) ⇒ BigDecimal = (x: BigDecimal, y: BigDecimal) ⇒ x + y
+    private val aggregator: (BigDecimal, BigDecimal) => BigDecimal = (x: BigDecimal, y: BigDecimal) => x + y
     private val mc = new MathContext(10000, RoundingMode.HALF_EVEN)
     private var approximation = BigDecimal(0, mc)
 
     private var outstandingWork = 0
 
-    (1 to 8) foreach (_ ⇒ context.actorOf(Props(new Worker(self))))
+    (1 to 8).foreach(_ => context.actorOf(Props(new Worker(self))))
 
     def receive: Receive = {
-      case WorkRequest(worker, items) ⇒
-        works.toStream.take(items).foreach { job ⇒
+      case WorkRequest(worker, items) =>
+        works.toStream.take(items).foreach { job =>
           worker ! job
           outstandingWork += 1
         }
-      case JobResult(id, report) ⇒
+      case JobResult(id, report) =>
         approximation = aggregator(approximation, report)
         outstandingWork -= 1
         if (outstandingWork == 0 && works.isEmpty) {

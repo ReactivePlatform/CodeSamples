@@ -22,36 +22,36 @@ class PersistentObjectManager extends PersistentActor {
   private var shoppingCart: ShoppingCart = ShoppingCart.empty
 
   def receiveCommand: Receive = {
-    case ManagerCommand(cmd, id, replyTo) ⇒
+    case ManagerCommand(cmd, id, replyTo) =>
       try {
         val event = cmd match {
-          case SetOwner(cart, owner)         ⇒ OwnerChanged(cart, owner)
-          case AddItem(cart, item, count)    ⇒ ItemAdded(cart, item, count)
-          case RemoveItem(cart, item, count) ⇒ ItemRemoved(cart, item, count)
+          case SetOwner(cart, owner)         => OwnerChanged(cart, owner)
+          case AddItem(cart, item, count)    => ItemAdded(cart, item, count)
+          case RemoveItem(cart, item, count) => ItemRemoved(cart, item, count)
         }
         // perform the update here in order to treat validation errors immediately
         shoppingCart = shoppingCart.applyEvent(event)
-        persist(event) { _ ⇒
+        persist(event) { _ =>
           replyTo ! ManagerEvent(id, event)
         }
       } catch {
-        case ex: IllegalArgumentException ⇒
+        case ex: IllegalArgumentException =>
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
-    case ManagerQuery(cmd, id, replyTo) ⇒
+    case ManagerQuery(cmd, id, replyTo) =>
       try {
         val result = cmd match {
-          case GetItems(cart) ⇒ GetItemsResult(cart, shoppingCart.items)
+          case GetItems(cart) => GetItemsResult(cart, shoppingCart.items)
         }
         replyTo ! ManagerResult(id, result)
       } catch {
-        case ex: IllegalArgumentException ⇒
+        case ex: IllegalArgumentException =>
           replyTo ! ManagerRejection(id, ex.getMessage)
       }
   }
 
   def receiveRecover: Receive = {
-    case e: Event ⇒ shoppingCart = shoppingCart.applyEvent(e)
+    case e: Event => shoppingCart = shoppingCart.applyEvent(e)
   }
 }
 
@@ -66,8 +66,7 @@ class PersistentObjectManager extends PersistentActor {
 object PersistentObjectManagerExample extends App {
   def mkURI(): URI = URI.create(UUID.randomUUID().toString)
 
-  val config = ConfigFactory.parseString(
-    """
+  val config = ConfigFactory.parseString("""
 akka.actor.warn-about-java-serializer-usage = off
 akka.persistence.journal {
   plugin = "akka.persistence.journal.leveldb"
@@ -92,9 +91,9 @@ akka.persistence.snapshot-store.plugin = "akka.persistence.no-snapshot-store"
     manager ! ManagerQuery(GetItems(shoppingCart), 5, self)
 
     def receive: Receive = {
-      case ManagerEvent(id, event)   ⇒ log.info("success ({}): {}", id, event)
-      case ManagerRejection(id, msg) ⇒ log.warning("rejected ({}): {}", id, msg)
-      case ManagerResult(id, result) ⇒
+      case ManagerEvent(id, event)   => log.info("success ({}): {}", id, event)
+      case ManagerRejection(id, msg) => log.warning("rejected ({}): {}", id, msg)
+      case ManagerResult(id, result) =>
         log.info("result ({}): {}", id, result)
         context.system.terminate()
     }

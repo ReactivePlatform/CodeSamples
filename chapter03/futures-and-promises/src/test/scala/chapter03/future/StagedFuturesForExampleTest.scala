@@ -35,7 +35,7 @@ class StagedFuturesForExampleTest {
 
     val results = stagedFutures.getProductInventoryByPostalCode(1234L, "212")
     results.foreach {
-      case (local, overall) ⇒
+      case (local, overall) =>
         org.junit.Assert.assertEquals(local, 5)
         org.junit.Assert.assertEquals(overall("212"), 407L)
     }

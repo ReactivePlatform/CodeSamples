@@ -20,18 +20,14 @@ class GatedStorageClient(system: ActorSystem) {
 
   // #snip
   private val limiter = new RateLimiter(100, 2.seconds)
-  private val breaker = CircuitBreaker(
-    system.scheduler,
-    10, Duration.Zero, 10.seconds)
+  private val breaker = CircuitBreaker(system.scheduler, 10, Duration.Zero, 10.seconds)
 
   def persistForThisClient(job: Job): Future[StorageStatus] = {
     import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
-    breaker
-      .withCircuitBreaker(limiter.call(persist(job)))
-      .recover {
-        case RateLimitExceeded              ⇒ StorageStatus.Failed
-        case _: CircuitBreakerOpenException ⇒ StorageStatus.Gated
-      }
+    breaker.withCircuitBreaker(limiter.call(persist(job))).recover {
+      case RateLimitExceeded              => StorageStatus.Failed
+      case _: CircuitBreakerOpenException => StorageStatus.Gated
+    }
   }
 
   // #snip

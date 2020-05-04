@@ -20,14 +20,13 @@ import com.typesafe.config.ConfigFactory
 import scala.concurrent.duration._
 
 //#snip_17-8
-class ShoppingCartTagging(system: ExtendedActorSystem)
-  extends WriteEventAdapter {
+class ShoppingCartTagging(system: ExtendedActorSystem) extends WriteEventAdapter {
   def manifest(event: Any): String = "" // no additional manifest needed
 
   def toJournal(event: Any): Any =
     event match {
-      case s: ShoppingCartMessage ⇒ Tagged(event, Set("shoppingCart"))
-      case other                  ⇒ other
+      case s: ShoppingCartMessage => Tagged(event, Set("shoppingCart"))
+      case other                  => other
     }
 }
 
@@ -36,24 +35,16 @@ class ShoppingCartTagging(system: ExtendedActorSystem)
 class ShoppingCartSimulator extends Actor with ActorLogging {
   def rnd: ThreadLocalRandom = ThreadLocalRandom.current
 
-  private val items: Array[ItemRef] = Array(
-    "apple",
-    "banana",
-    "plum",
-    "pear",
-    "peach").map(f ⇒ ItemRef(new URI(f)))
+  private val items: Array[ItemRef] = Array("apple", "banana", "plum", "pear", "peach").map(f => ItemRef(new URI(f)))
 
   def pickItem(): ItemRef = items(rnd.nextInt(items.length))
 
-  private val customers: Array[CustomerRef] = Array(
-    "alice",
-    "bob",
-    "charlie",
-    "mallory").map(c ⇒ CustomerRef(new URI(c)))
+  private val customers: Array[CustomerRef] =
+    Array("alice", "bob", "charlie", "mallory").map(c => CustomerRef(new URI(c)))
 
   def pickCustomer(): CustomerRef = customers(rnd.nextInt(customers.length))
 
-  private val id: Iterator[Int] = Iterator from 0
+  private val id: Iterator[Int] = Iterator.from(0)
 
   def command(cmd: Command) = ManagerCommand(cmd, id.next, self)
 
@@ -75,9 +66,9 @@ class ShoppingCartSimulator extends Actor with ActorLogging {
   self ! Cont(0)
 
   def receive: Receive = {
-    case Cont(n)             ⇒ driveCart(n)
-    case ManagerEvent(id, _) ⇒ if (id % 10000 == 0) log.info("done {} commands", id)
-    case ManagerResult(num, GetItemsResult(cart, items)) ⇒
+    case Cont(n)             => driveCart(n)
+    case ManagerEvent(id, _) => if (id % 10000 == 0) log.info("done {} commands", id)
+    case ManagerResult(num, GetItemsResult(cart, items)) =>
       context.stop(context.child(cart.id.toString).get)
       self ! Cont(num.toInt + 1)
   }
@@ -101,33 +92,32 @@ class TopProductListener extends Actor with ActorLogging {
   private implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   private val readJournal: LeveldbReadJournal =
-    PersistenceQuery(context.system)
-      .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+    PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
 
-  readJournal.eventsByTag(tag = "shoppingCart", offset = Sequence(0L))
-    .collect { case EventEnvelope(_, _, _, add: ItemAdded) ⇒ add }
+  readJournal
+    .eventsByTag(tag = "shoppingCart", offset = Sequence(0L))
+    .collect { case EventEnvelope(_, _, _, add: ItemAdded) => add }
     .groupedWithin(100000, 1.second)
     .addAttributes(Attributes.asyncBoundary)
-    .runForeach { seq: Seq[ItemAdded] ⇒
-      val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) {
-        (map, event) ⇒
-          map.get(event.item) match {
-            case Some(holder) ⇒
-              holder.value += event.count
-              map
-            case None ⇒
-              map.updated(event.item, new IntHolder(event.count))
-          }
+    .runForeach { seq: Seq[ItemAdded] =>
+      val histogram = seq.foldLeft(Map.empty[ItemRef, IntHolder]) { (map, event) =>
+        map.get(event.item) match {
+          case Some(holder) =>
+            holder.value += event.count
+            map
+          case None =>
+            map.updated(event.item, new IntHolder(event.count))
+        }
       }
-      self ! TopProducts(0, histogram.map(p ⇒ (p._1, p._2.value)))
+      self ! TopProducts(0, histogram.map(p => (p._1, p._2.value)))
     }
 
   private var topProducts = Map.empty[ItemRef, Int]
 
   def receive: Receive = {
-    case GetTopProducts(id, replyTo) ⇒
+    case GetTopProducts(id, replyTo) =>
       replyTo ! TopProducts(id, topProducts)
-    case TopProducts(_, products) ⇒
+    case TopProducts(_, products) =>
       topProducts = products
       log.info("new {}", products)
   }
@@ -136,8 +126,7 @@ class TopProductListener extends Actor with ActorLogging {
 //#snip_17-9
 
 object EventStreamExample extends App {
-  val config = ConfigFactory.parseString(
-    """
+  val config = ConfigFactory.parseString("""
 akka.loglevel = INFO
 akka.actor.debug.unhandled = on
 akka.actor.warn-about-java-serializer-usage = off

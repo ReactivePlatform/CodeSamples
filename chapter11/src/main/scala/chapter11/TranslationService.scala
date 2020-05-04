@@ -43,12 +43,13 @@ object TranslationService {
 
   private class Translator extends Actor {
     def receive: Receive = {
-      case Translate(query, replyTo) ⇒ query match {
-        case "Hur mår du?" ⇒
-          replyTo ! "How are you?"
-        case _ ⇒
-          replyTo ! s"error:cannot translate '$query'"
-      }
+      case Translate(query, replyTo) =>
+        query match {
+          case "Hur mår du?" =>
+            replyTo ! "How are you?"
+          case _ =>
+            replyTo ! s"error:cannot translate '$query'"
+        }
     }
   }
 
@@ -67,7 +68,7 @@ object TranslationService {
    */
   private class TranslatorV1 extends Actor {
     def receive: Receive = {
-      case TranslateV1(query, replyTo) ⇒
+      case TranslateV1(query, replyTo) =>
         if (query == "sv:en:Hur mår du?") {
           replyTo ! "How are you?"
         } else {
@@ -85,25 +86,21 @@ object TranslationService {
    * enumeration or based on runtime registration of values).
    */
   // #snip_11-18
-  final case class TranslateV2(
-    phrase:         String,
-    inputLanguage:  String,
-    outputLanguage: String,
-    replyTo:        ActorRef)
+  final case class TranslateV2(phrase: String, inputLanguage: String, outputLanguage: String, replyTo: ActorRef)
 
   sealed trait TranslationResponseV2
 
   final case class TranslationV2(
-    inputPhrase:    String,
-    outputPhrase:   String,
-    inputLanguage:  String,
-    outputLanguage: String)
+      inputPhrase: String,
+      outputPhrase: String,
+      inputLanguage: String,
+      outputLanguage: String)
 
   final case class TranslationErrorV2(
-    inputPhrase:    String,
-    inputLanguage:  String,
-    outputLanguage: String,
-    errorMessage:   String)
+      inputPhrase: String,
+      inputLanguage: String,
+      outputLanguage: String,
+      errorMessage: String)
 
   // #snip_11-18
 
@@ -116,18 +113,21 @@ object TranslationService {
     import context.dispatcher
 
     def receive: Receive = {
-      case TranslateV2(phrase, in, out, replyTo) ⇒
-        v1 ? (TranslateV1(s"$in:$out:$phrase", _)) collect {
-          case str: String ⇒
-            if (str.startsWith("error:")) {
-              TranslationErrorV2(phrase, in, out, str.substring(6))
-            } else {
-              TranslationV2(phrase, str, in, out)
-            }
-        } recover {
-          case _: TimeoutException ⇒
-            TranslationErrorV2(phrase, in, out, "timeout while talking to V1 back-end")
-        } pipeTo replyTo
+      case TranslateV2(phrase, in, out, replyTo) =>
+        (v1 ? (TranslateV1(s"$in:$out:$phrase", _)))
+          .collect {
+            case str: String =>
+              if (str.startsWith("error:")) {
+                TranslationErrorV2(phrase, in, out, str.substring(6))
+              } else {
+                TranslationV2(phrase, str, in, out)
+              }
+          }
+          .recover {
+            case _: TimeoutException =>
+              TranslationErrorV2(phrase, in, out, "timeout while talking to V1 back-end")
+          }
+          .pipeTo(replyTo)
     }
   }
 

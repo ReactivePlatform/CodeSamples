@@ -18,11 +18,10 @@ import chapter15.SendEmailResult
 
 // #snip
 final case class SendEmail(
-  sender:        String,
-  recipients:    List[String],
-  bodyLocation:  URL,
-  correlationID: UUID,
-  replyTo:       ActorRef[SendEmailResult])
+    sender: String,
+    recipients: List[String],
+    bodyLocation: URL,
+    correlationID: UUID,
+    replyTo: ActorRef[SendEmailResult])
 
 // #snip
-

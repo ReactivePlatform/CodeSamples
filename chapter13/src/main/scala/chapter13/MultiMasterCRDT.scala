@@ -17,8 +17,8 @@ import scala.concurrent.duration._
 object MultiMasterCRDT {
 
   // #snip_13-10
-  final case class Status(name: String)(
-    _predecessor: ⇒ Set[Status], _successor: ⇒ Set[Status]) extends ReplicatedData {
+  final case class Status(name: String)(_predecessor: => Set[Status], _successor: => Set[Status])
+      extends ReplicatedData {
 
     type T = Status
 
@@ -57,18 +57,15 @@ object MultiMasterCRDT {
       } else {
         val nextExclude = exclude + candidate
         val branches =
-          candidate.successors.map(successor ⇒ innerLoop(successor, nextExclude))
-        branches.reduce((l, r) ⇒
-          if (isSuccessor(l, r, nextExclude)) r else l)
+          candidate.successors.map(successor => innerLoop(successor, nextExclude))
+        branches.reduce((l, r) => if (isSuccessor(l, r, nextExclude)) r else l)
       }
 
-    def isSuccessor(
-      candidate: Status,
-      fixed:     Status, exclude: Set[Status]): Boolean =
+    def isSuccessor(candidate: Status, fixed: Status, exclude: Set[Status]): Boolean =
       if (candidate == fixed) true
       else {
         val toSearch = candidate.predecessors -- exclude
-        toSearch.exists(pred ⇒ isSuccessor(pred, fixed, exclude))
+        toSearch.exists(pred => isSuccessor(pred, fixed, exclude))
       }
 
     innerLoop(right, Set.empty)
@@ -94,27 +91,25 @@ object MultiMasterCRDT {
     private implicit val cluster: Cluster = Cluster(context.system)
 
     def receive: Receive = {
-      case Submit(job) ⇒
+      case Submit(job) =>
         log.info("submitting job {}", job)
         replicator ! Replicator.Update(
           StorageComponent,
           ORMap.empty[String, Status],
           Replicator.WriteMajority(5.seconds),
           Some(s"submit $job"))(_ + (job -> New))
-      case Cancel(job) ⇒
+      case Cancel(job) =>
         log.info("cancelling job {}", job)
         replicator ! Replicator.Update(
           StorageComponent,
           ORMap.empty[String, Status],
           Replicator.WriteMajority(5.seconds),
           Some(s"cancel $job"))(_ + (job -> Cancelled))
-      case r: Replicator.UpdateResponse[_] ⇒
+      case r: Replicator.UpdateResponse[_] =>
         log.info("received update result: {}", r)
-      case PrintStatus ⇒
-        replicator ! Replicator.Get(
-          StorageComponent,
-          Replicator.ReadMajority(5.seconds))
-      case g: Replicator.GetSuccess[_] ⇒
+      case PrintStatus =>
+        replicator ! Replicator.Get(StorageComponent, Replicator.ReadMajority(5.seconds))
+      case g: Replicator.GetSuccess[_] =>
         log.info("overall status: {}", g.get(StorageComponent))
     }
   }
@@ -131,29 +126,30 @@ object MultiMasterCRDT {
     replicator ! Replicator.Subscribe(StorageComponent, self)
 
     def receive: Receive = {
-      case Execute(job) ⇒
+      case Execute(job) =>
         log.info("executing job {}", job)
         replicator ! Replicator.Update(
           StorageComponent,
           ORMap.empty[String, Status],
-          Replicator.WriteMajority(5.seconds), Some(job)) { map ⇒
-            require(map.get(job).contains(New))
-            map + (job -> Executing)
-          }
-      case Finish(job) ⇒
+          Replicator.WriteMajority(5.seconds),
+          Some(job)) { map =>
+          require(map.get(job).contains(New))
+          map + (job -> Executing)
+        }
+      case Finish(job) =>
         log.info("job {} finished", job)
         replicator ! Replicator.Update(
           StorageComponent,
           ORMap.empty[String, Status],
           Replicator.WriteMajority(5.seconds))(_ + (job -> Finished))
-      case Replicator.UpdateSuccess(StorageComponent, Some(job)) ⇒
+      case Replicator.UpdateSuccess(StorageComponent, Some(job)) =>
         log.info("starting job {}", job)
-      case r: Replicator.UpdateResponse[_] ⇒
+      case r: Replicator.UpdateResponse[_] =>
         log.info("received update result: {}", r)
-      case ch: Replicator.Changed[_] ⇒
+      case ch: Replicator.Changed[_] =>
         val current = ch.get(StorageComponent).entries
         for {
-          (job, status) ← current.iterator
+          (job, status) <- current.iterator
           if status == Aborted
           if !lastState.get(job).contains(Aborted)
         } {
@@ -165,8 +161,7 @@ object MultiMasterCRDT {
 
   // #snip_13-13
 
-  val commonConfig: Config = ConfigFactory.parseString(
-    """
+  val commonConfig: Config = ConfigFactory.parseString("""
     akka.actor.provider = akka.cluster.ClusterActorRefProvider
     akka.remote.netty.tcp {
       host = "127.0.0.1"
@@ -208,22 +203,22 @@ object MultiMasterCRDT {
     clientInterface ! Submit("beta")
     clientInterface ! Submit("gamma")
     clientInterface ! Submit("delta")
-    1 second sleep
+    1.second(sleep)
     executor ! Execute("alpha")
     executor ! Execute("gamma")
     clientInterface ! Cancel("delta")
-    1 second sleep
+    1.second(sleep)
     clientInterface ! Cancel("alpha")
     clientInterface ! Cancel("beta")
     executor ! Execute("beta")
     executor ! Execute("delta")
-    1 second sleep
+    1.second(sleep)
     clientInterface ! Cancel("gamma")
-    1 second sleep
+    1.second(sleep)
     executor ! Finish("gamma")
-    3 seconds sleep
+    3.seconds(sleep)
     clientInterface ! PrintStatus
-    1 second sleep
+    1.second(sleep)
 
     sys1.terminate()
     sys2.terminate()

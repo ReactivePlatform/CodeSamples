@@ -36,18 +36,18 @@ object TranslationServiceSpec {
     }
 
     private val initial: Receive = {
-      case ExpectNominal ⇒ context.become(expectingNominal)
-      case ExpectError   ⇒ context.become(expectingError)
+      case ExpectNominal => context.become(expectingNominal)
+      case ExpectError   => context.become(expectingError)
     }
 
     def expectingNominal: Receive = {
-      case TranslateV1("sv:en:Hur mår du?", replyTo) ⇒
+      case TranslateV1("sv:en:Hur mår du?", replyTo) =>
         replyTo ! "How are you?"
         context.become(initial)
     }
 
     def expectingError: Receive = {
-      case TranslateV1(other, replyTo) ⇒
+      case TranslateV1(other, replyTo) =>
         replyTo ! s"error:cannot parse input '$other'"
         context.become(initial)
     }
@@ -147,8 +147,7 @@ class TranslationServiceSpec extends WordSpec with Matchers with Eventually with
       // this implicitly verifies that no other communication happened with V1
       req2.query should be("sv:en:Hur är läget?")
       req2.replyTo ! "error:cannot parse input 'sv:en:Hur är läget?'"
-      client.expectMsg(TranslationErrorV2("Hur är läget?", "sv", "en",
-        "cannot parse input 'sv:en:Hur är läget?'"))
+      client.expectMsg(TranslationErrorV2("Hur är läget?", "sv", "en", "cannot parse input 'sv:en:Hur är läget?'"))
 
       v1.expectNoMessage(3.second)
       // #snip_11-19
@@ -174,8 +173,7 @@ class TranslationServiceSpec extends WordSpec with Matchers with Eventually with
       // now verify translation errors
       v1 ! ExpectError
       v2 ! TranslateV2("Hur är läget?", "sv", "en", client.ref)
-      client.expectMsg(TranslationErrorV2("Hur är läget?", "sv", "en",
-        "cannot parse input 'sv:en:Hur är läget?'"))
+      client.expectMsg(TranslationErrorV2("Hur är läget?", "sv", "en", "cannot parse input 'sv:en:Hur är läget?'"))
 
       // final check for async errors
       asyncErrors.expectNoMessage(1.second)

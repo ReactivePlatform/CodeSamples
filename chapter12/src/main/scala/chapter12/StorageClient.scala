@@ -20,11 +20,9 @@ class StorageClient {
 
   def persistForThisClient(job: Job): Future[StorageStatus] = {
     import akka.rdpextras.ExecutionContexts.sameThreadExecutionContext
-    limiter
-      .call(persist(job))
-      .recover {
-        case RateLimitExceeded ⇒ StorageStatus.Failed
-      }
+    limiter.call(persist(job)).recover {
+      case RateLimitExceeded => StorageStatus.Failed
+    }
   }
 
   // #snip

@@ -87,28 +87,22 @@ object SchedulerSpec {
     private var schedulerTokens = Map.empty[SchedulerToken, Cancellable]
 
     override def receive: Receive = {
-      case Schedule(replyTo, msg, delay) ⇒
+      case Schedule(replyTo, msg, delay) =>
         import context.dispatcher
-        context.system.scheduler
-          .scheduleOnce(delay, replyTo, msg)
-      case ScheduleRepeatedly(replyTo, delay, msg) ⇒
+        context.system.scheduler.scheduleOnce(delay, replyTo, msg)
+      case ScheduleRepeatedly(replyTo, delay, msg) =>
         import context.dispatcher
-        val cancellable = context.system.scheduler
-          .schedule(
-            initialDelay = delay,
-            interval = delay,
-            receiver = replyTo,
-            message = msg
-          )
+        val cancellable =
+          context.system.scheduler.schedule(initialDelay = delay, interval = delay, receiver = replyTo, message = msg)
         val schedulerToken = SchedulerToken(UUID.randomUUID().toString)
         schedulerTokens = schedulerTokens.updated(schedulerToken, cancellable)
         replyTo ! schedulerToken
-      case CancelSchedule(token, replyTo) ⇒
+      case CancelSchedule(token, replyTo) =>
         schedulerTokens.get(token) match {
-          case Some(cancellable) ⇒
+          case Some(cancellable) =>
             cancellable.cancel()
             replyTo ! ScheduleCanceled
-          case None ⇒
+          case None =>
             replyTo ! ScheduleNotFound(token)
         }
     }

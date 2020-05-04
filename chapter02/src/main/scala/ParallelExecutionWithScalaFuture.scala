@@ -33,8 +33,9 @@ object ParallelExecutionWithScalaFuture {
     val fb: Future[ReplyB] = taskB()
     val fc: Future[ReplyC] = taskC()
 
-    val fr: Future[Result] = for (a ← fa; b ← fb; c ← fc)
-      yield aggregate(a, b, c)
+    val fr: Future[Result] =
+      for (a <- fa; b <- fb; c <- fc)
+        yield aggregate(a, b, c)
     // #snip
     println(fr)
   }

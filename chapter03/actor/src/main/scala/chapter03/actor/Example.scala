@@ -23,14 +23,14 @@ final case class CounterTooLargeException(message: String) extends Exception(mes
 
 class SupervisorActor extends Actor with ActorLogging {
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case _: CounterTooLargeException ⇒ Restart
+    case _: CounterTooLargeException => Restart
   }
 
   private val actor2 = context.actorOf(Props[SecondActor], "second-actor")
   private val actor1 = context.actorOf(Props(new FirstActor(actor2)), "first-actor")
 
   def receive: Receive = {
-    case Start ⇒ actor1 ! Start
+    case Start => actor1 ! Start
   }
 }
 
@@ -38,17 +38,16 @@ class AbstractCounterActor extends Actor with ActorLogging {
   protected var counterValue = 0
 
   def receive: Receive = {
-    case _ ⇒
+    case _ =>
   }
 
   def counterReceive: Receive = LoggingReceive {
-    case CounterMessage(i) if i <= 1000 ⇒
+    case CounterMessage(i) if i <= 1000 =>
       counterValue = i
       log.info(s"Counter value: $counterValue")
       sender ! CounterMessage(counterValue + 1)
-    case CounterMessage(_) ⇒
-      throw CounterTooLargeException(
-        "Exceeded max value of counter!")
+    case CounterMessage(_) =>
+      throw CounterTooLargeException("Exceeded max value of counter!")
   }
 
   override def postRestart(reason: Throwable): Unit = {
@@ -58,7 +57,7 @@ class AbstractCounterActor extends Actor with ActorLogging {
 
 class FirstActor(secondActor: ActorRef) extends AbstractCounterActor {
   override def receive = LoggingReceive {
-    case Start ⇒
+    case Start =>
       context.become(counterReceive)
       log.info("Starting counter passing.")
       secondActor ! CounterMessage(counterValue + 1)

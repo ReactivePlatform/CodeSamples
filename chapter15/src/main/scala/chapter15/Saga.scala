@@ -40,35 +40,35 @@ object Saga {
     override val persistenceId: String = s"transaction-$id"
 
     override def receiveCommand: Receive = {
-      case Transfer(amount, x, y) ⇒
+      case Transfer(amount, x, y) =>
         persist(TransferStarted(amount, x, y))(withdrawMoney)
     }
 
     def withdrawMoney(t: TransferStarted): Unit = {
-      t.x.withdraw(t.amount, id).map(_ ⇒ MoneyWithdrawn).pipeTo(self)
+      t.x.withdraw(t.amount, id).map(_ => MoneyWithdrawn).pipeTo(self)
       context.become(awaitMoneyWithdrawn(t.amount, t.x, t.y))
     }
 
     def awaitMoneyWithdrawn(amount: BigDecimal, x: Account, y: Account): Receive = {
-      case m @ MoneyWithdrawn ⇒ persist(m)(_ ⇒ depositMoney(amount, x, y))
+      case m @ MoneyWithdrawn => persist(m)(_ => depositMoney(amount, x, y))
     }
 
     def depositMoney(amount: BigDecimal, x: Account, y: Account): Unit = {
-      y.deposit(amount, id) map (_ ⇒ MoneyDeposited) pipeTo self
+      y.deposit(amount, id).map(_ => MoneyDeposited).pipeTo(self)
       context.become(awaitMoneyDeposited(amount, x))
     }
 
     def awaitMoneyDeposited(amount: BigDecimal, x: Account): Receive = {
-      case Status.Failure(ex) ⇒
-        x.deposit(amount, id) map (_ ⇒ RolledBack) pipeTo self
+      case Status.Failure(ex) =>
+        x.deposit(amount, id).map(_ => RolledBack).pipeTo(self)
         context.become(awaitRollback)
-      case MoneyDeposited ⇒
-        persist(MoneyDeposited)(_ ⇒ context.stop(self))
+      case MoneyDeposited =>
+        persist(MoneyDeposited)(_ => context.stop(self))
     }
 
     def awaitRollback: Receive = {
-      case RolledBack ⇒
-        persist(RolledBack)(_ ⇒ context.stop(self))
+      case RolledBack =>
+        persist(RolledBack)(_ => context.stop(self))
     }
 
     override def receiveRecover: Receive = {
@@ -76,16 +76,16 @@ object Saga {
       var last: Event = null
 
       {
-        case t: TransferStarted ⇒
+        case t: TransferStarted =>
           start = t
           last = t
-        case e: Event ⇒ last = e
-        case RecoveryCompleted ⇒
+        case e: Event => last = e
+        case RecoveryCompleted =>
           last match {
-            case null               ⇒ // wait for initialization
-            case t: TransferStarted ⇒ withdrawMoney(t)
-            case MoneyWithdrawn     ⇒ depositMoney(start.amount, start.x, start.y)
-            case MoneyDeposited     ⇒ context.stop(self)
+            case null               => // wait for initialization
+            case t: TransferStarted => withdrawMoney(t)
+            case MoneyWithdrawn     => depositMoney(start.amount, start.x, start.y)
+            case MoneyDeposited     => context.stop(self)
           }
       }
     }

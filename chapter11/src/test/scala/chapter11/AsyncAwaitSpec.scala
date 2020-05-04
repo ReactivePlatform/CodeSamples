@@ -27,9 +27,8 @@ class AsyncAwaitSpec extends WordSpec with Matchers {
   class TranslationWithTimeout(input: String) {
 
     def withTimeout(timeout: FiniteDuration): Future[String] = {
-      val timeoutFuture = akka.pattern.after(
-        timeout,
-        system.scheduler)(Future.failed(new TimeoutException(s"Translation timeout")))
+      val timeoutFuture =
+        akka.pattern.after(timeout, system.scheduler)(Future.failed(new TimeoutException(s"Translation timeout")))
       val outputFuture = tr.translate(input)
       Future.firstCompletedOf(Seq(outputFuture, timeoutFuture))
     }

@@ -22,27 +22,27 @@ object RequestResponseTypedActors {
 
   val responder: Behavior[Request] =
     Static {
-      case Request(msg, replyTo) ⇒
+      case Request(msg, replyTo) =>
         println(s"got request: $msg")
         replyTo ! Response("got it!")
     }
 
   def requester(responder: ActorRef[Request]): Behavior[Response] =
-    SelfAware { self ⇒
+    SelfAware { self =>
       responder ! Request("hello", self)
       Total {
-        case Response(msg) ⇒
+        case Response(msg) =>
           println(s"got response: $msg")
           Stopped
       }
     }
 
   def main(args: Array[String]): Unit = {
-    ActorSystem("ReqResTyped", ContextAware[Unit] { ctx ⇒
+    ActorSystem("ReqResTyped", ContextAware[Unit] { ctx =>
       val res = ctx.spawn(responder, "responder")
       val req = ctx.watch(ctx.spawn(requester(res), "requester"))
       Full {
-        case Sig(_, Terminated(`req`)) ⇒ Stopped
+        case Sig(_, Terminated(`req`)) => Stopped
       }
     })
   }

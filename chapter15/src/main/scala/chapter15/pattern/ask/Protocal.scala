@@ -14,12 +14,12 @@ import chapter15.StatusCode
 
 sealed trait MyCommands
 
-private final case class MyEmailResult(correlationID: UUID, status: StatusCode, explanation: Option[String]) extends MyCommands
+private final case class MyEmailResult(correlationID: UUID, status: StatusCode, explanation: Option[String])
+    extends MyCommands
 
 // #snip
-final case class StartVerificationProcess(
-  userEmail: String,
-  replyTo:   ActorRef[VerificationProcessResponse]) extends MyCommands
+final case class StartVerificationProcess(userEmail: String, replyTo: ActorRef[VerificationProcessResponse])
+    extends MyCommands
 
 sealed trait VerificationProcessResponse
 
@@ -28,4 +28,3 @@ final case class VerificationProcessStarted(userEmail: String) extends Verificat
 final case class VerificationProcessFailed(userEmail: String) extends VerificationProcessResponse
 
 // #snip
-

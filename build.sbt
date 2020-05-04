@@ -7,13 +7,13 @@ name := "ReactiveDesignPatterns"
 
 version in ThisBuild := "1.0.0"
 
+scalaVersion := "2.12.11"
+
 scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint")
 
 javacOptions in compile ++= Seq("-encoding", "UTF-8", "-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-XDignore.symbol.file")
 
 conflictWarning := conflictWarning.value.copy(failOnConflict = false)
-
-//javaFormattingSettingsFilename in ThisBuild := "formatting-java.xml"
 
 //sourceLevel in ThisBuild := Some("1.8")
 

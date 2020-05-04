@@ -28,14 +28,14 @@ class KVStore extends StateMachine {
   private var lastIndex: Long = 0
 
   def applyWrite: PartialFunction[(Long, WriteCommand[_]), String] = {
-    case (index, Put(key: String, value: String)) ⇒
+    case (index, Put(key: String, value: String)) =>
       map.put(key, value)
       lastIndex = index
       value
   }
 
   def applyRead: PartialFunction[ReadCommand[_], Option[String]] = {
-    case Get(key) ⇒ map.get(key)
+    case Get(key) => map.get(key)
   }
 
   def getLastAppliedIndex: Long = lastIndex
@@ -54,11 +54,7 @@ class KVStore extends StateMachine {
 // #snip_13-9
 object KVStoreBootstrap extends App {
   val ckite =
-    CKiteBuilder()
-      .stateMachine(new KVStore())
-      .rpc(FinagleThriftRpc)
-      .storage(MapDBStorage())
-      .build
+    CKiteBuilder().stateMachine(new KVStore()).rpc(FinagleThriftRpc).storage(MapDBStorage()).build
   ckite.start()
 
   HttpServer(ckite).start()

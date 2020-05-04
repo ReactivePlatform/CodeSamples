@@ -18,8 +18,7 @@ import scala.concurrent.duration.Duration
 // #snip_11-26
 case object TestFailureParentMessage
 
-class FailureParentSpec extends WordSpec
-  with Matchers with BeforeAndAfterAll {
+class FailureParentSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   implicit val system: ActorSystem = ActorSystem()
 
   "Using a FailureParent" must {
@@ -44,11 +43,11 @@ class FailureParent(failures: ActorRef) extends Actor {
   private val props: Props = Props[MyFailureParentActor]
   private val child: ActorRef = context.actorOf(props, "child")
   override val supervisorStrategy: OneForOneStrategy = OneForOneStrategy() {
-    case f ⇒ failures ! f; Stop
+    case f => failures ! f; Stop
   }
 
   def receive: Receive = {
-    case msg ⇒ child forward msg
+    case msg => child.forward(msg)
   }
 }
 
@@ -56,6 +55,6 @@ class FailureParent(failures: ActorRef) extends Actor {
 
 class MyFailureParentActor extends Actor {
   def receive: Receive = {
-    case _ ⇒ throw new NullPointerException
+    case _ => throw new NullPointerException
   }
 }

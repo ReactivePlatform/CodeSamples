@@ -31,7 +31,7 @@ class RateLimiter(requests: Int, period: FiniteDuration) {
     if (position == requests) position = 0
   }
 
-  def call[T](block: ⇒ Future[T]): Future[T] = {
+  def call[T](block: => Future[T]): Future[T] = {
     val now = Deadline.now
     if ((now - lastTime) < period) {
       Future.failed(RateLimitExceeded)

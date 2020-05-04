@@ -23,8 +23,7 @@ import scala.concurrent.duration._
 
 object BusinessHandshake extends App {
 
-  val config = ConfigFactory.parseString(
-    """|akka.loglevel = DEBUG
+  val config = ConfigFactory.parseString("""|akka.loglevel = DEBUG
        |akka.actor.debug {
        |  receive = on
        |  lifecycle = off
@@ -42,10 +41,7 @@ object BusinessHandshake extends App {
 
   final case class CannotChangeBudget(reason: String)
 
-  class Sam(
-    alice:  ActorRef,
-    bob:    ActorRef,
-    amount: BigDecimal) extends Actor {
+  class Sam(alice: ActorRef, bob: ActorRef, amount: BigDecimal) extends Actor {
     def receive: Receive = talkToAlice()
 
     def talkToAlice(): Receive = {
@@ -53,9 +49,9 @@ object BusinessHandshake extends App {
       context.setReceiveTimeout(1.second)
 
       LoggingReceive {
-        case ChangeBudgetDone           ⇒ context.become(talkToBob())
-        case CannotChangeBudget(reason) ⇒ context.stop(self)
-        case ReceiveTimeout             ⇒ alice ! ChangeBudget(-amount, self)
+        case ChangeBudgetDone           => context.become(talkToBob())
+        case CannotChangeBudget(reason) => context.stop(self)
+        case ReceiveTimeout             => alice ! ChangeBudget(-amount, self)
       }
     }
 
@@ -70,16 +66,16 @@ object BusinessHandshake extends App {
     private var alreadyDone: Set[ActorRef] = Set.empty
 
     def receive = LoggingReceive {
-      case ChangeBudget(amount, replyTo) if alreadyDone(replyTo) ⇒
+      case ChangeBudget(amount, replyTo) if alreadyDone(replyTo) =>
         replyTo ! ChangeBudgetDone
-      case ChangeBudget(amount, replyTo) if amount + budget > 0 ⇒
+      case ChangeBudget(amount, replyTo) if amount + budget > 0 =>
         budget += amount
         alreadyDone += replyTo
         context.watch(replyTo)
         replyTo ! ChangeBudgetDone
-      case ChangeBudget(_, replyTo) ⇒
+      case ChangeBudget(_, replyTo) =>
         replyTo ! CannotChangeBudget("insufficient budget")
-      case Terminated(saga) ⇒
+      case Terminated(saga) =>
         alreadyDone -= saga
     }
   }
@@ -90,8 +86,7 @@ object BusinessHandshake extends App {
 
 object PersistentBusinessHandshake extends App {
 
-  val config = ConfigFactory.parseString(
-    """|akka.loglevel = DEBUG
+  val config = ConfigFactory.parseString("""|akka.loglevel = DEBUG
        |akka.actor.debug {
        |  receive = on
        |  lifecycle = off
@@ -116,13 +111,13 @@ object PersistentBusinessHandshake extends App {
     def receiveRecover: Actor.emptyBehavior.type = Actor.emptyBehavior
 
     def receiveCommand: Receive = {
-      case _ ⇒
+      case _ =>
         deleteMessages(Long.MaxValue)
         context.become(waiting(sender()))
     }
 
     def waiting(replyTo: ActorRef): Receive = {
-      case d @ (_: DeleteMessagesSuccess | _: DeleteMessagesFailure) ⇒
+      case d @ (_: DeleteMessagesSuccess | _: DeleteMessagesFailure) =>
         replyTo ! d
         context.stop(self)
     }
@@ -139,12 +134,10 @@ object PersistentBusinessHandshake extends App {
 
   final case class AliceDeniedChange(deliveryId: Long)
 
-  class PersistentSam(
-    alice:                      ActorPath,
-    bob:                        ActorPath,
-    amount:                     BigDecimal,
-    override val persistenceId: String)
-    extends PersistentActor with AtLeastOnceDelivery with ActorLogging {
+  class PersistentSam(alice: ActorPath, bob: ActorPath, amount: BigDecimal, override val persistenceId: String)
+      extends PersistentActor
+      with AtLeastOnceDelivery
+      with ActorLogging {
 
     def receiveCommand: Receive = Actor.emptyBehavior
 
@@ -155,19 +148,19 @@ object PersistentBusinessHandshake extends App {
     def talkToAlice(): Receive = {
       log.debug("talking to Alice")
       var deliveryId: Long = 0
-      deliver(alice)(id ⇒ {
+      deliver(alice)(id => {
         deliveryId = id
         ChangeBudget(-amount, self, persistenceId)
       })
 
       LoggingReceive({
-        case ChangeBudgetDone ⇒
-          persist(AliceConfirmedChange(deliveryId)) { ev ⇒
+        case ChangeBudgetDone =>
+          persist(AliceConfirmedChange(deliveryId)) { ev =>
             confirmDelivery(ev.deliveryId)
             context.become(talkToBob())
           }
-        case CannotChangeBudget(reason) ⇒
-          persist(AliceDeniedChange(deliveryId)) { ev ⇒
+        case CannotChangeBudget(reason) =>
+          persist(AliceDeniedChange(deliveryId)) { ev =>
             confirmDelivery(ev.deliveryId)
             context.stop(self)
           }
@@ -180,10 +173,10 @@ object PersistentBusinessHandshake extends App {
     }
 
     def receiveRecover = LoggingReceive {
-      case AliceConfirmedChange(deliveryId) ⇒
+      case AliceConfirmedChange(deliveryId) =>
         confirmDelivery(deliveryId)
         context.become(talkToBob())
-      case AliceDeniedChange(deliveryId) ⇒
+      case AliceDeniedChange(deliveryId) =>
         confirmDelivery(deliveryId)
         context.stop(self)
     }
@@ -208,43 +201,38 @@ object PersistentBusinessHandshake extends App {
     private var alreadyDone: Set[String] = Set.empty
     private var budget: BigDecimal = 10
 
-    private val cleanupTimer: Cancellable = context.system.scheduler.
-      schedule(1.hour, 1.hour, self, CleanupDoneList)
+    private val cleanupTimer: Cancellable = context.system.scheduler.schedule(1.hour, 1.hour, self, CleanupDoneList)
 
     def receiveCommand = LoggingReceive {
-      case ChangeBudget(amount, replyTo, id) if alreadyDone(id) ⇒
+      case ChangeBudget(amount, replyTo, id) if alreadyDone(id) =>
         replyTo ! ChangeBudgetDone
-      case ChangeBudget(amount, replyTo, id) if amount + budget > 0 ⇒
-        persist(BudgetChanged(amount, id)) { ev ⇒
+      case ChangeBudget(amount, replyTo, id) if amount + budget > 0 =>
+        persist(BudgetChanged(amount, id)) { ev =>
           budget += ev.amount
           alreadyDone += ev.persistenceId
           replyTo ! ChangeBudgetDone
         }
-      case ChangeBudget(_, replyTo, _) ⇒
+      case ChangeBudget(_, replyTo, _) =>
         replyTo ! CannotChangeBudget("insufficient budget")
-      case CleanupDoneList ⇒
-        val journal = PersistenceQuery(context.system)
-          .readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
-        for (persistenceId ← alreadyDone) {
-          val stream = journal
-            .currentEventsByPersistenceId(persistenceId)
-            .map(_.event)
-            .collect {
-              case AliceConfirmedChange(_) ⇒ ChangeDone(persistenceId)
-            }
+      case CleanupDoneList =>
+        val journal = PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+        for (persistenceId <- alreadyDone) {
+          val stream = journal.currentEventsByPersistenceId(persistenceId).map(_.event).collect {
+            case AliceConfirmedChange(_) => ChangeDone(persistenceId)
+          }
           stream.runWith(Sink.head).pipeTo(self)
         }
-      case ChangeDone(id) ⇒
-        persist(ChangeDone(id)) { ev ⇒
+      case ChangeDone(id) =>
+        persist(ChangeDone(id)) { ev =>
           alreadyDone -= ev.persistenceId
         }
     }
 
     def receiveRecover = LoggingReceive {
-      case BudgetChanged(amount, id) ⇒
+      case BudgetChanged(amount, id) =>
         budget += amount
         alreadyDone += id
-      case ChangeDone(id) ⇒
+      case ChangeDone(id) =>
         alreadyDone -= id
     }
 

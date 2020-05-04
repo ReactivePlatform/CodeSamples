@@ -23,9 +23,7 @@ object Timestamp {
   }
 
   implicit class TimestampOps(val timestamp: Timestamp) extends AnyVal {
-    def toFiniteDuration: FiniteDuration = FiniteDuration(
-      timestamp.time,
-      TimeUnit.MILLISECONDS)
+    def toFiniteDuration: FiniteDuration = FiniteDuration(timestamp.time, TimeUnit.MILLISECONDS)
 
     def -(that: FiniteDuration): FiniteDuration = {
       FiniteDuration(timestamp.time - that.toMillis, TimeUnit.MILLISECONDS)
