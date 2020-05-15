@@ -16,7 +16,7 @@ addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.3.1")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.15")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.4.3")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.5.1")
 
 addSbtPlugin("com.lightbend.sbt" % "sbt-java-formatter" % "0.4.4")
 
