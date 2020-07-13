@@ -22,7 +22,7 @@ addSbtPlugin("com.lightbend.sbt" % "sbt-java-formatter" % "0.4.4")
 
 addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.1")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.10")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.4")
 
