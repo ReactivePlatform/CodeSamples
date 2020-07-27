@@ -42,7 +42,7 @@ object Dependencies {
 
   val junit = "junit" % "junit" % "4.12" % "test"
 
-  val guava = "com.google.guava" % "guava" % "23.0"
+  val guava = "com.google.guava" % "guava" % "23.6.1-jre"
 
   val finagle = "com.twitter" %% "finagle-http" % "19.4.0"
   val fasterxml = "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8"
