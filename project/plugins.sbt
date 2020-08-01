@@ -24,6 +24,6 @@ addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.1")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
