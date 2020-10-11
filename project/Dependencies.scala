@@ -40,7 +40,7 @@ object Dependencies {
 
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.7" % "test"
 
-  val junit = "junit" % "junit" % "4.12" % "test"
+  val junit = "junit" % "junit" % "4.13.1" % "test"
 
   val guava = "com.google.guava" % "guava" % "23.0"
 
